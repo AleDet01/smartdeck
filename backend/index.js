@@ -29,17 +29,30 @@ function originAllowed(origin) {
   return false;
 }
 
-app.use(cors({
-  origin: function (origin, callback) {
-    if (originAllowed(origin)) return callback(null, true);
-    // Log blocked origin for debugging and return no CORS headers
-    console.warn('CORS blocked origin:', origin, 'allowed list:', allowedOrigins);
-    return callback(null, false);
-  },
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
-}));
+// Custom CORS middleware: set CORS headers for allowed origins and handle preflight
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  if (originAllowed(origin)) {
+    // reflect the requested origin (required when credentials=true)
+    res.setHeader('Access-Control-Allow-Origin', origin || '*');
+    res.setHeader('Vary', 'Origin');
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+    res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type,Authorization');
+    if (req.method === 'OPTIONS') {
+      return res.sendStatus(204);
+    }
+    return next();
+  }
+
+  // Not allowed origin: log for debugging and let request continue (no CORS headers)
+  console.warn('CORS blocked origin:', origin, 'allowed list:', allowedOrigins);
+  if (req.method === 'OPTIONS') {
+    // preflight from disallowed origin - respond without CORS headers
+    return res.sendStatus(204);
+  }
+  return next();
+});
 
 // Body parser
 app.use(express.json());
