@@ -8,14 +8,13 @@ if (!MONGODB_URI) {
 
 const connectDB = async () => {
   try {
-    await mongoose.connect(MONGODB_URI, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true
-    });
+    // mongoose v6+ has sensible defaults; passing legacy options causes warnings
+    await mongoose.connect(MONGODB_URI);
     console.log('MongoDB connected');
   } catch (err) {
-    console.error('MongoDB connection error:', err.message);
-    process.exit(1);
+    console.error('MongoDB connection error:', err && err.message ? err.message : err);
+    // rethrow so the caller can decide how to handle (start/exit/retry)
+    throw err;
   }
 };
 

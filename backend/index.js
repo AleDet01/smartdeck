@@ -27,22 +27,42 @@ app.use(express.json());
 // Rotte autenticazione
 app.use('/auth', authRoutes);
 
-// Connessione a MongoDB
-connectDB();
+// Connessione a MongoDB e avvio server dopo connessione
+const mongoose = require('mongoose');
 
+const startServer = async () => {
+  try {
+    await connectDB();
 
-// Rotta di test
-app.get('/', (req, res) => {
-  res.send('Backend attivo e connesso a MongoDB!');
-});
+    // Rotta di test
+    app.get('/', (req, res) => {
+      res.send('Backend attivo e connesso a MongoDB!');
+    });
 
-// Health endpoint per Render
-app.get('/health', (req, res) => {
-  res.json({ status: 'ok', uptime: process.uptime() });
-});
+    // Health endpoint per Render (include stato connessione DB)
+    app.get('/health', (req, res) => {
+      const mongoState = mongoose.connection.readyState; // 0 = disconnected, 1 = connected
+      res.json({ status: mongoState === 1 ? 'ok' : 'degraded', mongoState, uptime: process.uptime() });
+    });
 
+    // Rotte flashcard
+    const flashRoutes = require('./routes/flash');
+    app.use('/flash', flashRoutes);
 
-// Rotte flashcard
+    // Rotte test result (statistiche test)
+    const testResultRoutes = require('./routes/testResult');
+    app.use('/testresult', testResultRoutes);
+
+    app.listen(PORT, () => {
+      console.log(`Server avviato sulla porta ${PORT}`);
+    });
+  } catch (err) {
+    console.error('Failed to start server due to DB error:', err && err.message ? err.message : err);
+    process.exit(1);
+  }
+};
+
+startServer();
 const flashRoutes = require('./routes/flash');
 app.use('/flash', flashRoutes);
 
