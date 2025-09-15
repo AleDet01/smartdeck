@@ -1,0 +1,97 @@
+.create-test-page-outer {
+	padding-top: 90px;
+	min-height: 100vh;
+	background: #f4f7fa;
+}
+
+.create-test-page {
+	max-width: 600px;
+	margin: 0 auto;
+	height: calc(100vh - 120px);
+	overflow-y: auto;
+	display: flex;
+	flex-direction: column;
+	justify-content: flex-start;
+}
+
+.create-test-page h2 {
+	margin-top: 0;
+}
+
+.create-test-page form {
+	display: flex;
+	flex-direction: column;
+	flex: 1;
+}
+
+.create-test-page input[type="file"] {
+	margin: 12px 0;
+}
+
+.create-test-page .question-list {
+	flex: 1;
+}
+
+.create-test-page .question-item {
+	margin: 18px 0;
+	padding: 12px;
+	border: 1px solid #e0e7ef;
+	border-radius: 8px;
+	background: #f8fafc;
+}
+
+.create-test-page .question-item input.modern-input {
+	margin-bottom: 8px;
+}
+
+.create-test-page .answer-row {
+	display: flex;
+	align-items: center;
+	margin-bottom: 6px;
+	gap: 8px;
+}
+
+.create-test-page .answer-row input.modern-input {
+	flex: 1;
+}
+
+.create-test-page .answer-row label {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+}
+
+.create-test-page .answer-row span {
+	font-size: 0.85rem;
+	margin-left: 6px;
+}
+
+.create-test-page .modern-btn {
+	margin-top: 18px;
+	align-self: flex-end;
+}
+
+.page-bg-wrapper {
+	position: fixed;
+	inset: 0;
+	z-index: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	pointer-events: none;
+	overflow: hidden;
+}
+
+.page-bg-wrapper .page-bg {
+	max-width: 100vw;
+	max-height: 100vh;
+	width: auto;
+	height: auto;
+	object-fit: contain;
+	display: block;
+}
+
+.create-test-page-outer {
+	position: relative;
+	z-index: 1;
+}

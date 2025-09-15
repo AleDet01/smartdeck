@@ -1,0 +1,107 @@
+
+import React, { useEffect, useState, useLayoutEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import '../css/DashboardPage.css'
+import Topbar from '../components/Topbar';
+
+const makeRandomImageUrl = seed => `https://picsum.photos/seed/${encodeURIComponent(seed)}/600/400`;
+
+function DashboardPage() {
+	const navigate = useNavigate();
+	const [areas, setAreas] = useState(null);
+
+	useEffect(() => {
+		const API_HOST = process.env.REACT_APP_API_HOST || 'http://localhost:3000';
+		const controller = new AbortController();
+
+		(async () => {
+			try {
+				const res = await fetch(`${API_HOST}/flash/areas/list`, { signal: controller.signal });
+				if (!res.ok) throw new Error(`HTTP ${res.status}`);
+				const data = await res.json();
+				const list = Array.isArray(data.areas) ? data.areas : (data && data.areas) || [];
+				const ts = Date.now();
+				const mapped = list.map((name, idx) => {
+					const safeName = String(name || '').trim() || `area-${idx}`;
+					return { name: safeName, img: makeRandomImageUrl(`${safeName}-${ts}-${idx}`) };
+				});
+				setAreas(mapped);
+			} catch (err) {
+				if (err.name === 'AbortError') return;
+				console.error('Errore fetching thematic areas:', err);
+				setAreas([]);
+			}
+		})();
+
+		return () => controller.abort();
+	}, []);
+
+	useLayoutEffect(() => {
+		if (!areas || areas.length === 0) return;
+		const MIN_PX = 12, STEP_PX = 1;
+		const adjustAll = () => {
+			const nodes = Array.from(document.querySelectorAll('.area-title'));
+			nodes.forEach(node => {
+				node.style.fontSize = '';
+				const containerWidth = node.clientWidth;
+				const computed = window.getComputedStyle(node);
+				let fontPx = parseFloat(computed.fontSize) || 16;
+				const fits = () => node.scrollWidth <= containerWidth + 1;
+				let safety = 100;
+				while (!fits() && fontPx > MIN_PX && safety-- > 0) {
+					fontPx = Math.max(MIN_PX, fontPx - STEP_PX);
+					node.style.fontSize = fontPx + 'px';
+				}
+			});
+		};
+		let raf = requestAnimationFrame(() => setTimeout(adjustAll, 0));
+		const onResize = () => { if (raf) cancelAnimationFrame(raf); raf = requestAnimationFrame(() => setTimeout(adjustAll, 0)); };
+		window.addEventListener('resize', onResize);
+		const retry = setTimeout(adjustAll, 250);
+		return () => { if (raf) cancelAnimationFrame(raf); window.removeEventListener('resize', onResize); clearTimeout(retry); };
+	}, [areas]);
+
+	if (areas === null) {
+		return (
+			<div className="dashboard-page">
+				<div className="page-bg-wrapper" aria-hidden="true">
+					<img className="page-bg" src={process.env.PUBLIC_URL + '/sfondo_pages.jpg'} alt="" />
+				</div>
+				<Topbar />
+				<div className="areas-grid">
+					<div>Caricamento aree...</div>
+				</div>
+			</div>
+		);
+	}
+
+	return (
+		<div className="dashboard-page">
+			<div className="page-bg-wrapper" aria-hidden="true">
+				<img className="page-bg" src={process.env.PUBLIC_URL + '/sfondo_pages.jpg'} alt="" />
+			</div>
+			<Topbar />
+			<div className="areas-grid">
+				{areas.length === 0 && (
+					<div>Nessuna area disponibile con flashcards.</div>
+				)}
+				{areas.map(area => (
+					<div key={area.name} className="area-box">
+						<img className="area-bg" src={area.img} alt={area.name} />
+						<div className="area-title">{area.name}</div>
+						<div className="area-content">
+							<button className="area-play-btn-icon" onClick={() => navigate(`/pretest/${area.name}`)} aria-label={`Play ${area.name}`}>
+								<svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+									<circle cx="14" cy="14" r="14" fill="#0096c7"/>
+									<polygon points="11,9 20,14 11,19" fill="#fff"/>
+								</svg>
+							</button>
+						</div>
+					</div>
+				))}
+			</div>
+		</div>
+	);
+}
+
+export default DashboardPage;

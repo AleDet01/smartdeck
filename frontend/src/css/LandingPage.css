@@ -1,0 +1,125 @@
+.landing-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: url('../../public/sfondo_dashboard.jpg') center/cover no-repeat;
+}
+.landing-box {
+  background: rgba(255,255,255,0.92);
+  border-radius: 18px;
+  box-shadow: 0 6px 32px 0 rgba(30,41,59,0.13);
+  display: flex;
+  flex-direction: row;
+  gap: 40px;
+  padding: 38px 28px;
+  min-width: 340px;
+  max-width: 720px;
+}
+/* Sezioni login/register più moderne */
+.form-section, .register-wrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 28px 18px 18px 18px;
+  border-radius: 16px;
+  border: 1.5px solid #e0e7ef;
+  background: rgba(248,250,252,0.92);
+  box-shadow: 0 4px 18px 0 rgba(30,41,59,0.10);
+  margin: 0 2px;
+}
+.section-title {
+  margin-bottom: 18px;
+  color: #23272f;
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+form {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+/* Input moderni con effetto focus/hover nitido */
+.modern-input {
+  padding: 13px 16px;
+  border: 2px solid #cbd5e1;
+  border-radius: 8px;
+  font-size: 1.08rem;
+  background: #f3f4f6;
+  transition: background 0.18s;
+  margin-bottom: 2px;
+}
+.modern-input:focus, .modern-input:hover {
+  border: 2px solid #0077b6;
+  background: #fff;
+  outline: none;
+}
+
+/* Bottoni moderni con effetto gradiente e animazione */
+/* Bottoni blu mare */
+.modern-btn {
+  background: linear-gradient(90deg, #ffe066 0%, #ffd60a 100%);
+  color: #23272f;
+  border: none;
+  border-radius: 10px;
+  padding: 14px 0;
+  font-size: 1.13rem;
+  font-weight: 700;
+  cursor: pointer;
+  margin-top: 12px;
+  box-shadow: 0 2px 16px 0 rgba(255, 214, 10, 0.13);
+  letter-spacing: 0.03em;
+  transition: background 0.18s, box-shadow 0.18s, filter 0.13s, color 0.18s;
+  position: relative;
+  overflow: hidden;
+}
+.modern-btn::after {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; right: 0; bottom: 0;
+  background: linear-gradient(90deg, #ffd60a 0%, #ffa600 100%);
+  opacity: 0;
+  transition: opacity 0.18s;
+  z-index: 0;
+}
+.modern-btn:hover, .modern-btn:focus {
+  background: linear-gradient(90deg, #ffd60a 0%, #ffa600 100%);
+  color: #23272f;
+}
+.modern-btn:active {
+  background: linear-gradient(90deg, #ffc300 0%, #ff8800 100%);
+  color: #23272f;
+}
+.divider {
+  width: 2px;
+  background: #e5e7eb;
+  margin: 0 24px;
+  border-radius: 2px;
+}
+.error {
+  color: #e53e3e;
+  margin-top: 8px;
+  font-size: 0.97rem;
+}
+.success {
+  color: #22c55e;
+  margin-top: 8px;
+  font-size: 0.97rem;
+}
+@media (max-width: 700px) {
+  .landing-box {
+    flex-direction: column;
+    gap: 24px;
+    padding: 24px 8px;
+  }
+  .divider {
+    width: 100%;
+    height: 2px;
+    margin: 24px 0;
+  }
+}

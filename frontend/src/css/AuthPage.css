@@ -1,0 +1,101 @@
+/* Stile condiviso per login e register */
+.auth-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(120deg, #fffbe6 0%, #ffe082 100%);
+}
+.auth-box {
+  background: linear-gradient(120deg, #fffde7 0%, #ffe082 100%);
+  border: 4px solid #ffb300;
+  border-radius: 0px;
+  box-shadow: 0 6px 32px rgba(255, 193, 7, 0.18);
+  display: flex;
+  flex-direction: row;
+  gap: 48px;
+  padding: 40px 32px;
+  min-width: 340px;
+  max-width: 700px;
+}
+.auth-section {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.auth-form-box {
+  background: linear-gradient(120deg, #ffe082 0%, #ffd54f 100%);
+  border: 3px solid #ff9800;
+  border-radius: 0px;
+  box-shadow: 0 4px 18px rgba(255, 152, 0, 0.13);
+  padding: 32px 18px 24px 18px;
+  margin: 0 auto;
+  max-width: 340px;
+}
+.auth-title {
+  margin-bottom: 18px;
+  color: #ff9800;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+.auth-input {
+  padding: 10px 12px;
+  border: 2.5px solid #ff9800;
+  border-radius: 0px;
+  font-size: 1rem;
+  background: #fffde7;
+  color: #b26a00;
+  margin-bottom: 10px;
+  transition: border 0.2s;
+}
+.auth-input:focus {
+  border: 2.5px solid #ffb300;
+  outline: none;
+  background: #fff8e1;
+}
+.auth-btn {
+  background: linear-gradient(90deg, #ff9800 0%, #ffb300 100%);
+  color: #fff;
+  border: none;
+  border-radius: 0px;
+  padding: 10px 0;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  margin-top: 6px;
+  box-shadow: 0 2px 8px rgba(255, 193, 7, 0.10);
+  letter-spacing: 1px;
+  transition: background 0.2s;
+}
+.auth-btn:hover {
+  background: linear-gradient(90deg, #ffa000 0%, #ff6f00 100%);
+}
+.auth-divider {
+  width: 2px;
+  background: #ffb300;
+  margin: 0 24px;
+  border-radius: 0px;
+}
+@media (max-width: 700px) {
+  .auth-box {
+    flex-direction: column;
+    gap: 24px;
+    padding: 24px 8px;
+  }
+  .auth-divider {
+    width: 100%;
+    height: 2px;
+    margin: 24px 0;
+  }
+}
+.error {
+  color: #e53e3e;
+  margin-top: 8px;
+  font-size: 0.95rem;
+}
+.success {
+  color: #22c55e;
+  margin-top: 8px;
+  font-size: 0.95rem;
+}
