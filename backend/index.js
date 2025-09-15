@@ -8,8 +8,8 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // CORS PRIMA DI TUTTO (origini configurabili via env var ALLOW_ORIGINS, comma-separated)
-// Default: remove localhost:5173, keep localhost:3001 and add production domain
-const allowedOrigins = (process.env.ALLOW_ORIGINS || 'https://smartdeck.onrender.com,http://localhost:3001').split(',').map(s => s.trim()).filter(Boolean);
+// Default: allow all origins for testing/dev. In production, set ALLOW_ORIGINS env var.
+const allowedOrigins = (process.env.ALLOW_ORIGINS || '*').split(',').map(s => s.trim()).filter(Boolean);
 
 
 function originAllowed(origin) {
