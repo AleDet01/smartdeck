@@ -1,0 +1,26 @@
+# render.yaml - sample for deploying backend (web) and frontend (static) on Render
+# Adjust service names, branch and env vars as needed
+services:
+  - type: web
+    name: orale-backend
+    env: node
+    branch: main
+    plan: free
+    buildCommand: cd backend && npm install
+    startCommand: cd backend && npm start
+    envVars:
+      - key: MONGODB_URI
+        value: ${MONGODB_URI}
+      - key: JWT_SECRET
+        value: ${JWT_SECRET}
+      - key: ALLOW_ORIGINS
+        value: ${ALLOW_ORIGINS}
+  - type: static
+    name: orale-frontend
+    branch: main
+    plan: free
+    buildCommand: cd frontend && npm install && npm run build
+    publishPath: frontend/build
+    envVars:
+      - key: REACT_APP_API_HOST
+        value: ${REACT_APP_API_HOST}

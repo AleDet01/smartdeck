@@ -1,6 +1,11 @@
 const mongoose = require('mongoose');
 
-const MONGODB_URI = 'mongodb+srv://alexdetu01_db_user:oP5n5Pv2UjTqvgJj@smartdeckcluster.fckswzj.mongodb.net/datasmartdeck?retryWrites=true&w=majority&appName=smartdeckcluster';
+const MONGODB_URI = process.env.MONGODB_URI;
+if (!MONGODB_URI) {
+  console.error('MONGODB_URI is not set. Set the environment variable and restart the server.');
+  process.exit(1);
+}
+
 const connectDB = async () => {
   try {
     await mongoose.connect(MONGODB_URI, {

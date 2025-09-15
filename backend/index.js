@@ -7,9 +7,15 @@ const authRoutes = require('./routes/auth');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// CORS PRIMA DI TUTTO
+// CORS PRIMA DI TUTTO (origini configurabili via env var ALLOW_ORIGINS, comma-separated)
+const allowedOrigins = (process.env.ALLOW_ORIGINS || 'http://localhost:5173,http://localhost:3001').split(',').map(s => s.trim()).filter(Boolean);
 app.use(cors({
-  origin: ['http://localhost:5173', 'http://localhost:3001'],
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps, curl)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.indexOf(origin) !== -1) return callback(null, true);
+    return callback(new Error('CORS policy: Origin not allowed'), false);
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
@@ -28,6 +34,11 @@ connectDB();
 // Rotta di test
 app.get('/', (req, res) => {
   res.send('Backend attivo e connesso a MongoDB!');
+});
+
+// Health endpoint per Render
+app.get('/health', (req, res) => {
+  res.json({ status: 'ok', uptime: process.uptime() });
 });
 
 
