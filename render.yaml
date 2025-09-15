@@ -1,26 +1,40 @@
-# render.yaml - sample for deploying backend (web) and frontend (static) on Render
-# Adjust service names, branch and env vars as needed
 services:
   - type: web
-    name: orale-backend
+    name: smartdeck-backend
     env: node
-    branch: main
-    plan: free
-    buildCommand: cd backend && npm install
-    startCommand: cd backend && npm start
-    envVars:
-      - key: MONGODB_URI
-        value: ${MONGODB_URI}
-      - key: JWT_SECRET
-        value: ${JWT_SECRET}
-      - key: ALLOW_ORIGINS
-        value: ${ALLOW_ORIGINS}
-  - type: static
-    name: orale-frontend
-    branch: main
-    plan: free
-    buildCommand: cd frontend && npm install && npm run build
-    publishPath: frontend/build
-    envVars:
-      - key: REACT_APP_API_HOST
-        value: ${REACT_APP_API_HOST}
+    # render.yaml - render manifest for smartdeck
+    # Defines one web service (backend) and one static site (frontend).
+    # Update branch names, service names, and env var values as needed.
+
+    services:
+      - type: web
+        name: smartdeck-backend
+        env: node
+        branch: main
+        plan: free
+        buildCommand: cd backend && npm install
+        startCommand: cd backend && npm start
+        healthCheckPath: /health
+        autodeploy: true
+        envVars:
+          - key: MONGODB_URI
+            value: ${MONGODB_URI}
+          - key: JWT_SECRET
+            value: ${JWT_SECRET}
+          - key: ALLOW_ORIGINS
+            value: ${ALLOW_ORIGINS}
+
+    staticSites:
+      - name: smartdeck-frontend
+        branch: main
+        plan: free
+        buildCommand: cd frontend && npm install && npm run build
+        publishPath: frontend/build
+        autodeploy: true
+        envVars:
+          - key: REACT_APP_API_HOST
+            value: ${REACT_APP_API_HOST}
+
+    # Notes:
+    # - Replace ${...} placeholders either in the UI (Render dashboard) or with
+    #   environment variables in CI. Do NOT commit real secrets into the repo.
