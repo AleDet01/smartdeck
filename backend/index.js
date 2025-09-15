@@ -34,7 +34,9 @@ function originAllowed(origin) {
 app.use(cors({
   origin: function (origin, callback) {
     if (originAllowed(origin)) return callback(null, true);
-    return callback(new Error('CORS policy: Origin not allowed'), false);
+    // Log blocked origin for debugging and return no CORS headers
+    console.warn('CORS blocked origin:', origin, 'allowed list:', allowedOrigins);
+    return callback(null, false);
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
@@ -108,13 +110,3 @@ const startServer = async () => {
 };
 
 startServer();
-const flashRoutes = require('./routes/flash');
-app.use('/flash', flashRoutes);
-
-// Rotte test result (statistiche test)
-const testResultRoutes = require('./routes/testResult');
-app.use('/testresult', testResultRoutes);
-
-app.listen(PORT, () => {
-  console.log(`Server avviato sulla porta ${PORT}`);
-});
