@@ -8,12 +8,10 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // CORS PRIMA DI TUTTO (origini configurabili via env var ALLOW_ORIGINS, comma-separated)
-const allowedOrigins = (process.env.ALLOW_ORIGINS || 'http://localhost:5173,http://localhost:3001').split(',').map(s => s.trim()).filter(Boolean);
+// Default: remove localhost:5173, keep localhost:3001 and add production domain
+const allowedOrigins = (process.env.ALLOW_ORIGINS || 'https://smartdeck.onrender.com,http://localhost:3001').split(',').map(s => s.trim()).filter(Boolean);
 
-// Helper to match origins. Supports exact matches and simple wildcard/suffix patterns:
-// - exact: https://example.com
-// - suffix: .onrender.com  (matches any origin that endsWith('.onrender.com'))
-// - wildcard: *.onrender.com (same as suffix)
+
 function originAllowed(origin) {
   if (!origin) return true; // allow non-browser requests (curl, Postman)
   for (const pattern of allowedOrigins) {
