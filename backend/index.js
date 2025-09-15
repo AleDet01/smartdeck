@@ -9,11 +9,31 @@ const PORT = process.env.PORT || 3000;
 
 // CORS PRIMA DI TUTTO (origini configurabili via env var ALLOW_ORIGINS, comma-separated)
 const allowedOrigins = (process.env.ALLOW_ORIGINS || 'http://localhost:5173,http://localhost:3001').split(',').map(s => s.trim()).filter(Boolean);
+
+// Helper to match origins. Supports exact matches and simple wildcard/suffix patterns:
+// - exact: https://example.com
+// - suffix: .onrender.com  (matches any origin that endsWith('.onrender.com'))
+// - wildcard: *.onrender.com (same as suffix)
+function originAllowed(origin) {
+  if (!origin) return true; // allow non-browser requests (curl, Postman)
+  for (const pattern of allowedOrigins) {
+    if (!pattern) continue;
+    if (pattern === '*') return true;
+    if (pattern.startsWith('*.')) {
+      const suffix = pattern.slice(1); // .onrender.com
+      if (origin.endsWith(suffix)) return true;
+    }
+    if (pattern.startsWith('.')) {
+      if (origin.endsWith(pattern)) return true;
+    }
+    if (origin === pattern) return true; // exact match
+  }
+  return false;
+}
+
 app.use(cors({
   origin: function (origin, callback) {
-    // Allow requests with no origin (like mobile apps, curl)
-    if (!origin) return callback(null, true);
-    if (allowedOrigins.indexOf(origin) !== -1) return callback(null, true);
+    if (originAllowed(origin)) return callback(null, true);
     return callback(new Error('CORS policy: Origin not allowed'), false);
   },
   credentials: true,
@@ -30,36 +50,61 @@ app.use('/auth', authRoutes);
 // Connessione a MongoDB e avvio server dopo connessione
 const mongoose = require('mongoose');
 
+const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+
 const startServer = async () => {
-  try {
-    await connectDB();
+  const maxAttempts = parseInt(process.env.DB_CONNECT_ATTEMPTS || '6', 10); // total attempts
+  let attempt = 0;
+  let lastErr = null;
 
-    // Rotta di test
-    app.get('/', (req, res) => {
-      res.send('Backend attivo e connesso a MongoDB!');
-    });
+  while (attempt < maxAttempts) {
+    try {
+      attempt++;
+      console.log(`Attempting to connect to MongoDB (attempt ${attempt}/${maxAttempts})`);
+      await connectDB();
+      console.log('MongoDB connection established');
+      lastErr = null;
+      break;
+    } catch (err) {
+      lastErr = err;
+      const backoff = Math.min(30000, 1000 * Math.pow(2, attempt - 1));
+      console.error(`MongoDB connection attempt ${attempt} failed:`, err && err.message ? err.message : err);
+      if (attempt >= maxAttempts) break;
+      console.log(`Waiting ${backoff}ms before next attempt...`);
+      // wait before retry
+      // eslint-disable-next-line no-await-in-loop
+      await sleep(backoff);
+    }
+  }
 
-    // Health endpoint per Render (include stato connessione DB)
-    app.get('/health', (req, res) => {
-      const mongoState = mongoose.connection.readyState; // 0 = disconnected, 1 = connected
-      res.json({ status: mongoState === 1 ? 'ok' : 'degraded', mongoState, uptime: process.uptime() });
-    });
-
-    // Rotte flashcard
-    const flashRoutes = require('./routes/flash');
-    app.use('/flash', flashRoutes);
-
-    // Rotte test result (statistiche test)
-    const testResultRoutes = require('./routes/testResult');
-    app.use('/testresult', testResultRoutes);
-
-    app.listen(PORT, () => {
-      console.log(`Server avviato sulla porta ${PORT}`);
-    });
-  } catch (err) {
-    console.error('Failed to start server due to DB error:', err && err.message ? err.message : err);
+  if (lastErr) {
+    console.error('Failed to start server due to DB error after retries:', lastErr && lastErr.message ? lastErr.message : lastErr);
     process.exit(1);
   }
+
+  // Mount routes and start server only after successful DB connection
+  // Rotta di test
+  app.get('/', (req, res) => {
+    res.send('Backend attivo e connesso a MongoDB!');
+  });
+
+  // Health endpoint per Render (include stato connessione DB)
+  app.get('/health', (req, res) => {
+    const mongoState = mongoose.connection.readyState; // 0 = disconnected, 1 = connected
+    res.json({ status: mongoState === 1 ? 'ok' : 'degraded', mongoState, uptime: process.uptime() });
+  });
+
+  // Rotte flashcard
+  const flashRoutes = require('./routes/flash');
+  app.use('/flash', flashRoutes);
+
+  // Rotte test result (statistiche test)
+  const testResultRoutes = require('./routes/testResult');
+  app.use('/testresult', testResultRoutes);
+
+  app.listen(PORT, () => {
+    console.log(`Server avviato sulla porta ${PORT}`);
+  });
 };
 
 startServer();
