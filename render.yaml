@@ -2,39 +2,35 @@ services:
   - type: web
     name: smartdeck-backend
     env: node
-    # render.yaml - render manifest for smartdeck
-    # Defines one web service (backend) and one static site (frontend).
-    # Update branch names, service names, and env var values as needed.
+    branch: main
+    plan: free
+    buildCommand: "cd backend && npm install"
+    startCommand: "cd backend && node index.js"
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: MONGODB_URI
+        fromDatabase:
+          name: smartdeck-db # Assicurati che il nome del DB sia corretto
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+      - key: ALLOW_ORIGINS
+        fromService:
+          type: static_site
+          name: smartdeck-frontend
+          property: url
 
-    services:
-      - type: web
-        name: smartdeck-backend
-        env: node
-        branch: main
-        plan: free
-        buildCommand: cd backend && npm install
-        startCommand: cd backend && npm start
-        healthCheckPath: /health
-        autodeploy: true
-        envVars:
-          - key: MONGODB_URI
-            value: ${MONGODB_URI}
-          - key: JWT_SECRET
-            value: ${JWT_SECRET}
-          - key: ALLOW_ORIGINS
-            value: ${ALLOW_ORIGINS}
-
-    staticSites:
-      - name: smartdeck-frontend
-        branch: main
-        plan: free
-        buildCommand: cd frontend && npm install && npm run build
-        publishPath: frontend/build
-        autodeploy: true
-        envVars:
-          - key: REACT_APP_API_HOST
-            value: ${REACT_APP_API_HOST}
-
-    # Notes:
-    # - Replace ${...} placeholders either in the UI (Render dashboard) or with
-    #   environment variables in CI. Do NOT commit real secrets into the repo.
+staticSites:
+  - name: smartdeck-frontend
+    branch: main
+    plan: free
+    buildCommand: "cd frontend && npm install && npm run build"
+    publishPath: "frontend/build"
+    autoDeploy: true
+    envVars:
+      - key: REACT_APP_API_HOST
+        fromService:
+          type: web
+          name: smartdeck-backend
+          property: url
