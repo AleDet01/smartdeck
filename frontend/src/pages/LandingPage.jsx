@@ -24,7 +24,7 @@ export default function LandingPage() {
 			const data = await res.json();
 			if (res.ok) {
 				localStorage.setItem('token', data.token);
-				window.location.href = '/dashboard';
+				window.location.href = '/#/dashboard';
 			} else {
 				setError(data.error || 'Errore di login');
 			}

@@ -37,14 +37,14 @@ export default function CreateTestPage() {
       questions: questions.map((q, qi) => ({ question: q.question, answers: q.answers.map((txt, idx) => ({ text: txt, isCorrect: (correctIndexes[qi] === idx) })), difficulty: 'media' }))
     };
     fetch(`${API_HOST}/flash`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
-      .then(() => window.location.href = '/dashboard')
+      .then(() => window.location.href = '/#/dashboard')
       .catch(() => {
         try {
           const stored = JSON.parse(localStorage.getItem('customTests') || '[]');
           const newTest = { id: `custom-${Date.now()}`, name: testName, questions };
           stored.unshift(newTest);
           localStorage.setItem('customTests', JSON.stringify(stored));
-          window.location.href = '/dashboard';
+          window.location.href = '/#/dashboard';
         } catch (e) { alert('Errore salvataggio test'); }
       });
   };
