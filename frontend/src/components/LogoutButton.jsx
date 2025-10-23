@@ -31,6 +31,7 @@ export default function LogoutButton() {
         position: 'fixed',
         right: 16,
         bottom: 16,
+        zIndex: 2000,
         padding: '10px 14px',
         background: '#f3f4f6',
         border: '1px solid #e5e7eb',
