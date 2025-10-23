@@ -7,12 +7,13 @@ const JWT_SECRET = process.env.JWT_SECRET || 'supersecretkey';
 function setAuthCookie(res, token) {
   const isProd = process.env.NODE_ENV === 'production';
   const maxAgeSeconds = 2 * 60 * 60; // 2h
+  const sameSiteAttr = isProd ? 'SameSite=None' : 'SameSite=Lax';
   const cookie = [
     `token=${token}`,
     'HttpOnly',
     'Path=/',
     `Max-Age=${maxAgeSeconds}`,
-    'SameSite=Lax',
+    sameSiteAttr,
     isProd ? 'Secure' : null
   ].filter(Boolean).join('; ');
   res.setHeader('Set-Cookie', cookie);
