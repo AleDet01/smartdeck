@@ -38,7 +38,7 @@ export default function LandingPage() {
     <div className="landing-container">
 			<div className="landing-box">
 				<div className="form-section" style={{ gap: 10 }}>
-					<h2 className="section-title" style={{ userSelect: 'none' }}>{mode === 'login' ? 'Accedi' : 'Registrati'}</h2>
+					<h2 className="section-title" style={{ userSelect: 'none' }}>Benvenuto</h2>
 					<form onSubmit={handleSubmit}>
 						<input className="modern-input" type="text" name="username" autoComplete="username" required placeholder="Username" value={username} onChange={e => setUsername(e.target.value)} />
 						<input className="modern-input" type="password" name="password" autoComplete={mode === 'login' ? 'current-password' : 'new-password'} required placeholder="Password" value={password} onChange={e => setPassword(e.target.value)} />
