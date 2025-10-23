@@ -8,6 +8,7 @@ import StatsList from './pages/StatsList';
 import CreateTestPage from './pages/CreateTestPage';
 import PreTestPage from './pages/PreTestPage';
 import TestPage from './pages/TestPage';
+import LogoutButton from './components/LogoutButton';
 
 function RequireAuth({ children }) {
   const token = localStorage.getItem('token');
@@ -28,6 +29,7 @@ export default function App() {
   <Route path="/test/:area/:num" element={<RequireAuth><TestPage /></RequireAuth>} />
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
+      <LogoutButton />
     </HashRouter>
   );
 }
