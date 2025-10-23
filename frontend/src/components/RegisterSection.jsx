@@ -1,9 +1,6 @@
 import React, { useState } from 'react';
 import '../css/LandingPage.css';
-
-const API_HOST =
-	process.env.REACT_APP_API_HOST ||
-	(window.location.hostname === 'localhost' ? 'http://localhost:3000' : '');
+import API_HOST from '../utils/apiHost';
 
 export default function RegisterSection({ onRegisterSuccess }) {
 	const [username, setUsername] = useState('');
@@ -37,10 +34,10 @@ export default function RegisterSection({ onRegisterSuccess }) {
 
 	return (
 		<>
-			<h2 className="section-title">Registrati</h2>
+			<h2 className="section-title" style={{ color: 'transparent', userSelect: 'none' }}>Registrati</h2>
 			<form onSubmit={handleRegister}>
-				<input className="modern-input" type="text" placeholder="Username" value={username} onChange={e => setUsername(e.target.value)} />
-				<input className="modern-input" type="password" placeholder="Password" value={password} onChange={e => setPassword(e.target.value)} />
+				<input className="modern-input" type="text" name="username" autoComplete="username" required placeholder="Username" value={username} onChange={e => setUsername(e.target.value)} />
+				<input className="modern-input" type="password" name="password" autoComplete="new-password" required placeholder="Password" value={password} onChange={e => setPassword(e.target.value)} />
 				<button className="modern-btn" type="submit">Registrati</button>
 			</form>
 			{error && <div className="error">{error}</div>}

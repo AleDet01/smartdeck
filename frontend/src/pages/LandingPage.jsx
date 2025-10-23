@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import RegisterSection from '../components/RegisterSection';
+import API_HOST from '../utils/apiHost';
 import '../css/LandingPage.css';
 
 export default function LandingPage() {
@@ -8,9 +9,7 @@ export default function LandingPage() {
 	const [password, setPassword] = useState('');
 	const [error, setError] = useState('');
 	
-	const API_HOST =
-		process.env.REACT_APP_API_HOST ||
-		(window.location.hostname === 'localhost' ? 'http://localhost:3000' : '');
+
 	
 	const handleSubmit = async (e) => {
 		e.preventDefault();
@@ -19,7 +18,7 @@ export default function LandingPage() {
 			const res = await fetch(`${API_HOST}/auth/login`, {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ username, password })
+				body: JSON.stringify({ username: username.trim(), password })
 			});
 			const data = await res.json();
 			if (res.ok) {
@@ -37,10 +36,10 @@ export default function LandingPage() {
     <div className="landing-container">
 			<div className="landing-box">
 				<div className="form-section">
-					<h2 className="section-title">Login</h2>
+					<h2 className="section-title" style={{ color: 'transparent', userSelect: 'none' }}>Accedi</h2>
 					<form onSubmit={handleSubmit}>
-						<input className="modern-input" type="text" placeholder="Username" value={username} onChange={e => setUsername(e.target.value)} />
-						<input className="modern-input" type="password" placeholder="Password" value={password} onChange={e => setPassword(e.target.value)} />
+						<input className="modern-input" type="text" name="username" autoComplete="username" required placeholder="Username" value={username} onChange={e => setUsername(e.target.value)} />
+						<input className="modern-input" type="password" name="password" autoComplete="current-password" required placeholder="Password" value={password} onChange={e => setPassword(e.target.value)} />
 						<button className="modern-btn" type="submit">Accedi</button>
 					</form>
 					{error && <div className="error">{error}</div>}
