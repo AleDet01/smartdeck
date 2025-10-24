@@ -16,6 +16,23 @@ const makeConceptImageUrl = (name, idx) => {
 	return `https://source.unsplash.com/600x400/?${encodeURIComponent(topic)},minimal`;
 };
 
+// Lightweight, reliable gradient placeholder as a data URI (no network)
+const GRADIENTS = [
+	['#dbeafe', '#bfdbfe'], // soft blue
+	['#e2e8f0', '#cbd5e1'], // slate/gray
+	['#fde68a', '#f59e0b'], // warm yellow
+	['#e9d5ff', '#c4b5fd'], // purple tint
+	['#ccfbf1', '#5eead4'], // teal
+	['#fee2e2', '#fecaca'], // soft red
+	['#dcfce7', '#86efac']  // green
+];
+
+const makeGradientDataUrl = (idx = 0) => {
+	const [c1, c2] = GRADIENTS[idx % GRADIENTS.length];
+	const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='600' height='400'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0%' stop-color='${c1}'/><stop offset='100%' stop-color='${c2}'/></linearGradient></defs><rect width='600' height='400' fill='url(#g)'/></svg>`;
+	return 'data:image/svg+xml;utf8,' + encodeURIComponent(svg);
+};
+
 function DashboardPage() {
 	const navigate = useNavigate();
 	const [areas, setAreas] = useState(null);
@@ -30,9 +47,9 @@ function DashboardPage() {
 				if (!res.ok) throw new Error(`HTTP ${res.status}`);
 				const data = await res.json();
 				const list = Array.isArray(data.areas) ? data.areas : (data && data.areas) || [];
-				const mapped = list.map((name, idx) => {
+								const mapped = list.map((name, idx) => {
 					const safeName = String(name || '').trim() || `area-${idx}`;
-									return { name: safeName, img: makeConceptImageUrl(safeName, idx) };
+									return { name: safeName, img: makeConceptImageUrl(safeName, idx), fallback: makeGradientDataUrl(idx) };
 				});
 				setAreas(mapped);
 			} catch (err) {
@@ -96,7 +113,7 @@ function DashboardPage() {
 				)}
 				{areas.map(area => (
 					<div key={area.name} className="area-box">
-						<img className="area-bg" src={area.img} alt={area.name} />
+							<img className="area-bg" src={area.img} alt={area.name} onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = area.fallback; }} />
 						<div className="area-title">{area.name}</div>
 						<div className="area-content">
 							<button className="area-play-btn-icon" onClick={() => navigate(`/pretest/${area.name}`)} aria-label={`Play ${area.name}`}>
