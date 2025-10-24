@@ -94,7 +94,7 @@ function DashboardPage() {
 					<img className="page-bg" src={process.env.PUBLIC_URL + '/sfondo_pages.jpg'} alt="" />
 				</div>
 				<Topbar />
-				<div className="areas-grid">
+				<div className="areas-grid" id="tests">
 					<div>Caricamento aree...</div>
 				</div>
 			</div>

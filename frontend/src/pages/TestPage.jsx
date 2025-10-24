@@ -199,7 +199,6 @@ export default function TestPage() {
                 setTimeout(() => {
                   const el = document.getElementById('tests');
                   if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                  else window.location.hash = '#tests';
                 }, 160);
               }}>Vai alla sezione test</button>
             </div>
