@@ -2,8 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Topbar from '../components/Topbar';
 import '../css/TestPage.css';
-
-const API_HOST = process.env.REACT_APP_API_HOST || 'http://localhost:3000';
+import API_HOST from '../utils/apiHost';
 
 export default function TestPage() {
   const { area, num } = useParams();
@@ -16,7 +15,7 @@ export default function TestPage() {
   const [result, setResult] = useState(null);
   const timerRef = useRef(Date.now());
   const navigate = useNavigate();
-  const userId = localStorage.getItem('userId');
+  const [userId, setUserId] = useState(null);
 
   const resetStateForTest = qs => {
     setQuestions(qs);
@@ -29,6 +28,21 @@ export default function TestPage() {
   };
 
   useEffect(() => {
+    // Resolve logged-in user via cookie session
+    (async () => {
+      try {
+        const me = await fetch(`${API_HOST}/auth/me`, { credentials: 'include' });
+        if (me.ok) {
+          const data = await me.json();
+          setUserId(data && data.user && (data.user.id || data.user._id) ? (data.user.id || data.user._id) : null);
+        } else {
+          setUserId(null);
+        }
+      } catch (e) {
+        setUserId(null);
+      }
+    })();
+
     const controller = new AbortController();
 
     try {
@@ -42,7 +56,7 @@ export default function TestPage() {
 
     (async () => {
       try {
-        const res = await fetch(`${API_HOST}/flash/thematic/${area}`, { signal: controller.signal });
+        const res = await fetch(`${API_HOST}/flash/thematic/${area}`, { signal: controller.signal, credentials: 'include' });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
         const shuffled = data.sort(() => 0.5 - Math.random());
@@ -83,6 +97,7 @@ export default function TestPage() {
     fetch(`${API_HOST}/testresult`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
       body: JSON.stringify(payload)
     })
       .then(async r => {
@@ -104,10 +119,10 @@ export default function TestPage() {
     const now = Date.now();
 
     if (selectedAnswer !== null) return;
-
+    const elapsed = now - timerRef.current;
     setTimes(prev => {
       const copy = [...prev];
-      copy[current] = now - timerRef.current;
+      copy[current] = elapsed;
       return copy;
     });
 
@@ -123,23 +138,22 @@ export default function TestPage() {
       if (active && typeof active.blur === 'function') active.blur();
     } catch (err) { }
 
-    timerRef.current = now;
-
+    // Do not reset timerRef yet; special handling for last question below
 
     setTimeout(() => {
-
       setSelectedAnswer(null);
       if (current < questions.length - 1) {
         setCurrent(prev => prev + 1);
-
+        // start timing for the next question
         timerRef.current = Date.now();
         return;
       }
 
+      // Final question: use the captured elapsed to avoid zeroing due to timer reset
       const finalAnswers = (allAnswers.slice(0));
       finalAnswers[current] = i;
       const finalTimes = (times.slice(0));
-      finalTimes[current] = now - timerRef.current;
+      finalTimes[current] = elapsed;
       computeAndSave(finalAnswers, finalTimes);
     }, 300);
   };

@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Topbar from '../components/Topbar';
-
-const API_HOST = process.env.REACT_APP_API_HOST || 'http://localhost:3000';
+import '../css/PreTestPage.css';
+import API_HOST from '../utils/apiHost';
 
 export default function PreTestPage() {
   const { area } = useParams();
@@ -11,7 +11,7 @@ export default function PreTestPage() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetch(`${API_HOST}/flash/thematic/${area}`)
+    fetch(`${API_HOST}/flash/thematic/${area}`, { credentials: 'include' })
       .then(res => {
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         return res.json();
@@ -23,6 +23,13 @@ export default function PreTestPage() {
       });
   }, [area]);
 
+  const quickPicks = useMemo(() => {
+    const base = [5, 10, 15, 20];
+    const list = base.filter(n => n <= (maxQuestions || 1));
+    if (list.length === 0) return [Math.min(5, maxQuestions || 1)];
+    return list;
+  }, [maxQuestions]);
+
   return (
     <div className="pretest-page">
       <div className="page-bg-wrapper" aria-hidden="true">
@@ -31,7 +38,20 @@ export default function PreTestPage() {
       <Topbar />
       <div className="pretest-card">
         <h2>Configura il test: <span className="accent">{area}</span></h2>
-        <label>Numero domande (max disponibile: {maxQuestions}):
+        <div className="quick-picks" aria-label="Selezione rapida numero domande">
+          {quickPicks.map(n => (
+            <button
+              key={n}
+              className={n === numQuestions ? 'chip active' : 'chip'}
+              onClick={() => setNumQuestions(n)}
+              type="button"
+            >
+              {n}
+            </button>
+          ))}
+        </div>
+        <label>
+          Numero domande (max {maxQuestions}):
           <input
             type="number"
             min={1}
@@ -46,13 +66,13 @@ export default function PreTestPage() {
           />
         </label>
         <button
-          className="modern-btn"
+          className="modern-btn cta"
           onClick={() => {
-            // ensure area is encoded when navigating
             const encoded = encodeURIComponent(area);
             navigate(`/test/${encoded}/${numQuestions}`);
           }}
           disabled={!maxQuestions || numQuestions < 1}
+          type="button"
         >
           Inizia il test
         </button>

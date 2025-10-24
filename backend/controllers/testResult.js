@@ -3,8 +3,10 @@ const TestResult = require('../models/testResult');
 // Salva un nuovo risultato test
 exports.saveTestResult = async (req, res) => {
   try {
-    const { userId, area, numQuestions, answers, correctCount, totalTime } = req.body;
-    const testResult = new TestResult({ userId, area, numQuestions, answers, correctCount, totalTime });
+    const { area, numQuestions, answers, correctCount, totalTime } = req.body;
+    const effectiveUserId = (req.user && req.user.id) || req.body.userId;
+    if (!effectiveUserId) return res.status(401).json({ error: 'Utente non autenticato' });
+    const testResult = new TestResult({ userId: effectiveUserId, area, numQuestions, answers, correctCount, totalTime });
     await testResult.save();
     res.status(201).json({ message: 'Test salvato', testResult });
   } catch (err) {

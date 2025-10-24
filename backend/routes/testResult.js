@@ -1,9 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const testResultController = require('../controllers/testResult');
+const { authMiddleware } = require('../controllers/auth');
 
-// POST /testresult - salva risultato test
-router.post('/', testResultController.saveTestResult);
+// POST /testresult - salva risultato test (richiede autenticazione via cookie/JWT)
+router.post('/', authMiddleware, testResultController.saveTestResult);
 
 // GET /testresult/areas - lista aree
 router.get('/areas/list', testResultController.listAreas);
