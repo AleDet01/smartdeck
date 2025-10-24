@@ -5,40 +5,61 @@ import AreaChart from '../components/AreaChart';
 import StatsBox from '../components/StatsBox';
 import '../css/DashboardPage.css';
 import '../css/StatsPage.css';
-
-const mockData = () => {
-  const labels = ['Ago', 'Set', 'Ott', 'Nov', 'Dic', 'Gen', 'Feb', 'Mar'];
-  return labels.map(l => ({ label: l, score: Math.round(50 + Math.random() * 50) }));
-};
+import API_HOST from '../utils/apiHost';
 
 export default function AreaStatsPage() {
   const { area } = useParams();
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState([]);
   const [summary, setSummary] = useState({ attempts: 0, avg: 0, best: 0 });
+  const [wrong, setWrong] = useState([]);
 
   useEffect(() => {
-    const API_HOST = process.env.REACT_APP_API_HOST || 'http://localhost:3000';
     const controller = new AbortController();
 
     (async () => {
       try {
-        const res = await fetch(`${API_HOST}/flash/areas/${encodeURIComponent(area)}/stats`, { signal: controller.signal });
-        if (!res.ok) throw new Error(res.statusText);
-        const json = await res.json();
-        if (json && Array.isArray(json.series) && json.series.length) {
-          setData(json.series);
-          setSummary({ attempts: json.attempts || 0, avg: json.avg || 0, best: json.best || 0 });
+        const meRes = await fetch(`${API_HOST}/auth/me`, { credentials: 'include', signal: controller.signal });
+        const me = await meRes.json();
+        if (!meRes.ok || !me || !me.authenticated || !me.user) {
+          setData([]);
+          setSummary({ attempts: 0, avg: 0, best: 0 });
+          setWrong([]);
+          return;
+        }
+        const statsRes = await fetch(`${API_HOST}/testresult/${encodeURIComponent(me.user.id)}/${encodeURIComponent(area)}`, { credentials: 'include', signal: controller.signal });
+        if (statsRes.ok) {
+          const json = await statsRes.json();
+          const results = Array.isArray(json.results) ? json.results : [];
+          if (json.stats) {
+            setSummary({
+              attempts: json.stats.totalTests || 0,
+              avg: Math.round((json.stats.avgScore || 0) * 100),
+              best: results.length ? Math.max(...results.map(r => Math.round((r.correctCount / r.numQuestions) * 100))) : 0
+            });
+            const series = results.map((r, idx) => ({ label: `#${results.length - idx}`, score: Math.round((r.correctCount / r.numQuestions) * 100) })).reverse();
+            setData(series);
+          } else {
+            setSummary({ attempts: 0, avg: 0, best: 0 });
+            setData([]);
+          }
         } else {
-          const m = mockData(area);
-          setData(m);
-          setSummary({ attempts: 12, avg: Math.round(m.reduce((s, x) => s + x.score, 0) / m.length), best: Math.max(...m.map(x => x.score)) });
+          setSummary({ attempts: 0, avg: 0, best: 0 });
+          setData([]);
+        }
+        // wrong answers
+        const wrongRes = await fetch(`${API_HOST}/testresult/wrong/${encodeURIComponent(me.user.id)}/${encodeURIComponent(area)}?limit=50`, { credentials: 'include', signal: controller.signal });
+        if (wrongRes.ok) {
+          const w = await wrongRes.json();
+          setWrong(Array.isArray(w.wrong) ? w.wrong : []);
+        } else {
+          setWrong([]);
         }
       } catch (err) {
         if (err.name === 'AbortError') return;
-        const m = mockData(area);
-        setData(m);
-        setSummary({ attempts: 12, avg: Math.round(m.reduce((s, x) => s + x.score, 0) / m.length), best: Math.max(...m.map(x => x.score)) });
+        setData([]);
+        setSummary({ attempts: 0, avg: 0, best: 0 });
+        setWrong([]);
       } finally {
         setLoading(false);
       }
@@ -68,6 +89,23 @@ export default function AreaStatsPage() {
             <div className="chart-card" style={{ margin: 24 }}>
               <h3 style={{ margin: '8px 0' }}>Andamento punteggi</h3>
               <AreaChart data={data} dataKey="score" height={260} />
+            </div>
+
+            <div className="chart-card" style={{ margin: 24, maxHeight: 260, overflowY: 'auto' }}>
+              <h3 style={{ margin: '8px 0' }}>Risposte sbagliate recenti</h3>
+              {wrong.length === 0 ? (
+                <div style={{ color: '#64748b' }}>Nessun errore registrato per questa area.</div>
+              ) : (
+                <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+                  {wrong.map((w, i) => (
+                    <li key={i} style={{ padding: '8px 0', borderBottom: '1px solid #e2e8f0' }}>
+                      <div style={{ fontWeight: 600 }}>{w.question}</div>
+                      <div style={{ fontSize: 13, color: '#ef4444' }}>Tua risposta: {w.userAnswer}</div>
+                      <div style={{ fontSize: 13, color: '#16a34a' }}>Corretta: {w.correctAnswer}</div>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
           </>
         )}

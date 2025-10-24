@@ -44,9 +44,11 @@ exports.getStatsByArea = async (req, res) => {
 // Lista aree disponibili (distinct)
 exports.listAreas = async (req, res) => {
   try {
-    const areas = await TestResult.distinct('area');
-  console.log('[testResult.listAreas] found areas:', areas.length, areas);
-  res.json({ areas });
+    const { userId } = req.query;
+    const query = userId ? { userId } : {};
+    const areas = await TestResult.distinct('area', query);
+    console.log('[testResult.listAreas] found areas:', areas.length, 'for userId:', userId || 'ALL');
+    res.json({ areas });
   } catch (err) {
     res.status(500).json({ error: 'Errore recupero aree', details: err.message });
   }
@@ -86,5 +88,30 @@ exports.getRecentByArea = async (req, res) => {
     res.json({ results });
   } catch (err) {
     res.status(500).json({ error: 'Errore recupero recenti', details: err.message });
+  }
+};
+
+// Wrong answers by user and area (flattened), latest first
+exports.getWrongAnswersByUserArea = async (req, res) => {
+  try {
+    const { userId, area } = req.params;
+    const limit = Math.min(parseInt(req.query.limit) || 50, 200);
+    const results = await TestResult.find({ userId, area }).sort({ createdAt: -1 }).limit(100);
+    const wrong = [];
+    for (const r of results) {
+      const createdAt = r.createdAt;
+      (r.answers || []).forEach(a => {
+        if (!a.isCorrect) wrong.push({
+          question: a.question,
+          userAnswer: a.userAnswer,
+          correctAnswer: a.correctAnswer,
+          createdAt
+        });
+      });
+      if (wrong.length >= limit) break;
+    }
+    res.json({ wrong: wrong.slice(0, limit) });
+  } catch (err) {
+    res.status(500).json({ error: 'Errore recupero risposte sbagliate', details: err.message });
   }
 };

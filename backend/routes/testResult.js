@@ -14,6 +14,9 @@ router.get('/aggregate/:area', testResultController.getAggregateByArea);
 // GET /testresult/recent/:area - recent results per area
 router.get('/recent/:area', testResultController.getRecentByArea);
 
+// Wrong answers for user and area
+router.get('/wrong/:userId/:area', testResultController.getWrongAnswersByUserArea);
+
 // GET /testresult/:userId/:area - statistiche per utente e area
 router.get('/:userId/:area', testResultController.getStatsByArea);
 
