@@ -1,6 +1,7 @@
 import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import API_HOST from '../utils/apiHost';
+import '../css/LogoutButton.css';
 
 export default function LogoutButton() {
   const location = useLocation();
@@ -16,7 +17,6 @@ export default function LogoutButton() {
         credentials: 'include'
       });
     } catch {}
-    // Clear any legacy token flag just in case
     try { localStorage.removeItem('token'); } catch {}
     navigate('/');
   };
@@ -25,22 +25,10 @@ export default function LogoutButton() {
 
   return (
     <button
-      onClick={handleLogout}
+      type="button"
+      className="logout-btn"
       title="Esci"
-      style={{
-        position: 'fixed',
-        right: 16,
-        bottom: 16,
-        zIndex: 2000,
-        padding: '10px 14px',
-        background: '#f3f4f6',
-        border: '1px solid #e5e7eb',
-        borderRadius: 10,
-        boxShadow: '0 2px 10px rgba(0,0,0,0.08)',
-        cursor: 'pointer',
-        fontWeight: 600,
-        color: '#23272f'
-      }}
+      onClick={handleLogout}
     >
       Esci
     </button>

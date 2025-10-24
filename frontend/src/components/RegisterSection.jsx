@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, memo } from 'react';
 import '../css/LandingPage.css';
 import API_HOST from '../utils/apiHost';
 
-export default function RegisterSection({ onRegisterSuccess }) {
+function RegisterSection({ onRegisterSuccess }) {
 	const [username, setUsername] = useState('');
 	const [password, setPassword] = useState('');
 	const [error, setError] = useState('');
@@ -16,7 +16,8 @@ export default function RegisterSection({ onRegisterSuccess }) {
 			const res = await fetch(`${API_HOST}/auth/register`, {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ username, password })
+				credentials: 'include',
+				body: JSON.stringify({ username: username.trim(), password })
 			});
 			const data = await res.json();
 			if (res.ok) {
@@ -34,7 +35,7 @@ export default function RegisterSection({ onRegisterSuccess }) {
 
 	return (
 		<>
-			<h2 className="section-title" style={{ color: 'transparent', userSelect: 'none' }}>Registrati</h2>
+			<h2 className="section-title visually-hidden-title">Registrati</h2>
 			<form onSubmit={handleRegister}>
 				<input className="modern-input" type="text" name="username" autoComplete="username" required placeholder="Username" value={username} onChange={e => setUsername(e.target.value)} />
 				<input className="modern-input" type="password" name="password" autoComplete="new-password" required placeholder="Password" value={password} onChange={e => setPassword(e.target.value)} />
@@ -45,3 +46,5 @@ export default function RegisterSection({ onRegisterSuccess }) {
 		</>
 	);
 }
+
+export default memo(RegisterSection);

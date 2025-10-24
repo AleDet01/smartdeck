@@ -45,6 +45,11 @@
   text-transform: uppercase;
   letter-spacing: 0.04em;
 }
+/* Titoli visivamente nascosti (mantengono layout) */
+.visually-hidden-title {
+  color: transparent !important;
+  user-select: none;
+}
 form {
   width: 100%;
   display: flex;
