@@ -100,7 +100,7 @@ function logout(req, res) {
     'token=; Max-Age=0',
     'HttpOnly',
     'Path=/',
-    'SameSite=Lax',
+    isProd ? 'SameSite=None' : 'SameSite=Lax',
     isProd ? 'Secure' : null
   ].filter(Boolean).join('; ');
   res.setHeader('Set-Cookie', cookie);

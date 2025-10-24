@@ -3,6 +3,7 @@ import React, { useEffect, useState, useLayoutEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../css/DashboardPage.css'
 import Topbar from '../components/Topbar';
+import API_HOST from '../utils/apiHost';
 
 // Conceptual/minimal image topics (abstract + landscapes)
 const IMAGE_TOPICS = [
@@ -38,12 +39,11 @@ function DashboardPage() {
 	const [areas, setAreas] = useState(null);
 
 	useEffect(() => {
-		const API_HOST = process.env.REACT_APP_API_HOST || 'http://localhost:3000';
 		const controller = new AbortController();
 
 		(async () => {
 			try {
-				const res = await fetch(`${API_HOST}/flash/areas/list`, { signal: controller.signal });
+				const res = await fetch(`${API_HOST}/flash/areas/list`, { signal: controller.signal, credentials: 'include' });
 				if (!res.ok) throw new Error(`HTTP ${res.status}`);
 				const data = await res.json();
 				const list = Array.isArray(data.areas) ? data.areas : (data && data.areas) || [];
