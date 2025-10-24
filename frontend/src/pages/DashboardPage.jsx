@@ -4,7 +4,17 @@ import { useNavigate } from 'react-router-dom';
 import '../css/DashboardPage.css'
 import Topbar from '../components/Topbar';
 
-const makeRandomImageUrl = seed => `https://picsum.photos/seed/${encodeURIComponent(seed)}/600/400`;
+// Conceptual/minimal image topics (abstract + landscapes)
+const IMAGE_TOPICS = [
+	'abstract', 'geometry', 'minimal', 'gradient', 'pattern', 'texture',
+	'landscape', 'mountains', 'desert', 'forest', 'aerial', 'sea', 'ice', 'mist', 'dunes'
+];
+
+const makeConceptImageUrl = (name, idx) => {
+	const topic = IMAGE_TOPICS[(name.length + idx) % IMAGE_TOPICS.length];
+	// Unsplash Source returns a random image matching the query; adding 'minimal' biases to cleaner visuals
+	return `https://source.unsplash.com/600x400/?${encodeURIComponent(topic)},minimal`;
+};
 
 function DashboardPage() {
 	const navigate = useNavigate();
@@ -20,10 +30,9 @@ function DashboardPage() {
 				if (!res.ok) throw new Error(`HTTP ${res.status}`);
 				const data = await res.json();
 				const list = Array.isArray(data.areas) ? data.areas : (data && data.areas) || [];
-				const ts = Date.now();
 				const mapped = list.map((name, idx) => {
 					const safeName = String(name || '').trim() || `area-${idx}`;
-					return { name: safeName, img: makeRandomImageUrl(`${safeName}-${ts}-${idx}`) };
+									return { name: safeName, img: makeConceptImageUrl(safeName, idx) };
 				});
 				setAreas(mapped);
 			} catch (err) {
@@ -91,10 +100,16 @@ function DashboardPage() {
 						<div className="area-title">{area.name}</div>
 						<div className="area-content">
 							<button className="area-play-btn-icon" onClick={() => navigate(`/pretest/${area.name}`)} aria-label={`Play ${area.name}`}>
-								<svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
-									<circle cx="14" cy="14" r="14" fill="#0096c7"/>
-									<polygon points="11,9 20,14 11,19" fill="#fff"/>
-								</svg>
+									<svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+										<defs>
+											<linearGradient id="playGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+												<stop offset="0%" stopColor="#ffe066"/>
+												<stop offset="100%" stopColor="#ffd60a"/>
+											</linearGradient>
+										</defs>
+										<circle cx="14" cy="14" r="14" fill="url(#playGrad)"/>
+										<polygon points="11,9 20,14 11,19" fill="#23272f"/>
+									</svg>
 							</button>
 						</div>
 					</div>

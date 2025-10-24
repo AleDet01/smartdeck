@@ -182,12 +182,11 @@ html, body, #root {
 .area-play-btn-icon svg {
   display: block;
   border-radius: 50%;
-  box-shadow: 0 2px 8px 0 rgba(0,119,182,0.13);
-  transition: box-shadow 0.18s, background 0.18s, transform 0.13s;
+  box-shadow: 0 2px 8px 0 rgba(255, 214, 10, 0.13);
+  transition: box-shadow 0.18s, transform 0.13s;
 }
 .area-play-btn-icon:hover svg, .area-play-btn-icon:focus svg {
-  box-shadow: 0 6px 18px 0 rgba(0,150,199,0.18);
-  background: #00b4d8;
+  box-shadow: 0 6px 18px 0 rgba(255, 166, 0, 0.18);
   transform: scale(1.08);
 }
 @media (max-width: 1200px) {
