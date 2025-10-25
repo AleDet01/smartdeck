@@ -4,7 +4,7 @@ Questo documento descrive in dettaglio l’architettura del frontend, ogni pagin
 
 ### Stack e convenzioni
 
-- Libreria: React 18
+- Libreria: React (CRA)
 - Routing: `react-router-dom` con `HashRouter`
 - Chiamate HTTP: `fetch` con `credentials: 'include'` per inviare i cookie httpOnly
 - Gestione config host API: `src/utils/apiHost.js`
@@ -217,14 +217,7 @@ File: `src/components/AreaBox.jsx`
 
 - Componente semplice (titolo + pulsante). Non è usato direttamente nella dashboard attuale (che rende una card con immagine e bottone play custom), ma può fungere da fallback o esempio minimal.
 
-### RegisterSection
-
-File: `src/components/RegisterSection.jsx`
-
-- Sezione di registrazione riutilizzabile (non più montata nella Landing poiché l’abbiamo unificata in un form con toggle).
-- Logica: POST `/auth/register` con `credentials: 'include'`. Dopo successo chiama `onRegisterSuccess()` se passato.
-
----
+ 
 
 ## Stili e scelte UI
 
