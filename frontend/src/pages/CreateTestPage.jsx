@@ -9,6 +9,7 @@ export default function CreateTestPage() {
   const [numQuestions, setNumQuestions] = useState(1);
   const [questions, setQuestions] = useState([{ question: '', answers: ['', '', ''] }]);
   const [correctIndexes, setCorrectIndexes] = useState([0]);
+  const [fileName, setFileName] = useState('');
 
   const handleNumQuestions = (n) => {
     setNumQuestions(n);
@@ -27,8 +28,11 @@ export default function CreateTestPage() {
   const handleAnswerChange = (qi, ai, value) => setQuestions(qs => qs.map((q, idx) => idx === qi ? { ...q, answers: q.answers.map((a, j) => j === ai ? value : a) } : q));
   const handleMarkCorrect = (qi, ai) => setCorrectIndexes(ci => { const arr = [...ci]; arr[qi] = ai; return arr; });
   const allFilled = testName && questions.every(q => q.question && q.answers.every(a => a));
-  // image upload currently unused; file input kept for future use
-  const handleImage = e => { /* no-op: file input intentionally unused */ };
+  // image upload currently unused; we only show the chosen file name (future ready)
+  const handleImage = e => {
+    const f = e.target.files && e.target.files[0];
+    setFileName(f ? f.name : '');
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -36,7 +40,7 @@ export default function CreateTestPage() {
       thematicArea: testName,
       questions: questions.map((q, qi) => ({ question: q.question, answers: q.answers.map((txt, idx) => ({ text: txt, isCorrect: (correctIndexes[qi] === idx) })), difficulty: 'media' }))
     };
-    fetch(`${API_HOST}/flash`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
+    fetch(`${API_HOST}/flash`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify(payload) })
       .then(() => window.location.href = '/#/dashboard')
       .catch(() => {
         try {
@@ -56,29 +60,48 @@ export default function CreateTestPage() {
       </div>
       <Topbar />
       <div className="create-test-page">
-        <h2>Crea un nuovo test</h2>
-        <form onSubmit={handleSubmit}>
-          <input type="text" placeholder="Nome del test" value={testName} onChange={e => setTestName(e.target.value)} className="modern-input" />
-          <input type="file" accept="image/*" onChange={handleImage} />
-          <input type="number" min={1} max={20} value={numQuestions} onChange={e => handleNumQuestions(Number(e.target.value))} className="modern-input" placeholder="Numero domande" />
-          <div className="question-list">
-            {questions.map((q, i) => (
-              <div key={i} className="question-item">
-                <input type="text" placeholder={`Domanda ${i+1}`} value={q.question} onChange={e => handleQuestionChange(i, e.target.value)} className="modern-input" />
-                {q.answers.map((a, j) => (
-                  <div key={j} className="answer-row">
-                    <input type="text" placeholder={`Risposta ${j+1}`} value={a} onChange={e => handleAnswerChange(i, j, e.target.value)} className="modern-input" />
-                    <label>
-                      <input type="radio" name={`correct-${i}`} checked={correctIndexes[i]===j} onChange={() => handleMarkCorrect(i,j)} />
-                      <span>Corretta</span>
-                    </label>
-                  </div>
-                ))}
-              </div>
-            ))}
+        <div className="ct-card">
+          <div className="ct-header">
+            <h2>Crea un nuovo test</h2>
+            <p className="ct-sub">Imposta il nome, scegli quante domande e indica la risposta corretta per ciascuna.</p>
           </div>
-          <button className="modern-btn" type="submit" disabled={!allFilled}>Conferma</button>
-        </form>
+          <form onSubmit={handleSubmit}>
+            <input type="text" placeholder="Nome del test (es. Algebra 1)" value={testName} onChange={e => setTestName(e.target.value)} className="modern-input" />
+
+            <div className="ct-row">
+              <input type="number" min={1} max={20} value={numQuestions} onChange={e => handleNumQuestions(Number(e.target.value))} className="modern-input" placeholder="Numero domande" />
+              <div className="ct-quick">
+                <button type="button" className="chip-gold" onClick={() => handleNumQuestions(5)}>5</button>
+                <button type="button" className="chip-gold" onClick={() => handleNumQuestions(10)}>10</button>
+                <button type="button" className="chip-gold" onClick={() => handleNumQuestions(15)}>15</button>
+              </div>
+            </div>
+
+            <div className="ct-file">
+              <input id="cover-image" type="file" accept="image/*" onChange={handleImage} />
+              <label htmlFor="cover-image" className="file-btn">Scegli immagine (opzionale)</label>
+              <span className="file-name">{fileName || 'Nessun file'}</span>
+            </div>
+
+            <div className="question-list">
+              {questions.map((q, i) => (
+                <div key={i} className="question-item">
+                  <input type="text" placeholder={`Domanda ${i+1}`} value={q.question} onChange={e => handleQuestionChange(i, e.target.value)} className="modern-input" />
+                  {q.answers.map((a, j) => (
+                    <div key={j} className="answer-row">
+                      <input type="text" placeholder={`Risposta ${j+1}`} value={a} onChange={e => handleAnswerChange(i, j, e.target.value)} className="modern-input" />
+                      <label className="correct-pill">
+                        <input type="radio" name={`correct-${i}`} checked={correctIndexes[i]===j} onChange={() => handleMarkCorrect(i,j)} />
+                        <span>Corretta</span>
+                      </label>
+                    </div>
+                  ))}
+                </div>
+              ))}
+            </div>
+            <button className="modern-btn" type="submit" disabled={!allFilled}>Conferma</button>
+          </form>
+        </div>
       </div>
     </div>
   );

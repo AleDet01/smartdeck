@@ -14,6 +14,25 @@
 	justify-content: flex-start;
 }
 
+/* Card contenitore con accenti giallo/nero in linea col tema */
+.ct-card {
+	background: rgba(255,255,255,0.96);
+	border: 1.5px solid rgba(255, 214, 10, 0.38);
+	border-radius: 16px;
+	box-shadow: 0 8px 28px rgba(0,0,0,0.10);
+	padding: 18px 16px 20px;
+}
+
+.ct-header h2 {
+	margin: 0 0 6px 0;
+	color: #111;
+}
+.ct-header .ct-sub {
+	margin: 0 0 16px 0;
+	color: #4b5563;
+	font-size: 0.95rem;
+}
+
 .create-test-page h2 {
 	margin-top: 0;
 }
@@ -24,9 +43,52 @@
 	flex: 1;
 }
 
-.create-test-page input[type="file"] {
+.ct-row {
+	display: grid;
+	grid-template-columns: 1fr auto;
+	gap: 10px;
+	align-items: center;
+	margin-top: 10px;
+}
+
+.ct-quick {
+	display: inline-flex;
+	gap: 8px;
+}
+.chip-gold {
+	background: #ffd60a;
+	border: 1px solid rgba(0,0,0,0.18);
+	color: #111;
+	border-radius: 999px;
+	padding: 6px 10px;
+	font-weight: 600;
+	cursor: pointer;
+}
+.chip-gold:hover { filter: brightness(0.98); }
+
+.ct-file {
+	display: flex;
+	align-items: center;
+	gap: 10px;
 	margin: 12px 0;
 }
+.ct-file input[type="file"] {
+	position: absolute;
+	width: 1px; height: 1px; overflow: hidden;
+	clip: rect(1px,1px,1px,1px);
+	white-space: nowrap; clip-path: inset(50%);
+	border: 0; padding: 0; margin: -1px;
+}
+.ct-file .file-btn {
+	background: #111;
+	color: #ffd60a;
+	border-radius: 10px;
+	padding: 10px 12px;
+	border: 1px solid rgba(0,0,0,0.18);
+	cursor: pointer;
+}
+.ct-file .file-btn:hover { filter: brightness(1.05); }
+.ct-file .file-name { color: #4b5563; font-size: 0.92rem; }
 
 .create-test-page .question-list {
 	flex: 1;
@@ -35,9 +97,14 @@
 .create-test-page .question-item {
 	margin: 18px 0;
 	padding: 12px;
-	border: 1px solid #e0e7ef;
+	border: 1px solid rgba(255, 214, 10, 0.32);
 	border-radius: 8px;
 	background: #f8fafc;
+}
+
+.create-test-page .question-item:focus-within {
+  box-shadow: 0 0 0 2px rgba(255, 214, 10, 0.35) inset;
+  background: #ffffff;
 }
 
 .create-test-page .question-item input.modern-input {
@@ -59,6 +126,16 @@
 	display: inline-flex;
 	align-items: center;
 	gap: 6px;
+}
+
+.create-test-page .answer-row label.correct-pill {
+	background: #111;
+	color: #ffd60a;
+	border-radius: 999px;
+	padding: 4px 8px;
+}
+.create-test-page .answer-row label.correct-pill input[type="radio"] {
+	accent-color: #ffd60a;
 }
 
 .create-test-page .answer-row span {
