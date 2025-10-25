@@ -152,7 +152,7 @@ File: `src/pages/AreaStatsPage.jsx` — Stili: `src/css/StatsPage.css`
 	- `GET /testresult/:userId/:area` → `{ stats, results }` con:
 		- `stats.totalTests, stats.avgScore, ...`
 		- `results` (lista tentativi)
-	- `GET /testresult/wrong/:userId/:area?limit=50` → array errori recenti
+	- `GET /testresult/wrong/:userId/:area?limit=50` → array errori recenti (deduplicati per domanda+risposta corretta, mantenendo solo l'occorrenza più recente)
 - Calcoli UI:
 	- `summary`: `{ attempts, avg, best }` dove `avg = round(avgScore*100)`; `best` = max percentuale tra i risultati.
 	- Serie grafico: `[{label: '#<index>', score: <percent>}, ...]` in ordine cronologico.

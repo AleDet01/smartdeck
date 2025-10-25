@@ -93,26 +93,34 @@ exports.getRecentByArea = async (req, res) => {
   }
 };
 
-// Wrong answers by user and area (flattened), latest first
+// Wrong answers by user and area (flattened), latest first, de-duplicated by question+correctAnswer
 exports.getWrongAnswersByUserArea = async (req, res) => {
   try {
     const { userId, area } = req.params;
     const limit = Math.min(parseInt(req.query.limit) || 50, 200);
-    const results = await TestResult.find({ userId, area }).sort({ createdAt: -1 }).limit(100);
+    const results = await TestResult.find({ userId, area }).sort({ createdAt: -1 }).limit(150);
     const wrong = [];
-    for (const r of results) {
+    const seen = new Set();
+    outer: for (const r of results) {
       const createdAt = r.createdAt;
-      (r.answers || []).forEach(a => {
-        if (!a.isCorrect) wrong.push({
-          question: a.question,
-          userAnswer: a.userAnswer,
-          correctAnswer: a.correctAnswer,
-          createdAt
-        });
-      });
-      if (wrong.length >= limit) break;
+      for (const a of (r.answers || [])) {
+        if (a && !a.isCorrect) {
+          const q = (a.question || '').trim();
+          const ca = (a.correctAnswer || '').trim();
+          const key = `${q}||${ca}`.toLowerCase();
+          if (seen.has(key)) continue;
+          wrong.push({
+            question: q,
+            userAnswer: a.userAnswer,
+            correctAnswer: ca,
+            createdAt
+          });
+          seen.add(key);
+          if (wrong.length >= limit) break outer;
+        }
+      }
     }
-    res.json({ wrong: wrong.slice(0, limit) });
+    res.json({ wrong });
   } catch (err) {
     res.status(500).json({ error: 'Errore recupero risposte sbagliate', details: err.message });
   }

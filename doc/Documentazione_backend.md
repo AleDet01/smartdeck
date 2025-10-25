@@ -215,6 +215,7 @@ Endpoint:
 
 - `GET /testresult/wrong/:userId/:area?limit=50`
 	- Restituisce una lista “flattened” delle ultime risposte errate dell’utente in quell’area
+	- Deduplica automaticamente le domande sbagliate ripetute tra tentativi diversi: la lista contiene al massimo una voce per ciascuna combinazione domanda+risposta corretta (case-insensitive, trim), mantenendo l'occorrenza più recente.
 	- Risposta `{ wrong: [ { question, userAnswer, correctAnswer, createdAt } ] }`
 
 Performance:
