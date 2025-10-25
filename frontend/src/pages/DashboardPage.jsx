@@ -5,7 +5,6 @@ import '../css/DashboardPage.css'
 import Topbar from '../components/Topbar';
 import API_HOST from '../utils/apiHost';
 
-// Conceptual/minimal image topics (abstract + landscapes)
 const IMAGE_TOPICS = [
 	'abstract', 'geometry', 'minimal', 'gradient', 'pattern', 'texture',
 	'landscape', 'mountains', 'desert', 'forest', 'aerial', 'sea', 'ice', 'mist', 'dunes'
@@ -13,11 +12,9 @@ const IMAGE_TOPICS = [
 
 const makeConceptImageUrl = (name, idx) => {
 	const topic = IMAGE_TOPICS[(name.length + idx) % IMAGE_TOPICS.length];
-	// Unsplash Source returns a random image matching the query; adding 'minimal' biases to cleaner visuals
 	return `https://source.unsplash.com/600x400/?${encodeURIComponent(topic)},minimal`;
 };
 
-// Lightweight, reliable gradient placeholder as a data URI (no network)
 const GRADIENTS = [
 	['#dbeafe', '#bfdbfe'], // soft blue
 	['#e2e8f0', '#cbd5e1'], // slate/gray

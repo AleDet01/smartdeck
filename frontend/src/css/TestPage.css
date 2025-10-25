@@ -6,7 +6,6 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  /* Unified background like Landing */
   background: linear-gradient(135deg, #cdd1d6 0%, #b2b7bd 45%, #a8aeb3 60%, #d2d6da 100%);
   position: relative;
   box-sizing: border-box;
@@ -23,7 +22,6 @@
   z-index: 0;
 }
 
-/* Hide legacy background image wrapper */
 .page-bg-wrapper { display: none !important; }
 
 .question-count {

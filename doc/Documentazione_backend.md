@@ -1,8 +1,5 @@
 ## SmartDeck – Documentazione Backend
 
-Questa guida descrive in profondità l’architettura, i moduli e i flussi del backend dell’applicazione SmartDeck. È pensata per lo studio e la manutenzione: spiega come è organizzato il codice, come funziona l’autenticazione, quali sono i modelli dati in MongoDB e tutte le API esposte, con payload e risposte attese.
-
----
 
 ## Panoramica architetturale
 

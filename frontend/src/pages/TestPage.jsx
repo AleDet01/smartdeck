@@ -28,7 +28,6 @@ export default function TestPage() {
   };
 
   useEffect(() => {
-    // Resolve logged-in user via cookie session
     (async () => {
       try {
         const me = await fetch(`${API_HOST}/auth/me`, { credentials: 'include' });
@@ -138,18 +137,13 @@ export default function TestPage() {
       if (active && typeof active.blur === 'function') active.blur();
     } catch (err) { }
 
-    // Do not reset timerRef yet; special handling for last question below
-
     setTimeout(() => {
       setSelectedAnswer(null);
       if (current < questions.length - 1) {
         setCurrent(prev => prev + 1);
-        // start timing for the next question
         timerRef.current = Date.now();
         return;
       }
-
-      // Final question: use the captured elapsed to avoid zeroing due to timer reset
       const finalAnswers = (allAnswers.slice(0));
       finalAnswers[current] = i;
       const finalTimes = (times.slice(0));

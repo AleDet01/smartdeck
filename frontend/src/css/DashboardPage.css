@@ -54,7 +54,6 @@ html, body {
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
-  /* Unified background like Landing (soft metallic + yellow glow) */
   background: linear-gradient(135deg, #cdd1d6 0%, #b2b7bd 45%, #a8aeb3 60%, #d2d6da 100%);
   padding-top: 130px;
   overflow-y: auto;
@@ -72,7 +71,6 @@ html, body {
   z-index: 0;
 }
 
-/* Hide legacy background image wrapper to use unified gradient */
 .page-bg-wrapper { display: none !important; }
 
 .dashboard-page { position: relative; z-index: 1; }
@@ -128,7 +126,6 @@ html, body, #root {
   align-items: center;
   padding-bottom: 22px;
 }
-/* Titolo piccolo, moderno, in alto a sinistra */
 .area-title {
   position: absolute;
   top: 10px;
@@ -151,12 +148,8 @@ html, body, #root {
   text-overflow: ellipsis;
   pointer-events: none;
 }
-.area-box {
-  /* ...existing code... */
-  position: relative;
-}
+.area-box { position: relative; }
 
-/* Pulsante solo icona play, moderno */
 .area-play-btn-icon {
   background: none;
   border: none;

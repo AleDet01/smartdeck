@@ -1,7 +1,6 @@
 .create-test-page-outer {
 	padding-top: 90px;
 	min-height: 100vh;
-	/* Unified background like Landing */
 	background: linear-gradient(135deg, #cdd1d6 0%, #b2b7bd 45%, #a8aeb3 60%, #d2d6da 100%);
 	position: relative;
 	overflow: hidden;
@@ -12,8 +11,8 @@
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background: radial-gradient(60rem 60rem at 80% 20%, rgba(255, 195, 0, 0.22), transparent 55%),
-              radial-gradient(40rem 40rem at 10% 90%, rgba(0, 0, 0, 0.18), transparent 60%);
+	background: radial-gradient(60rem 60rem at 80% 20%, rgba(255, 195, 0, 0.22), transparent 55%),
+							radial-gradient(40rem 40rem at 10% 90%, rgba(0, 0, 0, 0.18), transparent 60%);
   z-index: 0;
 }
 
@@ -27,7 +26,6 @@
 	justify-content: flex-start;
 }
 
-/* Card contenitore con accenti giallo/nero in linea col tema */
 .ct-card {
 	background: rgba(255,255,255,0.96);
 	border: 1.5px solid rgba(255, 214, 10, 0.38);
@@ -161,7 +159,6 @@
 	align-self: flex-end;
 }
 
-/* Hide legacy background image wrapper */
 .page-bg-wrapper { display: none !important; }
 
 .create-test-page-outer {

@@ -28,7 +28,6 @@ export default function CreateTestPage() {
   const handleAnswerChange = (qi, ai, value) => setQuestions(qs => qs.map((q, idx) => idx === qi ? { ...q, answers: q.answers.map((a, j) => j === ai ? value : a) } : q));
   const handleMarkCorrect = (qi, ai) => setCorrectIndexes(ci => { const arr = [...ci]; arr[qi] = ai; return arr; });
   const allFilled = testName && questions.every(q => q.question && q.answers.every(a => a));
-  // image upload currently unused; we only show the chosen file name (future ready)
   const handleImage = e => {
     const f = e.target.files && e.target.files[0];
     setFileName(f ? f.name : '');

@@ -3,14 +3,12 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  /* metallic-like neutral gradient with subtle darkening */
   background: linear-gradient(135deg, #cdd1d6 0%, #b2b7bd 45%, #a8aeb3 60%, #d2d6da 100%);
   position: relative;
   overflow: hidden;
 }
 
 .landing-container::before {
-  /* soft yellow glow accent to tie with brand primary */
   content: '';
   position: absolute;
   inset: 0;
@@ -29,7 +27,6 @@
   min-width: 340px;
   max-width: 720px;
 }
-/* Sezioni login/register più moderne */
 .form-section, .register-wrapper {
   flex: 1;
   display: flex;
@@ -51,7 +48,6 @@
   text-transform: uppercase;
   letter-spacing: 0.04em;
 }
-/* Titoli visivamente nascosti (mantengono layout) */
 .visually-hidden-title {
   color: transparent !important;
   user-select: none;
@@ -62,7 +58,6 @@ form {
   flex-direction: column;
   gap: 14px;
 }
-/* Input moderni con effetto focus/hover nitido */
 .modern-input {
   padding: 13px 16px;
   border: 2px solid #c7cdd6;
@@ -78,12 +73,10 @@ form {
   outline: none;
 }
 
-/* Bottoni moderni con effetto gradiente e animazione */
-/* Bottoni blu mare */
 .modern-btn {
   background: linear-gradient(90deg, #ffe066 0%, #ffd60a 100%);
   color: #23272f;
-  border: 1px solid rgba(0,0,0,0.18); /* subtle black accent */
+  border: 1px solid rgba(0,0,0,0.18);
   border-radius: 10px;
   padding: 14px 0;
   font-size: 1.13rem;
@@ -133,7 +126,7 @@ form {
   margin-top: 10px;
   background: transparent;
   border: none;
-  color: #d4a100; /* amber/yellow link */
+  color: #d4a100;
   font-size: 0.95rem;
   cursor: pointer;
   text-decoration: underline;
