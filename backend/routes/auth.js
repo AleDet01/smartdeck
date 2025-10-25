@@ -1,5 +1,5 @@
 const express = require('express');
-const { register, login, me, logout, startGoogleAuth, googleCallback } = require('../controllers/auth');
+const { register, login, me, logout } = require('../controllers/auth');
 const router = express.Router();
 
 router.post('/register', register);
@@ -7,9 +7,7 @@ router.post('/login', login);
 router.get('/me', me);
 router.post('/logout', logout);
 
-// OAuth Google
-router.get('/google', startGoogleAuth);
-router.get('/google/callback', googleCallback);
+// OAuth routes removed: using JWT via cookie
 
 router.get('/_users', async (req, res) => {
 	try {

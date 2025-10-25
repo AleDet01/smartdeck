@@ -1,10 +1,8 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
-const session = require('express-session');
 const connectDB = require('./db');
 const authRoutes = require('./routes/auth');
-const { passportInstance } = require('./controllers/auth');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -59,22 +57,9 @@ app.use((req, res, next) => {
 // Body parser
 app.use(express.json());
 
-// Sessione per OAuth (Passport)
-const isProd = process.env.NODE_ENV === 'production';
-app.set('trust proxy', 1); // richiesto su Render per cookie Secure
-app.use(session({
-  secret: process.env.SESSION_SECRET || 'dev-session-secret',
-  resave: false,
-  saveUninitialized: false,
-  cookie: {
-    httpOnly: true,
-    sameSite: isProd ? 'none' : 'lax',
-    secure: isProd,
-    maxAge: 2 * 60 * 60 * 1000 // 2h
-  }
-}));
-app.use(passportInstance.initialize());
-app.use(passportInstance.session());
+// JWT via cookie httpOnly: nessuna sessione lato server necessaria
+// Manteniamo trust proxy per gestire correttamente cookie Secure dietro proxy
+app.set('trust proxy', 1);
 
 // Rotte autenticazione
 app.use('/auth', authRoutes);
