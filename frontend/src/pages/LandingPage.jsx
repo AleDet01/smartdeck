@@ -46,6 +46,7 @@ export default function LandingPage() {
           <h2 className="section-title" style={{ userSelect: 'none' }}>Benvenuto</h2>
           <form onSubmit={handleSubmit} className="auth-form">
             <input
+              className="modern-input"
               type="text"
               placeholder="Username"
               value={username}
@@ -54,6 +55,7 @@ export default function LandingPage() {
               required
             />
             <input
+              className="modern-input"
               type="password"
               placeholder="Password"
               value={password}
@@ -61,7 +63,7 @@ export default function LandingPage() {
               autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
               required
             />
-            {error ? <div className="error-text">{error}</div> : null}
+            {error ? <div className="error">{error}</div> : null}
             <button className="modern-btn" type="submit" disabled={loading}>
               {loading ? 'Attendere…' : (mode === 'login' ? 'Entra' : 'Registrati')}
             </button>
