@@ -3,19 +3,25 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  /* metallic-like neutral gradient */
-  background: linear-gradient(135deg, #d4d7da 0%, #b7bcc1 45%, #aeb3b7 60%, #d9dbde 100%);
+  /* metallic-like neutral gradient with subtle darkening */
+  background: linear-gradient(135deg, #cdd1d6 0%, #b2b7bd 45%, #a8aeb3 60%, #d2d6da 100%);
   position: relative;
   overflow: hidden;
 }
 
 .landing-container::before {
-  content: none; /* remove dotted overlay for a cleaner, metallic look */
+  /* soft yellow glow accent to tie with brand primary */
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(60rem 60rem at 80% 20%, rgba(255, 195, 0, 0.22), transparent 55%),
+              radial-gradient(40rem 40rem at 10% 90%, rgba(0, 0, 0, 0.18), transparent 60%);
 }
 .landing-box {
-  background: rgba(255,255,255,0.92);
+  background: rgba(255,255,255,0.96);
   border-radius: 18px;
-  box-shadow: 0 6px 32px 0 rgba(30,41,59,0.13);
+  box-shadow: 0 8px 36px 0 rgba(0,0,0,0.12), 0 2px 0 rgba(0,0,0,0.02);
   display: flex;
   flex-direction: row;
   gap: 40px;
@@ -31,14 +37,14 @@
   align-items: center;
   padding: 28px 18px 18px 18px;
   border-radius: 16px;
-  border: 1.5px solid #e0e7ef;
-  background: rgba(248,250,252,0.92);
-  box-shadow: 0 4px 18px 0 rgba(30,41,59,0.10);
+  border: 1.5px solid rgba(255, 214, 10, 0.38);
+  background: rgba(250, 250, 248, 0.96);
+  box-shadow: 0 4px 16px 0 rgba(0,0,0,0.08);
   margin: 0 2px;
 }
 .section-title {
   margin-bottom: 18px;
-  color: #23272f;
+  color: #111111;
   font-size: 1.25rem;
   font-weight: 700;
   letter-spacing: 0.01em;
@@ -59,7 +65,7 @@ form {
 /* Input moderni con effetto focus/hover nitido */
 .modern-input {
   padding: 13px 16px;
-  border: 2px solid #cbd5e1;
+  border: 2px solid #c7cdd6;
   border-radius: 8px;
   font-size: 1.08rem;
   background: #f3f4f6;
@@ -67,7 +73,7 @@ form {
   margin-bottom: 2px;
 }
 .modern-input:focus, .modern-input:hover {
-  border: 2px solid #0077b6;
+  border: 2px solid #ffd60a; /* brand yellow */
   background: #fff;
   outline: none;
 }
@@ -77,14 +83,14 @@ form {
 .modern-btn {
   background: linear-gradient(90deg, #ffe066 0%, #ffd60a 100%);
   color: #23272f;
-  border: none;
+  border: 1px solid rgba(0,0,0,0.18); /* subtle black accent */
   border-radius: 10px;
   padding: 14px 0;
   font-size: 1.13rem;
   font-weight: 700;
   cursor: pointer;
   margin-top: 12px;
-  box-shadow: 0 2px 16px 0 rgba(255, 214, 10, 0.13);
+  box-shadow: 0 2px 16px 0 rgba(0,0,0,0.16), 0 0 0 1px rgba(255, 214, 10, 0.22) inset;
   letter-spacing: 0.03em;
   transition: background 0.18s, box-shadow 0.18s, filter 0.13s, color 0.18s;
   position: relative;
@@ -127,12 +133,12 @@ form {
   margin-top: 10px;
   background: transparent;
   border: none;
-  color: #0ea5e9;
+  color: #d4a100; /* amber/yellow link */
   font-size: 0.95rem;
   cursor: pointer;
   text-decoration: underline;
 }
-.link-btn:hover { color: #0284c7; }
+.link-btn:hover { color: #111111; }
 @media (max-width: 700px) {
   .landing-box {
     flex-direction: column;
