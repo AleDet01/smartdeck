@@ -1,110 +1,110 @@
 const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
+const passport = require('passport');
+const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const User = require('../models/user');
 
-const JWT_SECRET = process.env.JWT_SECRET || 'supersecretkey';
+const isProd = process.env.NODE_ENV === 'production';
+const FRONTEND_URL = process.env.FRONTEND_URL || null;
 
-function setAuthCookie(res, token) {
-  const isProd = process.env.NODE_ENV === 'production';
-  const maxAgeSeconds = 2 * 60 * 60; // 2h
-  const sameSiteAttr = isProd ? 'SameSite=None' : 'SameSite=Lax';
-  const cookie = [
-    `token=${token}`,
-    'HttpOnly',
-    'Path=/',
-    `Max-Age=${maxAgeSeconds}`,
-    sameSiteAttr,
-    isProd ? 'Secure' : null
-  ].filter(Boolean).join('; ');
-  res.setHeader('Set-Cookie', cookie);
-}
-
-function getTokenFromReq(req) {
-  // Prefer Authorization: Bearer <token>
-  const auth = req.headers.authorization;
-  if (auth && auth.startsWith('Bearer ')) {
-    return auth.split(' ')[1];
+// Passport serialize/deserialize
+passport.serializeUser((user, done) => {
+  done(null, user.id);
+});
+passport.deserializeUser(async (id, done) => {
+  try {
+    const user = await User.findById(id).select('-password');
+    done(null, user);
+  } catch (e) {
+    done(e);
   }
-  // Fallback to cookie named 'token'
-  const cookieHeader = req.headers.cookie || '';
-  const parts = cookieHeader.split(';').map(s => s.trim());
-  for (const part of parts) {
-    if (part.startsWith('token=')) {
-      return part.substring('token='.length);
+});
+
+// Google OAuth 2.0 strategy
+const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || '';
+const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET || '';
+const OAUTH_CALLBACK_URL = process.env.OAUTH_CALLBACK_URL || '/auth/google/callback';
+
+if (GOOGLE_CLIENT_ID && GOOGLE_CLIENT_SECRET) {
+  passport.use(new GoogleStrategy({
+    clientID: GOOGLE_CLIENT_ID,
+    clientSecret: GOOGLE_CLIENT_SECRET,
+    callbackURL: OAUTH_CALLBACK_URL
+  }, async (accessToken, refreshToken, profile, done) => {
+    try {
+      const provider = 'google';
+      const providerId = profile.id;
+      let user = await User.findOne({ provider, providerId });
+      if (!user) {
+        const username = (profile.emails && profile.emails[0] && profile.emails[0].value) || profile.displayName || `google_${providerId}`;
+        user = new User({ username, provider, providerId });
+        await user.save();
+      }
+      return done(null, user);
+    } catch (e) {
+      return done(e);
     }
-  }
-  return null;
+  }));
 }
 
-async function register(req, res) {
-  const { username, password } = req.body;
-  if (!username || !password) return res.status(400).json({ error: 'Username e password obbligatori' });
-  try {
-    const existing = await User.findOne({ username });
-    if (existing) return res.status(409).json({ error: 'Utente già registrato' });
-    const hash = await bcrypt.hash(password, 10);
-    const user = new User({ username, password: hash });
-    const saved = await user.save();
-    console.log('Nuovo utente salvato:', saved._id.toString(), saved.username);
-    // crea token e imposta cookie httpOnly
-    const token = jwt.sign({ id: saved._id, username: saved.username }, JWT_SECRET, { expiresIn: '2h' });
-    setAuthCookie(res, token);
-    res.status(201).json({ message: 'Registrazione avvenuta con successo', userId: saved._id, token });
-  } catch (err) {
-    res.status(500).json({ error: 'Errore server', details: err.message });
-  }
-}
-
-async function login(req, res) {
-  const { username, password } = req.body;
-  if (!username || !password) return res.status(400).json({ error: 'Username e password obbligatori' });
-  try {
-    const user = await User.findOne({ username });
-    if (!user) return res.status(401).json({ error: 'Credenziali non valide' });
-    const valid = await bcrypt.compare(password, user.password);
-    if (!valid) return res.status(401).json({ error: 'Credenziali non valide' });
-    const token = jwt.sign({ id: user._id, username: user.username }, JWT_SECRET, { expiresIn: '2h' });
-    setAuthCookie(res, token);
-    res.json({ token });
-  } catch (err) {
-    res.status(500).json({ error: 'Errore server', details: err.message });
-  }
-}
-
+// Middleware auth basato su sessione Passport
 function authMiddleware(req, res, next) {
-  const token = getTokenFromReq(req);
-  if (!token) return res.status(401).json({ error: 'Token mancante' });
-  try {
-    const decoded = jwt.verify(token, JWT_SECRET);
-    req.user = decoded;
-    next();
-  } catch {
-    res.status(401).json({ error: 'Token non valido' });
-  }
+  if (req.isAuthenticated && req.isAuthenticated()) return next();
+  return res.status(401).json({ error: 'Non autenticato' });
+}
+
+// Endpoints classici (opzionali): manteniamo per retrocompatibilità minima
+async function register(req, res) {
+  return res.status(501).json({ error: 'Registrazione locale disabilitata: usare OAuth' });
+}
+async function login(req, res) {
+  return res.status(501).json({ error: 'Login locale disabilitato: usare OAuth' });
 }
 
 function me(req, res) {
-  const token = getTokenFromReq(req);
-  if (!token) return res.status(200).json({ authenticated: false, user: null });
-  try {
-    const decoded = jwt.verify(token, JWT_SECRET);
-    return res.json({ authenticated: true, user: { id: decoded.id, username: decoded.username } });
-  } catch {
-    return res.status(200).json({ authenticated: false, user: null });
+  if (req.user) {
+    const u = req.user;
+    return res.json({ authenticated: true, user: { id: u._id || u.id, username: u.username } });
   }
+  return res.json({ authenticated: false, user: null });
 }
 
 function logout(req, res) {
-  const isProd = process.env.NODE_ENV === 'production';
-  const cookie = [
-    'token=; Max-Age=0',
-    'HttpOnly',
-    'Path=/',
-    isProd ? 'SameSite=None' : 'SameSite=Lax',
-    isProd ? 'Secure' : null
-  ].filter(Boolean).join('; ');
-  res.setHeader('Set-Cookie', cookie);
-  res.json({ message: 'Logout effettuato' });
+  const done = () => {
+    // distruggi cookie di sessione impostando Max-Age=0
+    const name = (req.session && req.session.cookie && req.session.cookie.name) || 'connect.sid';
+    const cookie = [
+      `${name}=; Max-Age=0`,
+      'HttpOnly',
+      'Path=/',
+      isProd ? 'SameSite=None' : 'SameSite=Lax',
+      isProd ? 'Secure' : null
+    ].filter(Boolean).join('; ');
+    res.setHeader('Set-Cookie', cookie);
+    res.json({ message: 'Logout effettuato' });
+  };
+  try {
+    req.logout(() => {
+      if (req.session) req.session.destroy(() => done()); else done();
+    });
+  } catch {
+    if (req.session) req.session.destroy(() => done()); else done();
+  }
 }
 
-module.exports = { register, login, authMiddleware, me, logout };
+// Avvio OAuth
+function startGoogleAuth(req, res, next) {
+  if (!GOOGLE_CLIENT_ID || !GOOGLE_CLIENT_SECRET) return res.status(500).send('OAuth non configurato');
+  return passport.authenticate('google', { scope: ['profile', 'email'] })(req, res, next);
+}
+
+// Callback OAuth
+const googleCallback = [
+  passport.authenticate('google', { failureRedirect: '/' }),
+  (req, res) => {
+    const origin = FRONTEND_URL || req.headers.origin || '';
+    const target = origin ? `${origin}/#/dashboard` : '/';
+    res.redirect(target);
+  }
+];
+
+module.exports = { passportInstance: passport, register, login, authMiddleware, me, logout, startGoogleAuth, googleCallback };
