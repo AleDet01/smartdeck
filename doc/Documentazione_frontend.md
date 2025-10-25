@@ -48,18 +48,12 @@ File: `src/App.jsx`
 
 ### LogoutButton (globale)
 
-- File: `src/components/LogoutButton.jsx` (montato in `App.jsx` fuori dalle `Routes`).
-- Nasconde il bottone su path `/` e `/login`.
-- Al click: `POST /auth/logout` (con `credentials: 'include'`) e navigate a `/`.
 
 ---
 
 ## Configurazione host API
 
-File: `src/utils/apiHost.js`
-
 - Logica:
-	- Usa `process.env.REACT_APP_API_HOST` se definito.
 	- In dev su `localhost`, fallback a `http://localhost:3000`.
 	- In altri ambienti, vuoto (stesso origin del backend se reverse-proxy/prod).
 

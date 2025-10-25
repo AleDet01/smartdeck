@@ -8,6 +8,7 @@ import CreateTestPage from './pages/CreateTestPage';
 import PreTestPage from './pages/PreTestPage';
 import TestPage from './pages/TestPage';
 import LogoutButton from './components/LogoutButton';
+import LogoBadge from './components/LogoBadge';
 import API_HOST from './utils/apiHost';
 
 function RequireAuth({ children }) {
@@ -46,6 +47,7 @@ export default function App() {
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
       <LogoutButton />
+      <LogoBadge />
     </HashRouter>
   );
 }

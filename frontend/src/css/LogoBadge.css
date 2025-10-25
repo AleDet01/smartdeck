@@ -1,0 +1,21 @@
+.logo-badge{
+  position: fixed;
+  left: 16px;
+  bottom: 16px;
+  z-index: 2000;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: rgba(255,255,255,0.9);
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.logo-badge-img{
+  max-width: 28px;
+  max-height: 28px;
+  object-fit: contain;
+  display: block;
+}
