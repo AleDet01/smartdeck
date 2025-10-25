@@ -1,7 +1,20 @@
 .create-test-page-outer {
 	padding-top: 90px;
 	min-height: 100vh;
-	background: #f4f7fa;
+	/* Unified background like Landing */
+	background: linear-gradient(135deg, #cdd1d6 0%, #b2b7bd 45%, #a8aeb3 60%, #d2d6da 100%);
+	position: relative;
+	overflow: hidden;
+}
+
+.create-test-page-outer::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(60rem 60rem at 80% 20%, rgba(255, 195, 0, 0.22), transparent 55%),
+              radial-gradient(40rem 40rem at 10% 90%, rgba(0, 0, 0, 0.18), transparent 60%);
+  z-index: 0;
 }
 
 .create-test-page {
@@ -148,25 +161,8 @@
 	align-self: flex-end;
 }
 
-.page-bg-wrapper {
-	position: fixed;
-	inset: 0;
-	z-index: 0;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	pointer-events: none;
-	overflow: hidden;
-}
-
-.page-bg-wrapper .page-bg {
-	max-width: 100vw;
-	max-height: 100vh;
-	width: auto;
-	height: auto;
-	object-fit: contain;
-	display: block;
-}
+/* Hide legacy background image wrapper */
+.page-bg-wrapper { display: none !important; }
 
 .create-test-page-outer {
 	position: relative;

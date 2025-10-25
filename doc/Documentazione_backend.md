@@ -246,6 +246,89 @@ Performance:
 
 ---
 
+## Diagrammi di flusso (Backend)
+
+### Pipeline richiesta → risposta (alto livello)
+
+```mermaid
+flowchart LR
+	A[Richiesta HTTP] --> B{CORS allowlist}
+	B -- consentita --> C[Imposta header CORS\nreflect origin + credentials]
+	B -- negata --> D[No header CORS]
+	C --> E[express.json()]
+	D --> E
+	E --> F{Routing}
+	F -->|/auth| G[controllers/auth]
+	F -->|/flash| H[controllers/flash]
+	F -->|/testresult| I[controllers/testResult]
+	G --> J[(MongoDB via Mongoose)]
+	H --> J
+	I --> J
+	J --> K[Risposta JSON]
+```
+
+### Login / Registrazione (JWT nel cookie)
+
+```mermaid
+sequenceDiagram
+	participant FE as Frontend
+	participant API as /auth
+	participant DB as MongoDB
+
+	FE->>API: POST /auth/register { username, password }
+	API->>DB: findOne(username) / insertOne(hash)
+	API-->>FE: Set-Cookie: token=JWT(...); HttpOnly; SameSite=(Lax|None); Secure?
+
+	FE->>API: POST /auth/login { username, password }
+	API->>DB: findOne(username) + bcrypt.compare
+	API-->>FE: Set-Cookie: token=JWT(...)
+```
+
+### Salvataggio risultato test (protetto)
+
+```mermaid
+sequenceDiagram
+	participant FE as Frontend
+	participant API as /testresult
+	participant MW as authMiddleware
+	participant DB as MongoDB
+
+	FE->>API: POST /testresult (credentials: include)
+	API->>MW: Verifica JWT da Cookie/Authorization
+	MW-->>API: req.user = { id, username }
+	API->>DB: insertOne({ userId: req.user.id, area, ... })
+	API-->>FE: 201 { message, testResult }
+```
+
+### Statistiche utente per area
+
+```mermaid
+sequenceDiagram
+	participant FE as Frontend
+	participant API as /testresult
+	participant DB as MongoDB
+
+	FE->>API: GET /testresult/:userId/:area
+	API->>DB: find({ userId, area })
+	DB-->>API: results[]
+	API-->>FE: { stats: { totalTests, avgTime, avgScore, ... }, results }
+```
+
+### Decisione CORS (allowlist)
+
+```mermaid
+flowchart TD
+	A[Origin richiesta] --> B{Match allowlist?}
+	B -- * / .dominio / *.dominio / match esatto --> C[Imposta Access-Control-Allow-Origin = origin]
+	B -- no --> D[Non impostare header CORS]
+	C --> E{Preflight?}
+	D --> E
+	E -- OPTIONS --> F[204 early return]
+	E -- altro --> G[Prosegui -> parser -> routing]
+```
+
+---
+
 ## Note su ambienti e CORS
 
 - In sviluppo spesso FE e BE girano su host/porte diverse (es. localhost:3000 e localhost:3001):
