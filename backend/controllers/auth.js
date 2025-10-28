@@ -75,6 +75,21 @@ function authMiddleware(req, res, next) {
   }
 }
 
+function optionalAuthMiddleware(req, res, next) {
+  const token = getTokenFromReq(req);
+  if (token) {
+    try {
+      const decoded = jwt.verify(token, JWT_SECRET);
+      req.user = decoded;
+    } catch {
+      req.user = null;
+    }
+  } else {
+    req.user = null;
+  }
+  next();
+}
+
 function me(req, res) {
   const token = getTokenFromReq(req);
   if (!token) return res.status(200).json({ authenticated: false, user: null });
@@ -99,4 +114,4 @@ function logout(req, res) {
   res.json({ message: 'Logout effettuato' });
 }
 
-module.exports = { register, login, authMiddleware, me, logout };
+module.exports = { register, login, authMiddleware, optionalAuthMiddleware, me, logout };
