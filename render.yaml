@@ -9,6 +9,8 @@ services:
     healthCheckPath: /health
     autoDeploy: true
     envVars:
+      - key: NODE_ENV
+        value: production
       - key: MONGODB_URI
         fromDatabase:
           name: smartdeck-db # Assicurati che il nome del DB sia corretto
