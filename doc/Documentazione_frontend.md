@@ -46,9 +46,6 @@ File: `src/App.jsx`
 - Edge cases:
 	- UI mostra null durante `loading` (evita flash di redirect).
 
-### LogoutButton (globale)
-
-
 ---
 
 ## Configurazione host API
@@ -186,10 +183,21 @@ File: `src/components/Topbar.jsx`
 
 ### LogoutButton
 
-File: `src/components/LogoutButton.jsx`
+File: `src/components/LogoutButton.jsx` — Stili: `src/css/LogoutButton.css`
 
-- Nasconde su `/` e `/login`.
-- Click → `POST /auth/logout` (include credentials), pulizia locale minima (rimuove token da localStorage se presente per retrocompatibilità) e navigate `/`.
+- Montato globalmente in `App.jsx` (visibile su tutte le pagine tranne `/` e `/login`).
+- Posizionamento: fisso in basso a destra (20px da bordi).
+- Click: `POST /auth/logout` (include credentials), pulizia locale minima (rimuove token da localStorage se presente per retrocompatibilità) e navigate `/`.
+- UI: pulsante rosso con icona "Esci", bordo arrotondato, ombra, hover con effetto scale.
+
+### LogoBadge
+
+File: `src/components/LogoBadge.jsx` — Stili: `src/css/LogoBadge.css`
+
+- Montato globalmente in `App.jsx` (visibile su tutte le pagine).
+- Posizionamento: fisso in basso a sinistra (20px da bordi), opposto al pulsante logout.
+- UI: contenitore 44x44px con bordo sottile, ombra leggera e sfondo bianco semi-trasparente; contiene logo 28x28px (`public/logo.png`).
+- Scopo: identità visiva del sito, sempre presente.
 
 ### AreaChart (Recharts)
 

@@ -1,0 +1,242 @@
+{
+	"info": {
+		"name": "SmartDeck API",
+		"description": "Collection completa delle API di SmartDeck per testing",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Authentication",
+			"item": [
+				{
+					"name": "Register",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"username\": \"testuser\",\n  \"password\": \"password123\"\n}"
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/auth/register",
+							"host": ["{{BASE_URL}}"],
+							"path": ["auth", "register"]
+						},
+						"description": "Registra un nuovo utente. Il backend imposta un cookie httpOnly con il JWT."
+					}
+				},
+				{
+					"name": "Login",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"username\": \"testuser\",\n  \"password\": \"password123\"\n}"
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/auth/login",
+							"host": ["{{BASE_URL}}"],
+							"path": ["auth", "login"]
+						},
+						"description": "Login utente esistente. Restituisce cookie httpOnly con JWT."
+					}
+				},
+				{
+					"name": "Get Session Info (Me)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/auth/me",
+							"host": ["{{BASE_URL}}"],
+							"path": ["auth", "me"]
+						},
+						"description": "Verifica lo stato della sessione corrente. Risponde con { authenticated: boolean, user?: { id, username } }"
+					}
+				},
+				{
+					"name": "Logout",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/auth/logout",
+							"host": ["{{BASE_URL}}"],
+							"path": ["auth", "logout"]
+						},
+						"description": "Logout: invalida il cookie JWT (Max-Age=0)"
+					}
+				}
+			]
+		},
+		{
+			"name": "Flashcards",
+			"item": [
+				{
+					"name": "Get All Flashcards",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/flash",
+							"host": ["{{BASE_URL}}"],
+							"path": ["flash"]
+						},
+						"description": "Ottiene tutte le flashcard esistenti (qualsiasi area tematica)"
+					}
+				},
+				{
+					"name": "Get Thematic Areas List",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/flash/areas/list",
+							"host": ["{{BASE_URL}}"],
+							"path": ["flash", "areas", "list"]
+						},
+						"description": "Restituisce l'elenco delle aree tematiche disponibili { areas: string[] }"
+					}
+				},
+				{
+					"name": "Get Flashcards by Area",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/flash/thematic/Matematica",
+							"host": ["{{BASE_URL}}"],
+							"path": ["flash", "thematic", "Matematica"]
+						},
+						"description": "Ottiene tutte le flashcard di una specifica area tematica. Sostituisci 'Matematica' con l'area desiderata."
+					}
+				},
+				{
+					"name": "Create Flashcards (Test)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"thematicArea\": \"Matematica\",\n  \"questions\": [\n    {\n      \"question\": \"Quanto fa 2 + 2?\",\n      \"answers\": [\n        { \"text\": \"3\", \"isCorrect\": false },\n        { \"text\": \"4\", \"isCorrect\": true },\n        { \"text\": \"5\", \"isCorrect\": false }\n      ],\n      \"difficulty\": \"media\"\n    },\n    {\n      \"question\": \"Quanto fa 5 * 3?\",\n      \"answers\": [\n        { \"text\": \"15\", \"isCorrect\": true },\n        { \"text\": \"8\", \"isCorrect\": false },\n        { \"text\": \"12\", \"isCorrect\": false }\n      ],\n      \"difficulty\": \"facile\"\n    }\n  ]\n}"
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/flash",
+							"host": ["{{BASE_URL}}"],
+							"path": ["flash"]
+						},
+						"description": "Crea nuove flashcard per un test/area tematica. Richiede autenticazione (cookie JWT)."
+					}
+				}
+			]
+		},
+		{
+			"name": "Test Results",
+			"item": [
+				{
+					"name": "Save Test Result",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"area\": \"Matematica\",\n  \"numQuestions\": 2,\n  \"answers\": [\n    {\n      \"question\": \"Quanto fa 2 + 2?\",\n      \"userAnswer\": \"3\",\n      \"correctAnswer\": \"4\",\n      \"isCorrect\": false,\n      \"time\": 2450\n    },\n    {\n      \"question\": \"Quanto fa 5 * 3?\",\n      \"userAnswer\": \"15\",\n      \"correctAnswer\": \"15\",\n      \"isCorrect\": true,\n      \"time\": 3200\n    }\n  ],\n  \"correctCount\": 1,\n  \"totalTime\": 5650,\n  \"createdAt\": \"2025-10-28T10:30:00.000Z\"\n}"
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/testresult",
+							"host": ["{{BASE_URL}}"],
+							"path": ["testresult"]
+						},
+						"description": "Salva il risultato di un test completato. Il userId viene estratto dal cookie JWT. Il campo time è in millisecondi."
+					}
+				},
+				{
+					"name": "Get User Areas with Results",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/testresult/areas/list?userId={{USER_ID}}",
+							"host": ["{{BASE_URL}}"],
+							"path": ["testresult", "areas", "list"],
+							"query": [
+								{
+									"key": "userId",
+									"value": "{{USER_ID}}",
+									"description": "ID utente (ottieni da /auth/me)"
+								}
+							]
+						},
+						"description": "Ottiene l'elenco delle aree tematiche per cui l'utente ha completato almeno un test. Risponde con { areas: string[] }"
+					}
+				},
+				{
+					"name": "Get User Stats by Area",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/testresult/{{USER_ID}}/Matematica",
+							"host": ["{{BASE_URL}}"],
+							"path": ["testresult", "{{USER_ID}}", "Matematica"]
+						},
+						"description": "Ottiene statistiche aggregate e lista risultati per un'area specifica. Risponde con { stats: { totalTests, avgScore, ... }, results: [...] }"
+					}
+				},
+				{
+					"name": "Get Wrong Answers by User and Area",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/testresult/wrong/{{USER_ID}}/Matematica?limit=50",
+							"host": ["{{BASE_URL}}"],
+							"path": ["testresult", "wrong", "{{USER_ID}}", "Matematica"],
+							"query": [
+								{
+									"key": "limit",
+									"value": "50",
+									"description": "Numero massimo di errori da restituire (default 50)"
+								}
+							]
+						},
+						"description": "Ottiene le risposte sbagliate recenti dell'utente per un'area. La lista è deduplicata: per ogni combinazione domanda+risposta corretta viene mantenuta solo l'occorrenza più recente."
+					}
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "BASE_URL",
+			"value": "https://smartdeck.onrender.com",
+			"type": "string"
+		},
+		{
+			"key": "USER_ID",
+			"value": "",
+			"type": "string"
+		}
+	]
+}
