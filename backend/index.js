@@ -9,17 +9,31 @@ const PORT = process.env.PORT || 3000;
 
 const allowedOrigins = process.env.ALLOW_ORIGINS 
   ? process.env.ALLOW_ORIGINS.split(',').map(s => s.trim())
-  : ['http://localhost:3001'];
+  : ['http://localhost:3001', 'http://localhost:3000'];
+
+// Aggiungi sempre smartdeck-frontend.onrender.com se in produzione
+if (process.env.NODE_ENV === 'production') {
+  allowedOrigins.push('https://smartdeck-frontend.onrender.com');
+}
+
+console.log('✓ CORS allowedOrigins:', allowedOrigins);
 
 app.use(cors({
   origin: (origin, callback) => {
+    // Permetti richieste senza origin (tipo Postman, curl, server-to-server)
     if (!origin) return callback(null, true);
-    if (allowedOrigins.includes(origin)) return callback(null, true);
+    
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+    
+    console.warn(`⚠ CORS blocked origin: ${origin}`);
     callback(new Error('Not allowed by CORS'));
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  allowedHeaders: ['Content-Type', 'Authorization', 'Cookie'],
+  exposedHeaders: ['Set-Cookie']
 }));
 
 app.use(express.json());

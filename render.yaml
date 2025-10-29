@@ -18,10 +18,9 @@ services:
       - key: JWT_SECRET
         generateValue: true
       - key: ALLOW_ORIGINS
-        fromService:
-          type: static_site
-          name: smartdeck-frontend
-          property: url
+        value: https://smartdeck-frontend.onrender.com
+      - key: SESSION_SECRET
+        generateValue: true
 
 staticSites:
   - name: smartdeck-frontend
@@ -35,7 +34,4 @@ staticSites:
         destination: "/index.html"
     envVars:
       - key: REACT_APP_API_HOST
-        fromService:
-          type: web
-          name: smartdeck-backend
-          property: url
+        value: https://smartdeck.onrender.com
