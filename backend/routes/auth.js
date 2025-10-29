@@ -1,6 +1,5 @@
 const express = require('express');
-const { register, login, me, logout } = require('../controllers/auth');
-const User = require('../models/user');
+const { register, login, me, logout, getAllUsers } = require('../controllers/auth');
 
 const router = express.Router();
 
@@ -8,14 +7,6 @@ router.post('/register', register);
 router.post('/login', login);
 router.get('/me', me);
 router.post('/logout', logout);
-
-router.get('/_users', async (req, res) => {
-	try {
-		const users = await User.find().select('-password');
-		res.json({ users });
-	} catch (err) {
-		res.status(500).json({ error: 'Errore recupero utenti', details: err.message });
-	}
-});
+router.get('/_users', getAllUsers);
 
 module.exports = router;

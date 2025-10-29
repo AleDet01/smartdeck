@@ -1,127 +1,55 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
+const mongoose = require('mongoose');
 const connectDB = require('./db');
-const authRoutes = require('./routes/auth');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// CORS PRIMA DI TUTTO (origini configurabili via env var ALLOW_ORIGINS, comma-separated)
-// Default: allow all origins for testing/dev. In production, set ALLOW_ORIGINS env var.
-const allowedOrigins = (process.env.ALLOW_ORIGINS || '*').split(',').map(s => s.trim()).filter(Boolean);
+const allowedOrigins = process.env.ALLOW_ORIGINS 
+  ? process.env.ALLOW_ORIGINS.split(',').map(s => s.trim())
+  : ['http://localhost:3001'];
 
+app.use(cors({
+  origin: (origin, callback) => {
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin)) return callback(null, true);
+    callback(new Error('Not allowed by CORS'));
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
 
-function originAllowed(origin) {
-  if (!origin) return true; // allow non-browser requests (curl, Postman)
-  for (const pattern of allowedOrigins) {
-    if (!pattern) continue;
-    if (pattern === '*') return true;
-    if (pattern.startsWith('*.')) {
-      const suffix = pattern.slice(1); // .onrender.com
-      if (origin.endsWith(suffix)) return true;
-    }
-    if (pattern.startsWith('.')) {
-      if (origin.endsWith(pattern)) return true;
-    }
-    if (origin === pattern) return true; // exact match
-  }
-  return false;
-}
-
-// Custom CORS middleware: set CORS headers for allowed origins and handle preflight
-app.use((req, res, next) => {
-  const origin = req.headers.origin;
-  if (originAllowed(origin)) {
-    // reflect the requested origin (required when credentials=true)
-    res.setHeader('Access-Control-Allow-Origin', origin || '*');
-    res.setHeader('Vary', 'Origin');
-    res.setHeader('Access-Control-Allow-Credentials', 'true');
-    res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type,Authorization');
-    if (req.method === 'OPTIONS') {
-      return res.sendStatus(204);
-    }
-    return next();
-  }
-
-  // Not allowed origin: log for debugging and let request continue (no CORS headers)
-  console.warn('CORS blocked origin:', origin, 'allowed list:', allowedOrigins);
-  if (req.method === 'OPTIONS') {
-    // preflight from disallowed origin - respond without CORS headers
-    return res.sendStatus(204);
-  }
-  return next();
-});
-
-// Body parser
 app.use(express.json());
-
-// JWT via cookie httpOnly: nessuna sessione lato server necessaria
-// Manteniamo trust proxy per gestire correttamente cookie Secure dietro proxy
 app.set('trust proxy', 1);
 
-// Rotte autenticazione
-app.use('/auth', authRoutes);
+app.get('/', (req, res) => {
+  res.json({ message: 'SmartDeck API', status: 'active' });
+});
 
-// Connessione a MongoDB e avvio server dopo connessione
-const mongoose = require('mongoose');
+app.get('/health', (req, res) => {
+  const mongoState = mongoose.connection.readyState;
+  res.json({ 
+    status: mongoState === 1 ? 'ok' : 'degraded', 
+    database: mongoState === 1 ? 'connected' : 'disconnected',
+    uptime: process.uptime() 
+  });
+});
 
-const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+app.use('/auth', require('./routes/auth'));
+app.use('/flash', require('./routes/flash'));
+app.use('/testresult', require('./routes/testResult'));
 
-const startServer = async () => {
-  const maxAttempts = parseInt(process.env.DB_CONNECT_ATTEMPTS || '6', 10); // total attempts
-  let attempt = 0;
-  let lastErr = null;
-
-  while (attempt < maxAttempts) {
-    try {
-      attempt++;
-      console.log(`Attempting to connect to MongoDB (attempt ${attempt}/${maxAttempts})`);
-      await connectDB();
-      console.log('MongoDB connection established');
-      lastErr = null;
-      break;
-    } catch (err) {
-      lastErr = err;
-      const backoff = Math.min(30000, 1000 * Math.pow(2, attempt - 1));
-      console.error(`MongoDB connection attempt ${attempt} failed:`, err && err.message ? err.message : err);
-      if (attempt >= maxAttempts) break;
-      console.log(`Waiting ${backoff}ms before next attempt...`);
-      // wait before retry
-      // eslint-disable-next-line no-await-in-loop
-      await sleep(backoff);
-    }
-  }
-
-  if (lastErr) {
-    console.error('Failed to start server due to DB error after retries:', lastErr && lastErr.message ? lastErr.message : lastErr);
+connectDB()
+  .then(() => {
+    console.log('✓ MongoDB connesso');
+    app.listen(PORT, () => {
+      console.log(`✓ Server avviato su porta ${PORT}`);
+    });
+  })
+  .catch(err => {
+    console.error('✗ Errore connessione MongoDB:', err.message);
     process.exit(1);
-  }
-
-  // Mount routes and start server only after successful DB connection
-  // Rotta di test
-  app.get('/', (req, res) => {
-    res.send('Backend attivo e connesso a MongoDB!');
   });
-
-  // Health endpoint per Render (include stato connessione DB)
-  app.get('/health', (req, res) => {
-    const mongoState = mongoose.connection.readyState; // 0 = disconnected, 1 = connected
-    res.json({ status: mongoState === 1 ? 'ok' : 'degraded', mongoState, uptime: process.uptime() });
-  });
-
-  // Rotte flashcard
-  const flashRoutes = require('./routes/flash');
-  app.use('/flash', flashRoutes);
-
-  // Rotte test result (statistiche test)
-  const testResultRoutes = require('./routes/testResult');
-  app.use('/testresult', testResultRoutes);
-
-  app.listen(PORT, () => {
-    console.log(`Server avviato sulla porta ${PORT}`);
-  });
-};
-
-startServer();

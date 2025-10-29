@@ -17,7 +17,7 @@ const TestResultSchema = new mongoose.Schema({
   totalTime: { type: Number, required: true },
   createdAt: { type: Date, default: Date.now }
 });
-// Helpful indexes for common queries
+
 TestResultSchema.index({ userId: 1, area: 1, createdAt: -1 });
 TestResultSchema.index({ area: 1, createdAt: -1 });
 

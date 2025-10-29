@@ -4,7 +4,7 @@ const User = require('../models/user');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'supersecretkey';
 const TOKEN_EXPIRY = '2h';
-const MAX_AGE = 2 * 60 * 60; // 2h in seconds
+const MAX_AGE = 2 * 60 * 60; // 2h di sessione massima
 
 function setAuthCookie(res, token) {
   const isProd = process.env.NODE_ENV === 'production';
@@ -123,4 +123,13 @@ function logout(req, res) {
   res.json({ message: 'Logout effettuato' });
 }
 
-module.exports = { register, login, authMiddleware, optionalAuthMiddleware, me, logout };
+async function getAllUsers(req, res) {
+  try {
+    const users = await User.find().select('-password');
+    res.json({ users });
+  } catch (err) {
+    res.status(500).json({ error: 'Errore recupero utenti', details: err.message });
+  }
+}
+
+module.exports = { register, login, authMiddleware, optionalAuthMiddleware, me, logout, getAllUsers };
