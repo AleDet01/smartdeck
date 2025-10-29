@@ -13,7 +13,7 @@ services:
         value: production
       - key: MONGODB_URI
         fromDatabase:
-          name: smartdeck-db # Assicurati che il nome del DB sia corretto
+          name: smartdeck-db
           property: connectionString
       - key: JWT_SECRET
         generateValue: true
