@@ -1,13 +1,40 @@
 const TestResult = require('../models/testResult');
 
+const calculateStats = (results) => {
+  const totalTests = results.length;
+  const totalQuestions = results.reduce((sum, r) => sum + r.numQuestions, 0);
+  const totalCorrect = results.reduce((sum, r) => sum + r.correctCount, 0);
+  const totalTime = results.reduce((sum, r) => sum + r.totalTime, 0);
+  
+  return {
+    totalTests,
+    totalQuestions,
+    totalCorrect,
+    totalTime,
+    avgTime: totalTime / totalQuestions,
+    avgScore: totalCorrect / totalQuestions
+  };
+};
+
 // Salva un nuovo risultato test
 exports.saveTestResult = async (req, res) => {
   try {
     const { area, numQuestions, answers, correctCount, totalTime } = req.body;
-    const effectiveUserId = (req.user && req.user.id) || req.body.userId;
-    if (!effectiveUserId) return res.status(401).json({ error: 'Utente non autenticato' });
-    const testResult = new TestResult({ userId: effectiveUserId, area, numQuestions, answers, correctCount, totalTime });
-    await testResult.save();
+    const effectiveUserId = req.user?.id || req.body.userId;
+    
+    if (!effectiveUserId) {
+      return res.status(401).json({ error: 'Utente non autenticato' });
+    }
+    
+    const testResult = await new TestResult({ 
+      userId: effectiveUserId, 
+      area, 
+      numQuestions, 
+      answers, 
+      correctCount, 
+      totalTime 
+    }).save();
+    
     res.status(201).json({ message: 'Test salvato', testResult });
   } catch (err) {
     res.status(500).json({ error: 'Errore salvataggio test', details: err.message });
@@ -19,25 +46,12 @@ exports.getStatsByArea = async (req, res) => {
   try {
     const { userId, area } = req.params;
     const results = await TestResult.find({ userId, area });
-    if (!results.length) return res.json({ stats: null });
-    // Statistiche base
-    const totalTests = results.length;
-    const totalQuestions = results.reduce((sum, r) => sum + r.numQuestions, 0);
-    const totalCorrect = results.reduce((sum, r) => sum + r.correctCount, 0);
-    const totalTime = results.reduce((sum, r) => sum + r.totalTime, 0);
-    const avgTime = totalTime / totalQuestions;
-    const avgScore = totalCorrect / totalQuestions;
-    res.json({
-      stats: {
-        totalTests,
-        totalQuestions,
-        totalCorrect,
-        totalTime,
-        avgTime,
-        avgScore
-      },
-      results
-    });
+    
+    if (!results.length) {
+      return res.json({ stats: null });
+    }
+    
+    res.json({ stats: calculateStats(results), results });
   } catch (err) {
     res.status(500).json({ error: 'Errore recupero statistiche', details: err.message });
   }
@@ -61,21 +75,22 @@ exports.getAggregateByArea = async (req, res) => {
   try {
     const { area } = req.params;
     const results = await TestResult.find({ area });
-    if (!results.length) return res.json({ stats: null });
-    const totalTests = results.length;
-    const totalQuestions = results.reduce((sum, r) => sum + r.numQuestions, 0);
-    const totalCorrect = results.reduce((sum, r) => sum + r.correctCount, 0);
-    const totalTime = results.reduce((sum, r) => sum + r.totalTime, 0);
-    const avgTime = totalTime / totalQuestions;
-    const avgScore = totalCorrect / totalQuestions;
-    // build distribution of scores (percentage bins)
+    
+    if (!results.length) {
+      return res.json({ stats: null });
+    }
+    
+    const stats = calculateStats(results);
+    
+    // Build distribution of scores (percentage bins)
     const scores = results.map(r => Math.round((r.correctCount / r.numQuestions) * 100));
-    const bins = [0,20,40,60,80,100].map((_,i)=>0);
+    const bins = [0, 0, 0, 0, 0];
     scores.forEach(s => {
-      const idx = Math.min(Math.floor(s/20),4);
+      const idx = Math.min(Math.floor(s / 20), 4);
       bins[idx]++;
     });
-    res.json({ stats: { totalTests, totalQuestions, totalCorrect, totalTime, avgTime, avgScore, bins }, results });
+    
+    res.json({ stats: { ...stats, bins }, results });
   } catch (err) {
     res.status(500).json({ error: 'Errore recupero aggregate', details: err.message });
   }
@@ -99,27 +114,32 @@ exports.getWrongAnswersByUserArea = async (req, res) => {
     const { userId, area } = req.params;
     const limit = Math.min(parseInt(req.query.limit) || 50, 200);
     const results = await TestResult.find({ userId, area }).sort({ createdAt: -1 }).limit(150);
+    
     const wrong = [];
     const seen = new Set();
-    outer: for (const r of results) {
-      const createdAt = r.createdAt;
+    
+    for (const r of results) {
+      if (wrong.length >= limit) break;
+      
       for (const a of (r.answers || [])) {
-        if (a && !a.isCorrect) {
-          const q = (a.question || '').trim();
-          const ca = (a.correctAnswer || '').trim();
-          const key = `${q}||${ca}`.toLowerCase();
-          if (seen.has(key)) continue;
-          wrong.push({
-            question: q,
-            userAnswer: a.userAnswer,
-            correctAnswer: ca,
-            createdAt
-          });
-          seen.add(key);
-          if (wrong.length >= limit) break outer;
+        if (!a?.isCorrect) {
+          const key = `${a.question?.trim() || ''}||${a.correctAnswer?.trim() || ''}`.toLowerCase();
+          
+          if (!seen.has(key)) {
+            wrong.push({
+              question: a.question?.trim() || '',
+              userAnswer: a.userAnswer,
+              correctAnswer: a.correctAnswer?.trim() || '',
+              createdAt: r.createdAt
+            });
+            seen.add(key);
+            
+            if (wrong.length >= limit) break;
+          }
         }
       }
     }
+    
     res.json({ wrong });
   } catch (err) {
     res.status(500).json({ error: 'Errore recupero risposte sbagliate', details: err.message });

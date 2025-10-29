@@ -1,52 +1,34 @@
-import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Topbar from '../components/Topbar';
+import PageBackground from '../components/PageBackground';
 import '../css/StatsPage.css';
 import API_HOST from '../utils/apiHost';
+import { useCurrentUser, useFetch } from '../utils/hooks';
 
-export default function StatsList() {
-  const [areas, setAreas] = useState(null);
+const StatsList = () => {
   const navigate = useNavigate();
+  const { user } = useCurrentUser();
+  const { data, loading } = useFetch(
+    user?.id ? `${API_HOST}/testresult/areas/list?userId=${encodeURIComponent(user.id)}` : null
+  );
 
-  useEffect(() => {
-    let mounted = true;
-    (async () => {
-      try {
-        const meRes = await fetch(`${API_HOST}/auth/me`, { credentials: 'include' });
-        const me = await meRes.json();
-        if (!meRes.ok || !me || !me.authenticated || !me.user) {
-          if (mounted) setAreas([]);
-          return;
-        }
-        const res = await fetch(`${API_HOST}/testresult/areas/list?userId=${encodeURIComponent(me.user.id)}`, { credentials: 'include' });
-        const json = await res.json();
-        if (mounted) setAreas(Array.isArray(json.areas) ? json.areas : []);
-      } catch {
-        if (mounted) setAreas([]);
-      }
-    })();
-    return () => { mounted = false; };
-  }, []);
+  const areas = data?.areas || [];
 
   return (
     <div className="stats-page">
-      <div className="page-bg-wrapper" aria-hidden="true">
-        <img className="page-bg" src={process.env.PUBLIC_URL + '/sfondo_pages.jpg'} alt="" />
-      </div>
+      <PageBackground />
       <Topbar />
       <div className="stats-container">
         <div className="stats-header">
           <h2 className="stats-title">Statistiche</h2>
           <p className="stats-subtitle">Scegli un'area per vedere i tuoi risultati e l'andamento nel tempo.</p>
         </div>
-        {areas === null && (
-          <div className="stats-empty">Caricamento…</div>
-        )}
-        {areas && areas.length === 0 && (
+        {loading && <div className="stats-empty">Caricamento…</div>}
+        {!loading && areas.length === 0 && (
           <div className="stats-empty">Nessuna area con test effettuati. Completa un test dalla dashboard per iniziare.</div>
         )}
         <div className="stats-areas-grid">
-          {areas && areas.map(a => (
+          {areas.map(a => (
             <button
               key={a}
               className="stat-chip"
@@ -60,4 +42,6 @@ export default function StatsList() {
       </div>
     </div>
   );
-}
+};
+
+export default StatsList;

@@ -1,24 +1,32 @@
 const express = require('express');
-const router = express.Router();
-const testResultController = require('../controllers/testResult');
 const { authMiddleware } = require('../controllers/auth');
+const {
+	saveTestResult,
+	listAreas,
+	getStatsByArea,
+	getAggregateByArea,
+	getRecentByArea,
+	getWrongAnswersByUserArea
+} = require('../controllers/testResult');
 
-// POST /testresult - salva risultato test (richiede autenticazione via cookie/JWT)
-router.post('/', authMiddleware, testResultController.saveTestResult);
+const router = express.Router();
 
-// GET /testresult/areas - lista aree
-router.get('/areas/list', testResultController.listAreas);
+// POST - salva risultato test (richiede autenticazione)
+router.post('/', authMiddleware, saveTestResult);
 
-// GET /testresult/aggregate/:area - aggregate stats per area
-router.get('/aggregate/:area', testResultController.getAggregateByArea);
+// GET - lista aree
+router.get('/areas/list', listAreas);
 
-// GET /testresult/recent/:area - recent results per area
-router.get('/recent/:area', testResultController.getRecentByArea);
+// GET - aggregate stats per area
+router.get('/aggregate/:area', getAggregateByArea);
 
-// Wrong answers for user and area
-router.get('/wrong/:userId/:area', testResultController.getWrongAnswersByUserArea);
+// GET - recent results per area
+router.get('/recent/:area', getRecentByArea);
 
-// GET /testresult/:userId/:area - statistiche per utente e area
-router.get('/:userId/:area', testResultController.getStatsByArea);
+// GET - wrong answers for user and area
+router.get('/wrong/:userId/:area', getWrongAnswersByUserArea);
+
+// GET - statistiche per utente e area
+router.get('/:userId/:area', getStatsByArea);
 
 module.exports = router;

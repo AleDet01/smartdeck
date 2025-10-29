@@ -1,10 +1,14 @@
 const Flashcard = require('../models/singleFlash');
 
+const getUserId = (req) => req.user?.id || null;
+
+const buildUserQuery = (userId, additionalFields = {}) => 
+	userId ? { ...additionalFields, createdBy: userId } : additionalFields;
+
 const getFlash = async (req, res) => {
 	try {
-		const userId = req.user ? req.user.id : null;
-		const query = userId ? { createdBy: userId } : {};
-		const flashcards = await Flashcard.find(query);
+		const userId = getUserId(req);
+		const flashcards = await Flashcard.find(buildUserQuery(userId));
 		console.log('Flashcard trovate per user', userId, ':', flashcards.length);
 		res.json(flashcards);
 	} catch (err) {
@@ -16,9 +20,8 @@ const getFlash = async (req, res) => {
 const getFlashByThematicArea = async (req, res) => {
 	const { thematicArea } = req.params;
 	try {
-		const userId = req.user ? req.user.id : null;
-		const query = userId ? { thematicArea, createdBy: userId } : { thematicArea };
-		const flashcards = await Flashcard.find(query);
+		const userId = getUserId(req);
+		const flashcards = await Flashcard.find(buildUserQuery(userId, { thematicArea }));
 		res.json(flashcards);
 	} catch (err) {
 		console.error('Errore getFlashByThematicArea:', err);
@@ -28,13 +31,13 @@ const getFlashByThematicArea = async (req, res) => {
 
 const createFlashcards = async (req, res) => {
 	try {
-		const userId = req.user ? req.user.id : null;
+		const userId = getUserId(req);
 		const payload = req.body;
-		let docs = [];
+		let docs;
 		
 		if (Array.isArray(payload)) {
 			docs = payload.map(item => ({ ...item, createdBy: userId }));
-		} else if (payload && payload.questions && payload.thematicArea) {
+		} else if (payload?.questions && payload?.thematicArea) {
 			docs = payload.questions.map(q => ({
 				question: q.question,
 				answers: q.answers,
@@ -56,9 +59,8 @@ const createFlashcards = async (req, res) => {
 
 const listThematicAreas = async (req, res) => {
 	try {
-		const userId = req.user ? req.user.id : null;
-		const query = userId ? { createdBy: userId } : {};
-		const areas = await Flashcard.distinct('thematicArea', query);
+		const userId = getUserId(req);
+		const areas = await Flashcard.distinct('thematicArea', buildUserQuery(userId));
 		res.json({ areas });
 	} catch (err) {
 		console.error('Errore listThematicAreas:', err);

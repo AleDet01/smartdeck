@@ -1,14 +1,12 @@
-import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import API_HOST from '../utils/apiHost';
 import '../css/LogoutButton.css';
 
+const HIDDEN_PATHS = ['/', '/login'];
+
 export default function LogoutButton() {
   const location = useLocation();
   const navigate = useNavigate();
-
-  const hiddenPaths = ['/', '/login'];
-  const isHidden = hiddenPaths.includes(location.pathname);
 
   const handleLogout = async () => {
     try {
@@ -16,12 +14,13 @@ export default function LogoutButton() {
         method: 'POST',
         credentials: 'include'
       });
-    } catch {}
-    try { localStorage.removeItem('token'); } catch {}
+      localStorage.removeItem('token');
+    } catch (err) {
+    }
     navigate('/');
   };
 
-  if (isHidden) return null;
+  if (HIDDEN_PATHS.includes(location.pathname)) return null;
 
   return (
     <button

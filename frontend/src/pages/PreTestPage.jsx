@@ -1,40 +1,33 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Topbar from '../components/Topbar';
+import PageBackground from '../components/PageBackground';
 import '../css/PreTestPage.css';
 import API_HOST from '../utils/apiHost';
+import { useFetch } from '../utils/hooks';
 
-export default function PreTestPage() {
+const PreTestPage = () => {
   const { area } = useParams();
-  const [numQuestions, setNumQuestions] = useState(10);
-  const [maxQuestions, setMaxQuestions] = useState(20);
   const navigate = useNavigate();
-
-  useEffect(() => {
-    fetch(`${API_HOST}/flash/thematic/${area}`, { credentials: 'include' })
-      .then(res => {
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        return res.json();
-      })
-      .then(data => setMaxQuestions(data.length || 20))
-      .catch(err => {
-        console.error('Failed to load flashcards for area:', err.message);
-        setMaxQuestions(20);
-      });
-  }, [area]);
+  const [numQuestions, setNumQuestions] = useState(10);
+  
+  const { data } = useFetch(`${API_HOST}/flash/thematic/${area}`);
+  const maxQuestions = data?.length || 20;
 
   const quickPicks = useMemo(() => {
     const base = [5, 10, 15, 20];
-    const list = base.filter(n => n <= (maxQuestions || 1));
-    if (list.length === 0) return [Math.min(5, maxQuestions || 1)];
-    return list;
+    const list = base.filter(n => n <= maxQuestions);
+    return list.length === 0 ? [Math.min(5, maxQuestions)] : list;
   }, [maxQuestions]);
+
+  const handleNumChange = (val) => {
+    const clamped = Math.max(1, Math.min(val, maxQuestions));
+    setNumQuestions(clamped);
+  };
 
   return (
     <div className="pretest-page">
-      <div className="page-bg-wrapper" aria-hidden="true">
-        <img className="page-bg" src={process.env.PUBLIC_URL + '/sfondo_pages.jpg'} alt="" />
-      </div>
+      <PageBackground />
       <Topbar />
       <div className="pretest-card">
         <h2>Configura il test: <span className="accent">{area}</span></h2>
@@ -57,20 +50,13 @@ export default function PreTestPage() {
             min={1}
             max={maxQuestions}
             value={numQuestions}
-            onChange={e => {
-              const val = Number(e.target.value) || 0;
-              const clamped = Math.max(1, Math.min(val, maxQuestions || 1));
-              setNumQuestions(clamped);
-            }}
+            onChange={e => handleNumChange(Number(e.target.value) || 0)}
             className="modern-input"
           />
         </label>
         <button
           className="modern-btn cta"
-          onClick={() => {
-            const encoded = encodeURIComponent(area);
-            navigate(`/test/${encoded}/${numQuestions}`);
-          }}
+          onClick={() => navigate(`/test/${encodeURIComponent(area)}/${numQuestions}`)}
           disabled={!maxQuestions || numQuestions < 1}
           type="button"
         >
@@ -79,4 +65,6 @@ export default function PreTestPage() {
       </div>
     </div>
   );
-}
+};
+
+export default PreTestPage;
