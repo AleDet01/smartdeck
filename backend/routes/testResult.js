@@ -1,21 +1,21 @@
 const express = require('express');
-const { authMiddleware } = require('../controllers/auth');
+const { authMiddleware, optionalAuthMiddleware } = require('../controllers/auth');
 const {
 	saveTestResult,
-	listAreas,
 	getStatsByArea,
 	getAggregateByArea,
 	getRecentByArea,
 	getWrongAnswersByUserArea
 } = require('../controllers/testResult');
+const { listThematicAreas } = require('../controllers/flash');
 
 const router = express.Router();
 
 // POST - salva risultato test (richiede autenticazione)
 router.post('/', authMiddleware, saveTestResult);
 
-// GET - lista aree
-router.get('/areas/list', listAreas);
+// GET - lista aree (usa listThematicAreas da flash.js)
+router.get('/areas/list', optionalAuthMiddleware, listThematicAreas);
 
 // GET - aggregate stats per area
 router.get('/aggregate/:area', getAggregateByArea);
