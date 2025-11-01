@@ -8,18 +8,18 @@ const MAX_AGE = 7200; // 2h in secondi
 
 const isProd = () => process.env.NODE_ENV === 'production';
 
-function setAuthCookie(res, token, maxAge = MAX_AGE) {
+const setAuthCookie = (res, token, maxAge = MAX_AGE) => {
   const options = [`token=${token}`, 'HttpOnly', 'Path=/', `Max-Age=${maxAge}`, `SameSite=${isProd() ? 'None' : 'Lax'}`, isProd() && 'Secure'].filter(Boolean).join('; ');
   res.setHeader('Set-Cookie', options);
-}
+};
 
-function getTokenFromReq(req) {
+const getTokenFromReq = (req) => {
   const auth = req.headers.authorization;
   if (auth?.startsWith('Bearer ')) return auth.substring(7);
   return req.headers.cookie?.split(';').find(c => c.trim().startsWith('token='))?.trim().substring(6) || null;
-}
+};
 
-async function register(req, res) {
+const register = async (req, res) => {
   const { username, password } = req.body;
   if (!username || !password) return res.status(400).json({ error: 'Username e password obbligatori' });
   
@@ -34,9 +34,9 @@ async function register(req, res) {
   } catch (err) {
     res.status(500).json({ error: 'Errore server', details: err.message });
   }
-}
+};
 
-async function login(req, res) {
+const login = async (req, res) => {
   const { username, password } = req.body;
   if (!username || !password) return res.status(400).json({ error: 'Username e password obbligatori' });
   
@@ -50,9 +50,9 @@ async function login(req, res) {
   } catch (err) {
     res.status(500).json({ error: 'Errore server', details: err.message });
   }
-}
+};
 
-function authMiddleware(req, res, next) {
+const authMiddleware = (req, res, next) => {
   const token = getTokenFromReq(req);
   if (!token) return res.status(401).json({ error: 'Token mancante' });
   
@@ -62,9 +62,9 @@ function authMiddleware(req, res, next) {
   } catch {
     res.status(401).json({ error: 'Token non valido' });
   }
-}
+};
 
-function optionalAuthMiddleware(req, res, next) {
+const optionalAuthMiddleware = (req, res, next) => {
   const token = getTokenFromReq(req);
   try {
     req.user = token ? jwt.verify(token, JWT_SECRET) : null;
@@ -72,9 +72,9 @@ function optionalAuthMiddleware(req, res, next) {
     req.user = null;
   }
   next();
-}
+};
 
-function me(req, res) {
+const me = (req, res) => {
   const token = getTokenFromReq(req);
   if (!token) return res.json({ authenticated: false, user: null });
   
@@ -84,20 +84,11 @@ function me(req, res) {
   } catch {
     res.json({ authenticated: false, user: null });
   }
-}
+};
 
-function logout(req, res) {
+const logout = (req, res) => {
   setAuthCookie(res, '', 0);
   res.json({ message: 'Logout effettuato' });
-}
+};
 
-async function getAllUsers(req, res) {
-  try {
-    const users = await User.find().select('-password');
-    res.json({ users });
-  } catch (err) {
-    res.status(500).json({ error: 'Errore recupero utenti', details: err.message });
-  }
-}
-
-module.exports = { register, login, authMiddleware, optionalAuthMiddleware, me, logout, getAllUsers };
+module.exports = { register, login, authMiddleware, optionalAuthMiddleware, me, logout };

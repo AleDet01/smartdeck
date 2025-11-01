@@ -16,11 +16,7 @@ const DashboardPage = () => {
 		const list = Array.isArray(data.areas) ? data.areas : [];
 		return list.map((name, idx) => {
 			const safeName = String(name || '').trim() || `area-${idx}`;
-			return { 
-				name: safeName, 
-				img: makeConceptImageUrl(safeName, idx), 
-				fallback: makeGradientDataUrl(idx) 
-			};
+			return { name: safeName, img: makeConceptImageUrl(safeName, idx), fallback: makeGradientDataUrl(idx) };
 		});
 	}, [data]);
 

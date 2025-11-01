@@ -16,12 +16,6 @@ export default function Topbar() {
         Test
       </button>
       <button 
-        className={`topbar-btn${isActive('/stats') ? ' active' : ''}`} 
-        onClick={() => navigate('/stats')}
-      >
-        Stats
-      </button>
-      <button 
         className={`topbar-btn${isActive('/crea-test') ? ' active' : ''}`} 
         onClick={() => navigate('/crea-test')}
       >

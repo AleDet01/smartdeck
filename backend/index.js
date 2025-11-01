@@ -54,7 +54,6 @@ app.get('/health', (req, res) => {
 
 app.use('/auth', require('./routes/auth'));
 app.use('/flash', require('./routes/flash'));
-app.use('/testresult', require('./routes/testResult'));
 
 connectDB()
   .then(() => {

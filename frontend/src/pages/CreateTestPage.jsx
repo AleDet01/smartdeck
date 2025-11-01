@@ -49,10 +49,7 @@ const CreateTestPage = () => {
       thematicArea: testName,
       questions: questions.map((q, qi) => ({
         question: q.question,
-        answers: q.answers.map((txt, idx) => ({ 
-          text: txt, 
-          isCorrect: correctIndexes[qi] === idx 
-        })),
+        answers: q.answers.map((txt, idx) => ({ text: txt, isCorrect: correctIndexes[qi] === idx })),
         difficulty: 'media'
       }))
     };
@@ -64,17 +61,12 @@ const CreateTestPage = () => {
         credentials: 'include',
         body: JSON.stringify(payload)
       });
-      window.location.href = '/#/dashboard';
     } catch {
-      try {
-        const stored = JSON.parse(localStorage.getItem('customTests') || '[]');
-        const newTest = { id: `custom-${Date.now()}`, name: testName, questions };
-        stored.unshift(newTest);
-        localStorage.setItem('customTests', JSON.stringify(stored));
-        window.location.href = '/#/dashboard';
-      } catch {
-        alert('Errore salvataggio test');
-      }
+      const stored = JSON.parse(localStorage.getItem('customTests') || '[]');
+      stored.unshift({ id: `custom-${Date.now()}`, name: testName, questions });
+      localStorage.setItem('customTests', JSON.stringify(stored));
+    } finally {
+      window.location.href = '/#/dashboard';
     }
   };
 

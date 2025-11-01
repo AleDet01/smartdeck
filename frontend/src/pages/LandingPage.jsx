@@ -19,18 +19,14 @@ export default function LandingPage() {
     setError('');
     setLoading(true);
     try {
-      const body = { username: username.trim(), password };
       const res = await fetch(`${API_HOST}/auth/${mode}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify(body)
+        body: JSON.stringify({ username: username.trim(), password })
       });
       const data = await res.json().catch(() => ({}));
-      if (!res.ok) {
-        throw new Error(data?.error || 'Errore di autenticazione');
-      }
-      // cookie httpOnly viene impostato dal server; reindirizza alla dashboard
+      if (!res.ok) throw new Error(data?.error || 'Errore di autenticazione');
       window.location.href = '/#/dashboard';
     } catch (err) {
       setError(err.message || 'Errore');
