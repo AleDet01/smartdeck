@@ -21,18 +21,7 @@ export default function TestPage() {
   };
 
   useEffect(() => {
-
     const controller = new AbortController();
-
-    try {
-      const active = JSON.parse(sessionStorage.getItem('activeCustomTest') || 'null');
-      if (active && active.name === area) {
-        resetStateForTest(active.questions.slice(0, parseInt(num)));
-        sessionStorage.removeItem('activeCustomTest');
-        return;
-      }
-    } catch (err) { }
-
     (async () => {
       try {
         const res = await fetch(`${API_HOST}/flash/thematic/${area}`, { signal: controller.signal, credentials: 'include' });
@@ -47,7 +36,6 @@ export default function TestPage() {
         setQuestions([]);
       }
     })();
-
     return () => controller.abort();
   }, [area, num]);
 

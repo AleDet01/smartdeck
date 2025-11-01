@@ -43,8 +43,11 @@ const CreateTestPage = () => {
 
   const handleImage = e => setFileName(e.target.files?.[0]?.name || '');
 
+  const [submitError, setSubmitError] = useState('');
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setSubmitError('');
     const payload = {
       thematicArea: testName,
       questions: questions.map((q, qi) => ({
@@ -55,18 +58,19 @@ const CreateTestPage = () => {
     };
 
     try {
-      await fetch(`${API_HOST}/flash`, {
+      const res = await fetch(`${API_HOST}/flash`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
         body: JSON.stringify(payload)
       });
-    } catch {
-      const stored = JSON.parse(localStorage.getItem('customTests') || '[]');
-      stored.unshift({ id: `custom-${Date.now()}`, name: testName, questions });
-      localStorage.setItem('customTests', JSON.stringify(stored));
-    } finally {
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data?.error || `HTTP ${res.status}`);
+      }
       window.location.href = '/#/dashboard';
+    } catch (err) {
+      setSubmitError(err.message || 'Errore durante la creazione del test.');
     }
   };
 
@@ -147,6 +151,7 @@ const CreateTestPage = () => {
                 </div>
               ))}
             </div>
+            {submitError && <div className="error" role="alert" style={{ marginTop: 8 }}>{submitError}</div>}
             <button className="modern-btn" type="submit" disabled={!allFilled}>
               Conferma
             </button>
