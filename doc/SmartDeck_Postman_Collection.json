@@ -1,0 +1,208 @@
+{
+	"info": {
+		"_postman_id": "smartdeck-collection-2025",
+		"name": "SmartDeck API Collection",
+		"description": "Collection REALE basata sugli endpoint effettivi di SmartDeck",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Authentication",
+			"item": [
+				{
+					"name": "Register",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"username\": \"testuser\",\n  \"password\": \"password123\"\n}"
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/auth/register",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"auth",
+								"register"
+							]
+						},
+						"description": "Registra un nuovo utente. Restituisce un token JWT e lo salva in un cookie."
+					},
+					"response": []
+				},
+				{
+					"name": "Login",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"username\": \"testuser\",\n  \"password\": \"password123\"\n}"
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/auth/login",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"auth",
+								"login"
+							]
+						},
+						"description": "Login con username e password. Restituisce token JWT e lo salva in un cookie."
+					},
+					"response": []
+				},
+				{
+					"name": "Me (Get Current User)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/auth/me",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"auth",
+								"me"
+							]
+						},
+						"description": "Ottiene le informazioni dell'utente autenticato corrente. Richiede token JWT nel cookie."
+					},
+					"response": []
+				},
+				{
+					"name": "Logout",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/auth/logout",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"auth",
+								"logout"
+							]
+						},
+						"description": "Effettua il logout cancellando il cookie con il token JWT."
+					},
+					"response": []
+				}
+			],
+			"description": "Endpoint per autenticazione e gestione utenti"
+		},
+		{
+			"name": "Flashcards",
+			"item": [
+				{
+					"name": "Get All Flashcards",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/flash",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"flash"
+							]
+						},
+						"description": "Ottiene tutte le flashcards. Autenticazione opzionale."
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Thematic Areas",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/flash/areas/list",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"flash",
+								"areas",
+								"list"
+							]
+						},
+						"description": "Ottiene la lista di tutte le aree tematiche disponibili. Autenticazione opzionale."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Flashcards by Thematic Area",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/flash/thematic/AWS",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"flash",
+								"thematic",
+								"AWS"
+							]
+						},
+						"description": "Ottiene tutte le flashcards di una specifica area tematica. Sostituisci 'AWS' con l'area desiderata. Autenticazione opzionale."
+					},
+					"response": []
+				},
+				{
+					"name": "Create Flashcards",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"thematicArea\": \"Matematica\",\n  \"questions\": [\n    {\n      \"question\": \"Quanto fa 2+2?\",\n      \"answers\": [\n        { \"text\": \"3\", \"isCorrect\": false },\n        { \"text\": \"4\", \"isCorrect\": true },\n        { \"text\": \"5\", \"isCorrect\": false }\n      ],\n      \"difficulty\": \"media\"\n    },\n    {\n      \"question\": \"Quanto fa 5*5?\",\n      \"answers\": [\n        { \"text\": \"20\", \"isCorrect\": false },\n        { \"text\": \"25\", \"isCorrect\": true },\n        { \"text\": \"30\", \"isCorrect\": false }\n      ],\n      \"difficulty\": \"media\"\n    }\n  ]\n}"
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/flash",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"flash"
+							]
+						},
+						"description": "Crea un nuovo set di flashcards con domande e risposte. RICHIEDE AUTENTICAZIONE (devi essere loggato)."
+					},
+					"response": []
+				}
+			],
+			"description": "Endpoint per gestione flashcards"
+		}
+	],
+	"variable": [
+		{
+			"key": "BASE_URL",
+			"value": "https://smartdeck.onrender.com",
+			"type": "string"
+		}
+	]
+}
