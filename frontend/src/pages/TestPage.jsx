@@ -12,6 +12,7 @@ export default function TestPage() {
   const [selectedAnswer, setSelectedAnswer] = useState(null);
   const [showStats, setShowStats] = useState(false);
   const [startTime] = useState(Date.now());
+  const [sessionSaved, setSessionSaved] = useState(false);
   const navigate = useNavigate();
 
   const resetStateForTest = qs => {
@@ -19,6 +20,7 @@ export default function TestPage() {
     setAllAnswers(Array(qs.length).fill(null));
     setSelectedAnswer(null);
     setShowStats(false);
+    setSessionSaved(false);
   };
 
   useEffect(() => {
@@ -58,6 +60,60 @@ export default function TestPage() {
     }, 300);
   };
 
+  // Salva la sessione quando il test è completato
+  useEffect(() => {
+    if (!showStats || sessionSaved || questions.length === 0) return;
+
+    const saveSession = async () => {
+      try {
+        const correctCount = allAnswers.filter((ansIdx, qIdx) => {
+          const selected = questions[qIdx]?.answers[ansIdx];
+          return selected?.isCorrect;
+        }).length;
+        const percent = Math.round((correctCount / questions.length) * 100);
+        const duration = Math.floor((Date.now() - startTime) / 1000);
+
+        const sessionData = {
+          thematicArea: area,
+          totalQuestions: questions.length,
+          correctAnswers: correctCount,
+          wrongAnswers: questions.length - correctCount,
+          score: percent,
+          duration,
+          questions: questions.map((q, idx) => {
+            const userIdx = allAnswers[idx];
+            const userAns = typeof userIdx === 'number' ? q.answers[userIdx] : null;
+            const correctAns = q.answers.find(a => a.isCorrect);
+            const correctIdx = q.answers.findIndex(a => a.isCorrect);
+            return {
+              questionId: q._id,
+              questionText: q.question,
+              userAnswerIndex: userIdx ?? -1,
+              userAnswerText: userAns?.text || 'Nessuna risposta',
+              correctAnswerIndex: correctIdx,
+              correctAnswerText: correctAns?.text || '',
+              isCorrect: userAns?.isCorrect || false,
+              timeSpent: 0
+            };
+          })
+        };
+
+        await fetch(`${API_HOST}/statistics/session`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify(sessionData)
+        });
+        
+        setSessionSaved(true);
+      } catch (err) {
+        console.error('Errore nel salvare la sessione:', err);
+      }
+    };
+
+    saveSession();
+  }, [showStats, sessionSaved, questions, allAnswers, area, startTime]);
+
   if (!questions.length) return (
     <div className="test-page">
       <div className="page-bg-wrapper" aria-hidden="true">
@@ -76,49 +132,6 @@ export default function TestPage() {
       return selected?.isCorrect;
     }).length;
     const percent = Math.round((correctCount / questions.length) * 100);
-    const duration = Math.floor((Date.now() - startTime) / 1000); // durata in secondi
-
-    // Salva la sessione nel database
-    React.useEffect(() => {
-      const saveSession = async () => {
-        try {
-          const sessionData = {
-            thematicArea: area,
-            totalQuestions: questions.length,
-            correctAnswers: correctCount,
-            wrongAnswers: questions.length - correctCount,
-            score: percent,
-            duration,
-            questions: questions.map((q, idx) => {
-              const userIdx = allAnswers[idx];
-              const userAns = typeof userIdx === 'number' ? q.answers[userIdx] : null;
-              const correctAns = q.answers.find(a => a.isCorrect);
-              const correctIdx = q.answers.findIndex(a => a.isCorrect);
-              return {
-                questionId: q._id,
-                questionText: q.question,
-                userAnswerIndex: userIdx ?? -1,
-                userAnswerText: userAns?.text || 'Nessuna risposta',
-                correctAnswerIndex: correctIdx,
-                correctAnswerText: correctAns?.text || '',
-                isCorrect: userAns?.isCorrect || false,
-                timeSpent: 0
-              };
-            })
-          };
-
-          await fetch(`${API_HOST}/statistics/session`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            credentials: 'include',
-            body: JSON.stringify(sessionData)
-          });
-        } catch (err) {
-          console.error('Errore nel salvare la sessione:', err);
-        }
-      };
-      saveSession();
-    }, []);
     
     return (
       <div className="test-page">
