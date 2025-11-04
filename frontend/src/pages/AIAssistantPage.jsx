@@ -9,7 +9,7 @@ const AIAssistantPage = () => {
 	const [messages, setMessages] = useState([
 		{
 			role: 'assistant',
-			content: '👋 Ciao! Sono il tuo assistente AI per creare test. Dimmi che tipo di test vuoi creare e io lo genererò per te!\n\nEsempio: "Crea un test di 5 domande sulla storia romana" oppure "Voglio un quiz sulla matematica, argomento frazioni"',
+			content: 'Ciao! Sono il tuo assistente AI per creare test. Dimmi che tipo di test vuoi creare e io lo genererò per te.\n\nEsempio: "Crea un test di 5 domande sulla storia romana" oppure "Voglio un quiz sulla matematica, argomento frazioni"',
 			timestamp: new Date()
 		}
 	]);
@@ -68,7 +68,7 @@ const AIAssistantPage = () => {
 				if (data.success) {
 					const assistantMessage = {
 						role: 'assistant',
-						content: `✅ Perfetto! Ho generato il test "${data.testData.thematicArea}" con ${data.createdCount} domande.\n\nPuoi trovarlo nella tua Dashboard. Vuoi fare subito il test o creare altro?`,
+						content: `Perfetto! Ho generato il test "${data.testData.thematicArea}" con ${data.createdCount} domande.\n\nPuoi trovarlo nella tua Dashboard. Vuoi fare subito il test o creare altro?`,
 						timestamp: new Date(),
 						testGenerated: true,
 						testArea: data.testData.thematicArea
@@ -78,7 +78,7 @@ const AIAssistantPage = () => {
 					// Fallback: mostra comunque un messaggio di conferma
 					const assistantMessage = {
 						role: 'assistant',
-						content: `📝 Ho capito! Vuoi creare un test su: "${text}"\n\nPer ora l'AI non è configurata, ma puoi creare il test manualmente andando su "Crea un nuovo test". Ti aiuto a formulare le domande!\n\nQuanti domande vuoi? Che livello di difficoltà?`,
+						content: `Ho capito! Vuoi creare un test su: "${text}"\n\nPer ora l'AI non è configurata, ma puoi creare il test manualmente andando su "Crea un nuovo test". Ti aiuto a formulare le domande!\n\nQuanti domande vuoi? Che livello di difficoltà?`,
 						timestamp: new Date()
 					};
 					setMessages(prev => [...prev, assistantMessage]);
@@ -104,7 +104,7 @@ const AIAssistantPage = () => {
 			console.error('Errore comunicazione AI:', err);
 			const errorMessage = {
 				role: 'assistant',
-				content: '😔 Ops! C\'è stato un errore. Per favore riprova o vai su "Crea un nuovo test" per creare manualmente.',
+				content: 'Ops! C\'è stato un errore. Per favore riprova o vai su "Crea un nuovo test" per creare manualmente.',
 				timestamp: new Date()
 			};
 			setMessages(prev => [...prev, errorMessage]);
@@ -140,7 +140,7 @@ const AIAssistantPage = () => {
 						{messages.map((msg, idx) => (
 							<div key={idx} className={`message ${msg.role}`}>
 								<div className="message-avatar">
-									{msg.role === 'assistant' ? '🤖' : '👤'}
+									{msg.role === 'assistant' ? 'AI' : 'U'}
 								</div>
 								<div className="message-content">
 									<div className="message-text">{msg.content}</div>
@@ -152,7 +152,7 @@ const AIAssistantPage = () => {
 											className="test-action-btn"
 											onClick={() => navigate('/dashboard')}
 										>
-											📋 Vai al Test
+											Vai al Test
 										</button>
 									)}
 								</div>
@@ -160,7 +160,7 @@ const AIAssistantPage = () => {
 						))}
 						{isLoading && (
 							<div className="message assistant">
-								<div className="message-avatar">🤖</div>
+								<div className="message-avatar">AI</div>
 								<div className="message-content">
 									<div className="typing-indicator">
 										<span></span>

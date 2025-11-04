@@ -2,13 +2,40 @@
   width: 100%;
   min-height: 100vh;
   margin: 0;
-  padding: 120px var(--space-4) var(--space-8);
+  padding: 100px var(--space-4) var(--space-6);
   display: flex;
   flex-direction: column;
   align-items: center;
   background: var(--color-gray-50);
   position: relative;
   box-sizing: border-box;
+  overflow: hidden;
+}
+
+.test-page::before {
+  content: '';
+  position: absolute;
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, rgba(0, 122, 255, 0.05) 0%, transparent 70%);
+  border-radius: 50%;
+  top: -250px;
+  right: -200px;
+  animation: float 20s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.test-page::after {
+  content: '';
+  position: absolute;
+  width: 450px;
+  height: 450px;
+  background: radial-gradient(circle, rgba(255, 149, 0, 0.04) 0%, transparent 70%);
+  border-radius: 50%;
+  bottom: -180px;
+  left: -150px;
+  animation: float 26s ease-in-out infinite reverse;
+  pointer-events: none;
 }
 
 .page-bg-wrapper {
@@ -16,34 +43,40 @@
 }
 
 .question-count {
+  position: relative;
+  z-index: 1;
   width: 100%;
   text-align: center;
-  font-size: 1.125rem;
+  font-size: 0.938rem;
   color: var(--color-gray-600);
-  margin-bottom: var(--space-6);
+  margin-bottom: var(--space-4);
   font-weight: 500;
   letter-spacing: -0.01em;
 }
 
 .flashcard {
+  position: relative;
+  z-index: 1;
   width: 100%;
-  max-width: 700px;
-  background: var(--color-white);
-  border-radius: var(--radius-lg);
-  padding: var(--space-8);
-  margin: 0 auto var(--space-6);
-  box-shadow: var(--shadow-md);
+  max-width: 650px;
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: var(--radius-xl);
+  padding: var(--space-6);
+  margin: 0 auto var(--space-5);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
   display: flex;
   flex-direction: column;
   align-items: center;
-  border: 1px solid var(--color-gray-200);
+  border: 1px solid rgba(255, 255, 255, 0.6);
 }
 
 .question {
   width: 100%;
-  font-size: 1.5rem;
+  font-size: 1.25rem;
   color: var(--color-gray-800);
-  margin-bottom: var(--space-8);
+  margin-bottom: var(--space-6);
   text-align: center;
   line-height: 1.5;
   font-weight: 600;
