@@ -39,14 +39,24 @@ html, body {
   box-shadow: 0 4px 18px 0 rgba(59, 130, 246, 0.4);
   transform: translateY(-2px);
 }
-@media (max-width: 700px) {
+@media (max-width: 900px) {
   .dashboard-topbar {
-    padding: 8px 10vw;
-    gap: 10px;
+    padding: 8px 16px;
+    gap: 8px;
   }
   .topbar-btn {
-    font-size: 1rem;
-    padding: 7px 12px;
+    font-size: 0.95rem;
+    padding: 8px 14px;
+  }
+}
+@media (max-width: 700px) {
+  .dashboard-topbar {
+    padding: 8px 10px;
+    gap: 6px;
+  }
+  .topbar-btn {
+    font-size: 0.85rem;
+    padding: 7px 10px;
   }
 }
  .dashboard-page {

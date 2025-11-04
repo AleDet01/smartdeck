@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import API_HOST from './apiHost';
 
-// Hook per fetch con abort controller
 export const useFetch = (url, options = {}) => {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -38,13 +37,12 @@ export const useFetch = (url, options = {}) => {
     })();
 
     return () => controller.abort();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [url]);
 
   return { data, loading, error };
 };
 
-// Hook per ottenere l'utente corrente
+
 export const useCurrentUser = () => {
   const { data, loading } = useFetch(`${API_HOST}/auth/me`);
   return {
@@ -54,7 +52,6 @@ export const useCurrentUser = () => {
   };
 };
 
-// Hook per adaptive font size
 export const useAdaptiveFontSize = (selector, deps = []) => {
   useEffect(() => {
     if (deps.some(d => !d)) return;

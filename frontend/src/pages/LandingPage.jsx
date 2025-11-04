@@ -3,7 +3,7 @@ import API_HOST from '../utils/apiHost';
 import '../css/LandingPage.css';
 
 export default function LandingPage() {
-  const [mode, setMode] = useState('login'); // 'login' | 'register'
+  const [mode, setMode] = useState('login');
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');

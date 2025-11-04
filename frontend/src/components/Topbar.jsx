@@ -21,6 +21,12 @@ export default function Topbar() {
       >
         Crea un nuovo test
       </button>
+      <button 
+        className={`topbar-btn${isActive('/statistiche') ? ' active' : ''}`} 
+        onClick={() => navigate('/statistiche')}
+      >
+        Statistiche
+      </button>
     </div>
   );
 }
