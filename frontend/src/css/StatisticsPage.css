@@ -402,8 +402,9 @@
 }
 
 .table-body {
-	max-height: 400px;
-	overflow-y: auto;
+	/* Remove inner scroll to avoid double scrollbars; let page handle scrolling */
+	max-height: none;
+	overflow: visible;
 }
 
 .table-row {

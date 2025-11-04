@@ -47,7 +47,8 @@
 	max-width: 900px;
 	width: 100%;
 	margin: 0 auto;
-	padding: 100px var(--space-5) var(--space-5);
+	/* Increase top padding to sit below fixed Topbar */
+	padding: 140px var(--space-5) var(--space-5);
 	display: flex;
 	flex-direction: column;
 	height: 100vh;
@@ -373,7 +374,8 @@
 /* Responsive */
 @media (max-width: 900px) {
 	.ai-container {
-		padding: 100px 14px 32px;
+		/* Match desktop increased top padding to avoid overlap */
+		padding: 140px 14px 32px;
 	}
 
 	.ai-header h1 {

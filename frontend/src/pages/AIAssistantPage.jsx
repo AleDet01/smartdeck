@@ -131,7 +131,7 @@ const AIAssistantPage = () => {
 			<Topbar />
 			<div className="ai-container">
 				<div className="ai-header">
-					<h1>🤖 AI Assistant</h1>
+					<h1>AI Assistant</h1>
 					<p className="ai-subtitle">Crea test semplicemente descrivendo cosa vuoi</p>
 				</div>
 
@@ -175,7 +175,7 @@ const AIAssistantPage = () => {
 
 					{showQuickActions && messages.length === 1 && (
 						<div className="quick-actions">
-							<div className="quick-title">💡 Prova questi esempi:</div>
+							<div className="quick-title">Prova questi esempi:</div>
 							<div className="quick-buttons">
 								{quickPrompts.map((prompt, idx) => (
 									<button 
@@ -205,28 +205,28 @@ const AIAssistantPage = () => {
 							onClick={() => handleSendMessage()}
 							disabled={isLoading || !inputMessage.trim()}
 						>
-							{isLoading ? '⏳' : '📤'}
+							{isLoading ? 'Invio…' : 'Invia'}
 						</button>
 					</div>
 				</div>
 
 				<div className="ai-info">
 					<div className="info-card">
-						<div className="info-icon">💬</div>
+						<div className="info-icon"></div>
 						<div className="info-text">
 							<strong>Come funziona?</strong>
 							<p>Descrivi il tipo di test che vuoi (materia, argomento, numero domande) e l'AI lo creerà per te automaticamente!</p>
 						</div>
 					</div>
 					<div className="info-card">
-						<div className="info-icon">⚡</div>
+						<div className="info-icon"></div>
 						<div className="info-text">
 							<strong>Veloce e preciso</strong>
 							<p>L'AI genera test in pochi secondi con domande pertinenti e risposte accurate.</p>
 						</div>
 					</div>
 					<div className="info-card">
-						<div className="info-icon">🎯</div>
+						<div className="info-icon"></div>
 						<div className="info-text">
 							<strong>Personalizzabile</strong>
 							<p>Specifica difficoltà, numero domande e argomenti specifici per test su misura.</p>

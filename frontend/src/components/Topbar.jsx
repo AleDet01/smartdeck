@@ -25,7 +25,7 @@ export default function Topbar() {
         className={`topbar-btn${isActive('/ai-assistant') ? ' active' : ''}`} 
         onClick={() => navigate('/ai-assistant')}
       >
-        🤖 AI Assistant
+        AI Assistant
       </button>
       <button 
         className={`topbar-btn${isActive('/statistiche') ? ' active' : ''}`} 

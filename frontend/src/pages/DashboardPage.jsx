@@ -40,7 +40,7 @@ const DashboardPage = () => {
 			<Topbar />
 			<div className="areas-grid">
 				{areas.length === 0 && <div>Nessuna area disponibile con flashcards.</div>}
-				{areas.map(area => (
+				{areas.map((area, idx) => (
 					<div key={area.name} className="area-box">
 						<img 
 							className="area-bg" 
@@ -58,16 +58,21 @@ const DashboardPage = () => {
 								onClick={() => navigate(`/pretest/${area.name}`)} 
 								aria-label={`Play ${area.name}`}
 							>
-								<svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+								{(() => {
+									const gradId = `playGrad_${idx}`;
+									return (
+										<svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
 									<defs>
-										<linearGradient id="playGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+											<linearGradient id={gradId} x1="0%" y1="0%" x2="100%" y2="0%">
 											<stop offset="0%" stopColor="#ffe066"/>
 											<stop offset="100%" stopColor="#ffd60a"/>
 										</linearGradient>
 									</defs>
-									<circle cx="14" cy="14" r="14" fill="url(#playGrad)"/>
+										<circle cx="14" cy="14" r="14" fill={`url(#${gradId})`}/>
 									<polygon points="11,9 20,14 11,19" fill="#23272f"/>
-								</svg>
+									</svg>
+									);
+								})()}
 							</button>
 						</div>
 					</div>

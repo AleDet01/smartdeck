@@ -46,7 +46,7 @@ const StatisticsPage = () => {
 				<Topbar />
 				<div className="stats-container">
 					<div className="stats-header">
-						<h1>📊 Statistiche</h1>
+						<h1>Statistiche</h1>
 						<p className="stats-subtitle">Le tue performance nei test</p>
 					</div>
 					<div className="no-data">
@@ -69,7 +69,7 @@ const StatisticsPage = () => {
 			<Topbar />
 			<div className="stats-container">
 				<div className="stats-header">
-					<h1>📊 Statistiche Dettagliate</h1>
+					<h1>Statistiche Dettagliate</h1>
 					<p className="stats-subtitle">Monitora i tuoi progressi e performance</p>
 				</div>
 
@@ -97,22 +97,22 @@ const StatisticsPage = () => {
 				{/* KPI Cards principali */}
 				<div className="kpi-grid">
 					<div className="kpi-card">
-						<div className="kpi-icon">🎯</div>
+						<div className="kpi-icon"></div>
 						<div className="kpi-value">{selectedArea === 'all' ? stats.totalSessions : displayStats.totalSessions}</div>
 						<div className="kpi-label">Test Completati</div>
 					</div>
 					<div className="kpi-card">
-						<div className="kpi-icon">📝</div>
+						<div className="kpi-icon"></div>
 						<div className="kpi-value">{selectedArea === 'all' ? stats.totalQuestions : displayStats.totalQuestions}</div>
 						<div className="kpi-label">Domande Totali</div>
 					</div>
 					<div className="kpi-card success">
-						<div className="kpi-icon">✅</div>
+						<div className="kpi-icon"></div>
 						<div className="kpi-value">{selectedArea === 'all' ? stats.totalCorrect : displayStats.totalCorrect}</div>
 						<div className="kpi-label">Risposte Corrette</div>
 					</div>
 					<div className="kpi-card danger">
-						<div className="kpi-icon">❌</div>
+						<div className="kpi-icon"></div>
 						<div className="kpi-value">{selectedArea === 'all' ? stats.totalWrong : displayStats.totalWrong}</div>
 						<div className="kpi-label">Risposte Sbagliate</div>
 					</div>
@@ -157,10 +157,10 @@ const StatisticsPage = () => {
 				{/* Best & Worst Performance (solo per "all") */}
 				{selectedArea === 'all' && stats.bestSession && (
 					<div className="performance-section">
-						<h2>🏅 Performance</h2>
+						<h2>Performance</h2>
 						<div className="performance-grid">
 							<div className="performance-card best">
-								<h3>🥇 Miglior Test</h3>
+								<h3>Miglior Test</h3>
 								<div className="perf-detail">
 									<span className="perf-area">{stats.bestSession.thematicArea}</span>
 									<span className="perf-score">{stats.bestSession.score}%</span>
@@ -168,7 +168,7 @@ const StatisticsPage = () => {
 								<div className="perf-date">{new Date(stats.bestSession.date).toLocaleDateString('it-IT')}</div>
 							</div>
 							<div className="performance-card worst">
-								<h3>📉 Test da Migliorare</h3>
+								<h3>Test da Migliorare</h3>
 								<div className="perf-detail">
 									<span className="perf-area">{stats.worstSession.thematicArea}</span>
 									<span className="perf-score">{stats.worstSession.score}%</span>
@@ -182,7 +182,7 @@ const StatisticsPage = () => {
 				{/* Grafico Progresso nel Tempo */}
 				{selectedArea === 'all' && stats.progressOverTime && stats.progressOverTime.length > 0 && (
 					<div className="chart-section">
-						<h2>📈 Progresso nel Tempo</h2>
+						<h2>Progresso nel Tempo</h2>
 						<div className="chart-container">
 							<SimpleLineChart data={stats.progressOverTime} />
 						</div>
@@ -192,7 +192,7 @@ const StatisticsPage = () => {
 				{/* Performance per Area Tematica */}
 				{selectedArea === 'all' && Object.keys(stats.byArea).length > 0 && (
 					<div className="area-performance-section">
-						<h2>📚 Performance per Area Tematica</h2>
+						<h2>Performance per Area Tematica</h2>
 						<div className="area-bars">
 							{Object.entries(stats.byArea).map(([areaName, areaData]) => (
 								<div key={areaName} className="area-bar-item">
@@ -221,7 +221,7 @@ const StatisticsPage = () => {
 
 				{/* Tabella Sessioni Recenti */}
 				<div className="recent-sessions-section">
-					<h2>🕒 Sessioni Recenti</h2>
+					<h2>Sessioni Recenti</h2>
 					<div className="sessions-table">
 						<div className="table-header">
 							<div className="th">Data</div>

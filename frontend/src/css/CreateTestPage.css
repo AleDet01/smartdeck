@@ -92,10 +92,19 @@
 }
 
 .ct-quick {
-	display: inline-flex;
+	display: flex;
 	gap: var(--space-2);
-	flex-wrap: wrap;
+	overflow-x: auto;
+	padding-bottom: var(--space-2);
+	scroll-snap-type: x mandatory;
+	-webkit-overflow-scrolling: touch;
 }
+
+.ct-quick::-webkit-scrollbar { height: 6px; }
+.ct-quick::-webkit-scrollbar-track { background: transparent; }
+.ct-quick::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.08); border-radius: 999px; }
+
+.chip-gold { scroll-snap-align: start; }
 
 .chip-gold {
 	background: var(--color-gray-100);
