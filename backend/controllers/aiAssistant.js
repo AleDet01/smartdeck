@@ -38,49 +38,49 @@ Importante:
 - Difficulty può essere: "facile", "media", "difficile"
 - Non aggiungere markdown, commenti o testo extra, solo JSON puro`;
 
-		// Usa Hugging Face Inference API (gratuita) come alternativa open source
-		const HF_API_KEY = process.env.HF_API_KEY || '';
-		const API_URL = 'https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.2';
+		// Usa OpenAI API
+		const OPENAI_API_KEY = process.env.OPENAI_API_KEY || '';
 		
-		if (!HF_API_KEY) {
+		if (!OPENAI_API_KEY) {
 			return res.status(500).json({ 
-				error: 'API Key non configurata. Aggiungi HF_API_KEY nelle variabili d\'ambiente.',
+				error: 'API Key non configurata. Aggiungi OPENAI_API_KEY nelle variabili d\'ambiente.',
 				fallback: true 
 			});
 		}
 
-		const response = await fetch(API_URL, {
+		const response = await fetch('https://api.openai.com/v1/chat/completions', {
 			method: 'POST',
 			headers: {
-				'Authorization': `Bearer ${HF_API_KEY}`,
+				'Authorization': `Bearer ${OPENAI_API_KEY}`,
 				'Content-Type': 'application/json'
 			},
 			body: JSON.stringify({
-				inputs: `${systemPrompt}\n\nRichiesta utente: ${prompt}\n\nJSON:`,
-				parameters: {
-					max_new_tokens: 2000,
-					temperature: 0.7,
-					top_p: 0.95,
-					return_full_text: false
-				}
+				model: 'gpt-3.5-turbo',
+				messages: [
+					{ role: 'system', content: systemPrompt },
+					{ role: 'user', content: prompt }
+				],
+				temperature: 0.7,
+				max_tokens: 2000
 			})
 		});
 
 		if (!response.ok) {
-			console.error('Errore API AI:', response.status, response.statusText);
-			return res.status(500).json({ error: 'Errore nella generazione del test con AI' });
+			const errorData = await response.json().catch(() => ({}));
+			console.error('Errore API OpenAI:', response.status, response.statusText, errorData);
+			return res.status(500).json({ 
+				error: 'Errore nella generazione del test con AI',
+				details: errorData.error?.message || 'Errore sconosciuto'
+			});
 		}
 
 		const aiResponse = await response.json();
-		console.log('Risposta AI:', aiResponse);
+		console.log('Risposta OpenAI:', aiResponse);
 
-		let generatedText = '';
-		if (Array.isArray(aiResponse) && aiResponse[0]?.generated_text) {
-			generatedText = aiResponse[0].generated_text;
-		} else if (aiResponse.generated_text) {
-			generatedText = aiResponse.generated_text;
-		} else {
-			throw new Error('Formato risposta AI non valido');
+		let generatedText = aiResponse.choices?.[0]?.message?.content || '';
+		
+		if (!generatedText) {
+			throw new Error('Risposta vuota dall\'AI');
 		}
 
 		// Estrai JSON dalla risposta
@@ -133,45 +133,42 @@ const chatWithAI = async (req, res) => {
 			return res.status(400).json({ error: 'Messaggio richiesto' });
 		}
 
-		const HF_API_KEY = process.env.HF_API_KEY || '';
+		const OPENAI_API_KEY = process.env.OPENAI_API_KEY || '';
 		
-		if (!HF_API_KEY) {
+		if (!OPENAI_API_KEY) {
 			return res.json({
-				reply: 'Ciao! Sono il tuo assistente AI. Per usarmi, l\'amministratore deve configurare una API key (HF_API_KEY). Nel frattempo, descrivi il test che vuoi creare e ti aiuterò con suggerimenti!'
+				reply: 'Ciao! Sono il tuo assistente AI. Per usarmi, l\'amministratore deve configurare una API key (OPENAI_API_KEY). Nel frattempo, descrivi il test che vuoi creare e ti aiuterò con suggerimenti!'
 			});
 		}
 
-		const API_URL = 'https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.2';
-
-		const response = await fetch(API_URL, {
+		const response = await fetch('https://api.openai.com/v1/chat/completions', {
 			method: 'POST',
 			headers: {
-				'Authorization': `Bearer ${HF_API_KEY}`,
+				'Authorization': `Bearer ${OPENAI_API_KEY}`,
 				'Content-Type': 'application/json'
 			},
 			body: JSON.stringify({
-				inputs: `Sei un assistente educativo che aiuta a creare quiz e test. Rispondi in modo amichevole e conciso.\n\nUtente: ${message}\n\nAssistente:`,
-				parameters: {
-					max_new_tokens: 500,
-					temperature: 0.8,
-					top_p: 0.9,
-					return_full_text: false
-				}
+				model: 'gpt-3.5-turbo',
+				messages: [
+					{ 
+						role: 'system', 
+						content: 'Sei un assistente educativo che aiuta a creare quiz e test. Rispondi in modo amichevole e conciso in italiano.' 
+					},
+					{ role: 'user', content: message }
+				],
+				temperature: 0.8,
+				max_tokens: 500
 			})
 		});
 
 		if (!response.ok) {
-			throw new Error('Errore API AI');
+			const errorData = await response.json().catch(() => ({}));
+			console.error('Errore API OpenAI:', errorData);
+			throw new Error('Errore API OpenAI');
 		}
 
 		const aiResponse = await response.json();
-		let reply = '';
-		
-		if (Array.isArray(aiResponse) && aiResponse[0]?.generated_text) {
-			reply = aiResponse[0].generated_text;
-		} else if (aiResponse.generated_text) {
-			reply = aiResponse.generated_text;
-		}
+		const reply = aiResponse.choices?.[0]?.message?.content || '';
 
 		res.json({ reply: reply.trim() || 'Mi dispiace, non sono riuscito a generare una risposta.' });
 
