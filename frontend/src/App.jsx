@@ -6,6 +6,7 @@ import CreateTestPage from './pages/CreateTestPage';
 import PreTestPage from './pages/PreTestPage';
 import TestPage from './pages/TestPage';
 import StatisticsPage from './pages/StatisticsPage';
+import AIAssistantPage from './pages/AIAssistantPage';
 import LogoutButton from './components/LogoutButton';
 import API_HOST from './utils/apiHost';
 
@@ -39,6 +40,7 @@ export default function App() {
         <Route path="/dashboard" element={<RequireAuth><DashboardPage /></RequireAuth>} />
         <Route path="/crea-test" element={<RequireAuth><CreateTestPage /></RequireAuth>} />
         <Route path="/statistiche" element={<RequireAuth><StatisticsPage /></RequireAuth>} />
+        <Route path="/ai-assistant" element={<RequireAuth><AIAssistantPage /></RequireAuth>} />
         <Route path="/pretest/:area" element={<RequireAuth><PreTestPage /></RequireAuth>} />
         <Route path="/test/:area/:num" element={<RequireAuth><TestPage /></RequireAuth>} />
         <Route path="*" element={<Navigate to="/" />} />

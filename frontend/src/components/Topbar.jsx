@@ -19,7 +19,13 @@ export default function Topbar() {
         className={`topbar-btn${isActive('/crea-test') ? ' active' : ''}`} 
         onClick={() => navigate('/crea-test')}
       >
-        Crea un nuovo test
+        Crea Test
+      </button>
+      <button 
+        className={`topbar-btn${isActive('/ai-assistant') ? ' active' : ''}`} 
+        onClick={() => navigate('/ai-assistant')}
+      >
+        🤖 AI Assistant
       </button>
       <button 
         className={`topbar-btn${isActive('/statistiche') ? ' active' : ''}`} 

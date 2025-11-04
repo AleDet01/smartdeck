@@ -53,6 +53,7 @@ app.get('/health', (req, res) => {
 app.use('/auth', require('./routes/auth'));
 app.use('/flash', require('./routes/flash'));
 app.use('/statistics', require('./routes/statistics'));
+app.use('/ai-assistant', require('./routes/aiAssistant'));
 
 connectDB()
   .then(() => {
