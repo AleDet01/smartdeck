@@ -39,12 +39,28 @@ export default function LandingPage() {
   return (
     <div className="landing-container">
       <div className="landing-box">
-        <div className="brand" aria-hidden="true">
-          <div className="brand-title">SmartDeck</div>
-          <div className="brand-subtitle">Studia, crea e valuta con semplicità</div>
-        </div>
         <div className="form-section">
           <h2 className="section-title" style={{ userSelect: 'none' }}>{mode === 'login' ? 'Benvenuto' : 'Crea un account'}</h2>
+          <div className="mode-switch" role="tablist" aria-label="Scegli modalità">
+            <button
+              type="button"
+              role="tab"
+              aria-selected={mode === 'login'}
+              className={`mode-btn${mode === 'login' ? ' active' : ''}`}
+              onClick={() => { setMode('login'); setError(''); }}
+            >
+              Accedi
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={mode === 'register'}
+              className={`mode-btn${mode === 'register' ? ' active' : ''}`}
+              onClick={() => { setMode('register'); setError(''); }}
+            >
+              Registrati
+            </button>
+          </div>
           <form onSubmit={handleSubmit} className="auth-form">
             <div className="field">
               <input
@@ -87,9 +103,7 @@ export default function LandingPage() {
               {loading ? 'Attendere…' : (mode === 'login' ? 'Entra' : 'Registrati')}
             </button>
           </form>
-          <button className="link-btn" type="button" onClick={toggleMode}>
-            {mode === 'login' ? 'Non hai un account? Registrati' : 'Hai già un account? Accedi'}
-          </button>
+          {/* Link alternativo rimosso in favore del selettore a pill */}
         </div>
       </div>
     </div>
