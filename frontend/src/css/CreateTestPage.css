@@ -37,10 +37,10 @@
 	z-index: 1;
 	max-width: 680px;
 	margin: 0 auto;
-	padding: 0 var(--space-5) var(--space-6);
+	padding: 0 var(--space-4) var(--space-6);
 	display: flex;
 	flex-direction: column;
-	gap: var(--space-5);
+	gap: var(--space-4);
 }
 
 .ct-card {
@@ -49,8 +49,8 @@
 	-webkit-backdrop-filter: blur(20px);
 	border: 1px solid rgba(255, 255, 255, 0.6);
 	border-radius: var(--radius-lg);
-	box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
-	padding: var(--space-5);
+	box-shadow: 0 2px 14px rgba(0, 0, 0, 0.06);
+	padding: var(--space-4);
 	transition: all var(--transition-base);
 }
 
@@ -70,7 +70,7 @@
 .ct-header .ct-sub {
 	margin: 0 0 var(--space-4) 0;
 	color: var(--color-gray-600);
-	font-size: 0.875rem;
+	font-size: 0.85rem;
 	line-height: 1.5;
 }
 
@@ -81,19 +81,19 @@
 .create-test-page form {
 	display: flex;
 	flex-direction: column;
-	gap: var(--space-4);
+	gap: var(--space-3);
 }
 
 .ct-row {
 	display: grid;
 	grid-template-columns: 1fr auto;
-	gap: var(--space-3);
+	gap: var(--space-2);
 	align-items: center;
 }
 
 .ct-quick {
 	display: flex;
-	gap: var(--space-2);
+	gap: 8px;
 	overflow-x: auto;
 	padding-bottom: var(--space-2);
 	scroll-snap-type: x mandatory;
@@ -111,9 +111,9 @@
 	border: 1px solid var(--color-gray-300);
 	color: var(--color-gray-700);
 	border-radius: var(--radius-full);
-	padding: var(--space-2) var(--space-4);
+	padding: 6px 12px;
 	font-weight: 500;
-	font-size: 0.875rem;
+	font-size: 0.85rem;
 	cursor: pointer;
 	transition: all var(--transition-fast);
 	letter-spacing: -0.01em;
@@ -184,7 +184,7 @@
 }
 
 .create-test-page .question-item {
-	padding: var(--space-4);
+	padding: var(--space-3);
 	border: 1px solid rgba(0, 0, 0, 0.08);
 	border-radius: var(--radius-md);
 	background: rgba(249, 250, 251, 0.6);
@@ -199,14 +199,14 @@
 }
 
 .create-test-page .question-item input.modern-input {
-	margin-bottom: var(--space-3);
+	margin-bottom: var(--space-2);
 }
 
 .create-test-page .answer-row {
 	display: flex;
 	align-items: center;
-	margin-bottom: var(--space-2);
-	gap: var(--space-3);
+	margin-bottom: 10px;
+	gap: var(--space-2);
 }
 
 .create-test-page .answer-row input.modern-input {
@@ -226,7 +226,7 @@
 	background: var(--color-blue);
 	color: var(--color-white);
 	border-radius: var(--radius-full);
-	padding: var(--space-2) var(--space-4);
+	padding: 6px 10px;
 	box-shadow: var(--shadow-sm);
 	transition: all var(--transition-fast);
 }
@@ -247,7 +247,7 @@
 }
 
 .create-test-page .modern-btn {
-	margin-top: var(--space-5);
+	margin-top: var(--space-4);
 	align-self: flex-end;
 }
 

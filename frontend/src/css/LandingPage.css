@@ -13,14 +13,30 @@
   overflow: hidden;
 }
 
-/* Sfondo minimalista con texture sottile */
+/* Sfondo minimalista con orbs animati (complesso ma visivamente sobrio) */
 .landing-container::before {
   content: '';
   position: absolute;
-  inset: 0;
-  background: 
-    radial-gradient(circle at 20% 80%, rgba(0, 122, 255, 0.03) 0%, transparent 50%),
-    radial-gradient(circle at 80% 20%, rgba(52, 199, 89, 0.02) 0%, transparent 50%);
+  width: 700px;
+  height: 700px;
+  top: -200px;
+  right: -200px;
+  background: radial-gradient(circle, rgba(0, 122, 255, 0.085) 0%, transparent 60%);
+  filter: blur(4px);
+  animation: orbFloat 26s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.landing-container::after {
+  content: '';
+  position: absolute;
+  width: 520px;
+  height: 520px;
+  bottom: -180px;
+  left: -160px;
+  background: radial-gradient(circle, rgba(52, 199, 89, 0.07) 0%, transparent 60%);
+  filter: blur(6px);
+  animation: orbFloatAlt 30s ease-in-out infinite reverse;
   pointer-events: none;
 }
 
@@ -31,28 +47,51 @@
   box-shadow: var(--shadow-xl);
   border: 1px solid var(--glass-border);
   display: flex;
-  flex-direction: row;
-  gap: var(--space-6);
-  padding: var(--space-6);
-  min-width: 340px;
-  max-width: 900px;
-  width: 90%;
+  flex-direction: column;
+  gap: var(--space-5);
+  padding: var(--space-5);
+  min-width: 320px;
+  max-width: 420px;
+  width: min(92%, 420px);
   position: relative;
   z-index: 1;
+  animation: riseIn 520ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  will-change: transform, opacity;
+}
+
+/* Subtle animated gradient border ring */
+.landing-box::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  background: conic-gradient(from 0deg, rgba(0,122,255,0.18), rgba(90,200,250,0.12), rgba(52,199,89,0.14), rgba(0,122,255,0.18));
+  -webkit-mask: 
+    linear-gradient(#000 0 0) content-box, 
+    linear-gradient(#000 0 0);
+  mask: 
+    linear-gradient(#000 0 0) content-box, 
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+          mask-composite: exclude;
+  padding: 1px;
+  pointer-events: none;
+  opacity: 0.55;
+  animation: ringRotate 22s linear infinite;
 }
 
 /* Brand header */
 .brand {
   position: absolute;
-  top: -48px;
+  top: -40px;
   left: 50%;
   transform: translateX(-50%);
-  background: rgba(255,255,255,0.75);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
+  background: rgba(255,255,255,0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   border: 1px solid rgba(255,255,255,0.5);
-  border-radius: 12px;
-  padding: 10px 16px;
+  border-radius: 10px;
+  padding: 8px 14px;
   box-shadow: 0 10px 30px rgba(0,0,0,0.06);
   text-align: center;
 }
@@ -75,7 +114,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: var(--space-6);
+  padding: var(--space-5);
   border-radius: var(--radius-lg);
   background: var(--color-white);
   border: 1px solid var(--color-gray-200);
@@ -91,7 +130,7 @@
 .section-title {
   margin-bottom: var(--space-4);
   color: var(--color-gray-800);
-  font-size: 1.75rem;
+  font-size: 1.375rem;
   font-weight: 600;
   letter-spacing: -0.02em;
   text-align: center;
@@ -111,9 +150,36 @@ form {
   gap: var(--space-4);
 }
 
+/* Floating field */
+.field {
+  position: relative;
+}
+
+.floating-label {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--color-gray-500);
+  font-size: 0.95rem;
+  transition: all var(--transition-fast);
+  pointer-events: none;
+}
+
+.field .modern-input {
+  width: 100%;
+}
+
+.field .modern-input:focus + .floating-label,
+.field .modern-input:not(:placeholder-shown) + .floating-label {
+  top: 6px;
+  font-size: 0.75rem;
+  color: var(--color-gray-600);
+}
+
 /* Input - Apple Style */
 .modern-input {
-  padding: var(--space-4) var(--space-4);
+  padding: var(--space-3) var(--space-4);
   border: 1px solid var(--color-gray-300);
   border-radius: var(--radius-md);
   font-size: 1rem;
@@ -136,6 +202,26 @@ form {
   border-color: var(--color-blue);
   box-shadow: 0 0 0 4px rgba(0, 122, 255, 0.08);
   background: var(--color-white);
+}
+
+/* Password toggle */
+.pass-toggle {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(0,0,0,0.04);
+  border: 1px solid rgba(0,0,0,0.06);
+  color: var(--color-gray-700);
+  padding: 6px 10px;
+  border-radius: 10px;
+  font-size: 0.813rem;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.pass-toggle:hover {
+  background: rgba(0,0,0,0.06);
 }
 
 /* Button - Apple CTA */
@@ -234,7 +320,7 @@ form {
   .landing-box {
     flex-direction: column;
     gap: var(--space-5);
-    padding: var(--space-6) var(--space-5);
+    padding: var(--space-5);
   }
   .brand { top: -44px; }
   
@@ -252,10 +338,44 @@ form {
 @media (max-width: 500px) {
   .landing-box {
     padding: var(--space-5) var(--space-4);
-    width: 95%;
+    width: 92%;
   }
   .brand { top: -40px; padding: 8px 12px; }
   
+
+/* Animations */
+@keyframes riseIn {
+  0% { opacity: 0; transform: translateY(8px) scale(0.995); }
+  60% { opacity: 1; transform: translateY(-1px) scale(1.0); }
+  100% { opacity: 1; transform: translateY(0) scale(1.0); }
+}
+
+@keyframes ringRotate {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes orbFloat {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  25% { transform: translate(18px, -14px) scale(1.04); }
+  50% { transform: translate(-12px, 10px) scale(0.98); }
+  75% { transform: translate(10px, 16px) scale(1.02); }
+}
+
+@keyframes orbFloatAlt {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  25% { transform: translate(-16px, 12px) scale(1.03); }
+  50% { transform: translate(12px, -10px) scale(0.99); }
+  75% { transform: translate(-8px, -12px) scale(1.01); }
+}
+
+/* Reduced motion: tone down animations */
+@media (prefers-reduced-motion: reduce) {
+  .landing-box { animation: none; }
+  .landing-box::before { animation: none; }
+  .landing-container::before,
+  .landing-container::after { animation: none; }
+}
   .form-section, .register-wrapper {
     padding: var(--space-5);
   }

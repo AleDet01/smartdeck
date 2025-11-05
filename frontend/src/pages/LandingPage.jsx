@@ -6,6 +6,7 @@ export default function LandingPage() {
   const [mode, setMode] = useState('login');
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -43,27 +44,45 @@ export default function LandingPage() {
           <div className="brand-subtitle">Studia, crea e valuta con semplicità</div>
         </div>
         <div className="form-section">
-          <h2 className="section-title" style={{ userSelect: 'none' }}>Benvenuto</h2>
+          <h2 className="section-title" style={{ userSelect: 'none' }}>{mode === 'login' ? 'Benvenuto' : 'Crea un account'}</h2>
           <form onSubmit={handleSubmit} className="auth-form">
-            <input
-              className="modern-input"
-              type="text"
-              placeholder="Username"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              autoComplete="username"
-              required
-            />
-            <input
-              className="modern-input"
-              type="password"
-              placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
-              required
-            />
-            {error ? <div className="error">{error}</div> : null}
+            <div className="field">
+              <input
+                id="username"
+                className="modern-input"
+                type="text"
+                placeholder=" "
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                autoComplete="username"
+                required
+              />
+              <label htmlFor="username" className="floating-label">Username</label>
+            </div>
+
+            <div className="field">
+              <input
+                id="password"
+                className="modern-input"
+                type={showPassword ? 'text' : 'password'}
+                placeholder=" "
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
+                required
+              />
+              <label htmlFor="password" className="floating-label">Password</label>
+              <button
+                type="button"
+                className="pass-toggle"
+                aria-label={showPassword ? 'Nascondi password' : 'Mostra password'}
+                onClick={() => setShowPassword(v => !v)}
+              >
+                {showPassword ? 'Nascondi' : 'Mostra'}
+              </button>
+            </div>
+
+            {error ? <div className="error" role="alert" aria-live="polite">{error}</div> : null}
             <button className="modern-btn" type="submit" disabled={loading}>
               {loading ? 'Attendere…' : (mode === 'login' ? 'Entra' : 'Registrati')}
             </button>
