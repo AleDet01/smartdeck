@@ -37,48 +37,6 @@
   z-index: 0;
 }
 
-.dashboard-topbar {
-  position: fixed;
-  top: var(--space-4);
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 100;
-  display: flex;
-  gap: var(--space-1);
-  background: rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06);
-  border-radius: var(--radius-full);
-  padding: var(--space-1);
-  border: 1px solid rgba(255, 255, 255, 0.6);
-}
-
-.topbar-btn {
-  background: transparent;
-  border: none;
-  color: var(--color-gray-600);
-  font-size: 0.875rem;
-  font-weight: 500;
-  padding: var(--space-2) var(--space-4);
-  border-radius: var(--radius-full);
-  cursor: pointer;
-  transition: all var(--transition-fast);
-  letter-spacing: -0.01em;
-  white-space: nowrap;
-}
-
-.topbar-btn:hover {
-  background: rgba(0, 0, 0, 0.04);
-  color: var(--color-gray-800);
-}
-
-.topbar-btn.active {
-  background: var(--color-white);
-  color: var(--color-gray-800);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  font-weight: 600;
-}
 
 .areas-grid {
   position: relative;
@@ -206,18 +164,6 @@
 }
 
 @media (max-width: 900px) {
-  .dashboard-topbar {
-    padding: var(--space-2);
-    gap: var(--space-1);
-    flex-wrap: wrap;
-    max-width: 90%;
-  }
-  
-  .topbar-btn {
-    font-size: 0.875rem;
-    padding: var(--space-2) var(--space-4);
-  }
-  
   .areas-grid {
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
     padding: 0 var(--space-4);
@@ -227,15 +173,6 @@
 @media (max-width: 600px) {
   .dashboard-page {
     padding-top: 120px;
-  }
-  
-  .dashboard-topbar {
-    top: var(--space-3);
-  }
-  
-  .topbar-btn {
-    font-size: 0.813rem;
-    padding: var(--space-2) var(--space-3);
   }
   
   .areas-grid {

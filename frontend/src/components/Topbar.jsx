@@ -1,5 +1,5 @@
 import { useNavigate, useLocation } from 'react-router-dom';
-import '../css/DashboardPage.css';
+import '../css/Topbar.css';
 
 export default function Topbar() {
   const navigate = useNavigate();

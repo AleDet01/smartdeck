@@ -32,13 +32,41 @@
   border: 1px solid var(--glass-border);
   display: flex;
   flex-direction: row;
-  gap: var(--space-7);
-  padding: var(--space-7);
+  gap: var(--space-6);
+  padding: var(--space-6);
   min-width: 340px;
   max-width: 900px;
   width: 90%;
   position: relative;
   z-index: 1;
+}
+
+/* Brand header */
+.brand {
+  position: absolute;
+  top: -48px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(255,255,255,0.75);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(255,255,255,0.5);
+  border-radius: 12px;
+  padding: 10px 16px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.06);
+  text-align: center;
+}
+
+.brand-title {
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--color-gray-800);
+}
+
+.brand-subtitle {
+  margin-top: 2px;
+  font-size: 0.813rem;
+  color: var(--color-gray-500);
 }
 
 /* Sezioni Form e Registrazione */
@@ -61,7 +89,7 @@
 }
 
 .section-title {
-  margin-bottom: var(--space-5);
+  margin-bottom: var(--space-4);
   color: var(--color-gray-800);
   font-size: 1.75rem;
   font-weight: 600;
@@ -116,12 +144,12 @@ form {
   color: var(--color-white);
   border: none;
   border-radius: var(--radius-md);
-  padding: var(--space-4) var(--space-5);
+  padding: var(--space-3) var(--space-5);
   font-size: 1.063rem;
   font-weight: 500;
   letter-spacing: -0.01em;
   cursor: pointer;
-  margin-top: var(--space-3);
+  margin-top: var(--space-2);
   box-shadow: var(--shadow-sm);
   transition: all var(--transition-base);
   position: relative;
@@ -205,9 +233,10 @@ form {
 @media (max-width: 800px) {
   .landing-box {
     flex-direction: column;
-    gap: var(--space-6);
+    gap: var(--space-5);
     padding: var(--space-6) var(--space-5);
   }
+  .brand { top: -44px; }
   
   .divider {
     width: 100%;
@@ -225,6 +254,7 @@ form {
     padding: var(--space-5) var(--space-4);
     width: 95%;
   }
+  .brand { top: -40px; padding: 8px 12px; }
   
   .form-section, .register-wrapper {
     padding: var(--space-5);

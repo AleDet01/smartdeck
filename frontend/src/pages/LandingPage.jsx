@@ -38,6 +38,10 @@ export default function LandingPage() {
   return (
     <div className="landing-container">
       <div className="landing-box">
+        <div className="brand" aria-hidden="true">
+          <div className="brand-title">SmartDeck</div>
+          <div className="brand-subtitle">Studia, crea e valuta con semplicità</div>
+        </div>
         <div className="form-section">
           <h2 className="section-title" style={{ userSelect: 'none' }}>Benvenuto</h2>
           <form onSubmit={handleSubmit} className="auth-form">
