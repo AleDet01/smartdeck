@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
 import DashboardPage from './pages/DashboardPage';
 import LandingPage from './pages/LandingPage';
-import CreateTestPage from './pages/CreateTestPage';
 import PreTestPage from './pages/PreTestPage';
 import TestPage from './pages/TestPage';
 import StatisticsPage from './pages/StatisticsPage';
@@ -38,7 +37,6 @@ export default function App() {
         <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<Navigate to="/" />} />
         <Route path="/dashboard" element={<RequireAuth><DashboardPage /></RequireAuth>} />
-        <Route path="/crea-test" element={<RequireAuth><CreateTestPage /></RequireAuth>} />
         <Route path="/statistiche" element={<RequireAuth><StatisticsPage /></RequireAuth>} />
         <Route path="/ai-assistant" element={<RequireAuth><AIAssistantPage /></RequireAuth>} />
         <Route path="/pretest/:area" element={<RequireAuth><PreTestPage /></RequireAuth>} />

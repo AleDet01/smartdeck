@@ -28,12 +28,12 @@ const AIAssistantPage = () => {
 	}, [messages]);
 
 	const quickPrompts = [
-		'Test di storia sulla seconda guerra mondiale',
-		'Quiz di matematica sulle equazioni',
-		'Test di geografia sull\'Europa',
-		'Quiz di biologia sul corpo umano',
-		'Test di letteratura italiana',
-		'Quiz di fisica sulla meccanica'
+		'Crea un test di storia sulla seconda guerra mondiale (10 domande)',
+		'Genera un quiz di matematica sulle equazioni di secondo grado (8 domande)',
+		'Genera test di geografia sull\'Europa (12 domande, livello medio)',
+		'Crea un quiz di biologia sul corpo umano (7 domande, livello facile)',
+		'Crea test di letteratura italiana sul Decadentismo (10 domande)',
+		'Genera quiz di fisica sulla meccanica classica (9 domande, livello avanzato)'
 	];
 
 	const handleSendMessage = async (text = inputMessage) => {
@@ -68,7 +68,7 @@ const AIAssistantPage = () => {
 				if (data.success) {
 					const assistantMessage = {
 						role: 'assistant',
-						content: `Perfetto! Ho generato il test "${data.testData.thematicArea}" con ${data.createdCount} domande.\n\nPuoi trovarlo nella tua Dashboard. Vuoi fare subito il test o creare altro?`,
+						content: `Perfetto! Ho generato il test "${data.testData.thematicArea}" con ${data.createdCount} domande.\n\nPuoi trovarlo nella tua Dashboard. Vuoi fare subito il test o generarne un altro?`,
 						timestamp: new Date(),
 						testGenerated: true,
 						testArea: data.testData.thematicArea
@@ -78,7 +78,7 @@ const AIAssistantPage = () => {
 					// Fallback: mostra comunque un messaggio di conferma
 					const assistantMessage = {
 						role: 'assistant',
-						content: `Ho capito! Vuoi creare un test su: "${text}"\n\nPer ora l'AI non è configurata, ma puoi creare il test manualmente andando su "Crea un nuovo test". Ti aiuto a formulare le domande!\n\nQuanti domande vuoi? Che livello di difficoltà?`,
+						content: `Ho capito! Vuoi creare un test su: "${text}".\n\nPosso generarlo per te in automatico. Quante domande desideri e che livello di difficoltà?`,
 						timestamp: new Date()
 					};
 					setMessages(prev => [...prev, assistantMessage]);
@@ -104,7 +104,7 @@ const AIAssistantPage = () => {
 			console.error('Errore comunicazione AI:', err);
 			const errorMessage = {
 				role: 'assistant',
-				content: 'Ops! C\'è stato un errore. Per favore riprova o vai su "Crea un nuovo test" per creare manualmente.',
+				content: 'Ops! C\'è stato un errore. Per favore riprova oppure specifica materia, argomento e numero di domande e lo genererò per te.',
 				timestamp: new Date()
 			};
 			setMessages(prev => [...prev, errorMessage]);
@@ -175,7 +175,7 @@ const AIAssistantPage = () => {
 
 					{showQuickActions && messages.length === 1 && (
 						<div className="quick-actions">
-							<div className="quick-title">Prova questi esempi:</div>
+							<div className="quick-title">Esempi di generazione automatica:</div>
 							<div className="quick-buttons">
 								{quickPrompts.map((prompt, idx) => (
 									<button 
