@@ -6,13 +6,7 @@ import '../css/AIAssistantPage.css';
 import API_HOST from '../utils/apiHost';
 
 const AIAssistantPage = () => {
-	const [messages, setMessages] = useState([
-		{
-			role: 'assistant',
-			content: 'Ciao! Sono il tuo assistente AI per creare test. Dimmi che tipo di test vuoi creare e io lo genererò per te.\n\nEsempio: "Crea un test di 5 domande sulla storia romana" oppure "Voglio un quiz sulla matematica, argomento frazioni"',
-			timestamp: new Date()
-		}
-	]);
+	const [messages, setMessages] = useState([]);
 	const [inputMessage, setInputMessage] = useState('');
 	const [isLoading, setIsLoading] = useState(false);
 	const [showQuickActions, setShowQuickActions] = useState(true);
@@ -130,11 +124,6 @@ const AIAssistantPage = () => {
 			<PageBackground />
 			<Topbar />
 			<div className="ai-container">
-				<div className="ai-header">
-					<h1>AI Assistant</h1>
-					<p className="ai-subtitle">Crea test semplicemente descrivendo cosa vuoi</p>
-				</div>
-
 				<div className="chat-container">
 					<div className="messages-area">
 						{messages.map((msg, idx) => (
@@ -173,7 +162,7 @@ const AIAssistantPage = () => {
 						<div ref={messagesEndRef} />
 					</div>
 
-					{showQuickActions && messages.length === 1 && (
+					{showQuickActions && messages.length === 0 && (
 						<div className="quick-actions">
 							<div className="quick-title">Esempi di generazione automatica:</div>
 							<div className="quick-buttons">
