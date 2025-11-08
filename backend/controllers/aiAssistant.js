@@ -1,6 +1,18 @@
 const Flashcard = require('../models/singleFlash');
+const OpenAI = require('openai');
 
-// Funzione per generare test con AI usando API compatibile OpenAI
+// Inizializza il client OpenAI
+let openaiClient = null;
+const initOpenAI = () => {
+	if (!openaiClient && process.env.OPENAI_API_KEY) {
+		openaiClient = new OpenAI({
+			apiKey: process.env.OPENAI_API_KEY
+		});
+	}
+	return openaiClient;
+};
+
+// Funzione per generare test con AI da qualsiasi input libero
 const generateTestWithAI = async (req, res) => {
 	try {
 		const userId = req.user?.id;
@@ -13,10 +25,46 @@ const generateTestWithAI = async (req, res) => {
 			return res.status(400).json({ error: 'Prompt richiesto' });
 		}
 
-		// Costruisci il prompt per l'AI
-		const systemPrompt = `Sei un assistente che genera quiz educativi in formato JSON. 
-Genera ESATTAMENTE 5 domande a scelta multipla con 3 risposte ciascuna (una corretta e due sbagliate).
-Rispondi SOLO con un oggetto JSON valido in questo formato:
+		const client = initOpenAI();
+		if (!client) {
+			return res.status(500).json({ 
+				error: 'API Key OpenAI non configurata. Aggiungi OPENAI_API_KEY nelle variabili d\'ambiente.',
+				fallback: true 
+			});
+		}
+
+		// Prompt migliorato: interpreta qualsiasi richiesta e genera flashcard
+		const systemPrompt = `Sei un assistente educativo esperto che genera quiz da qualsiasi input.
+
+ISTRUZIONI:
+1. Analizza attentamente la richiesta dell'utente (può essere generica, specifica, un argomento, una domanda, un testo da studiare, ecc.)
+2. Estrai l'argomento principale e genera domande pertinenti
+3. Se l'utente non specifica il numero di domande, genera 5-8 domande
+4. Se l'utente specifica un numero, rispettalo (max 20)
+5. Genera domande a scelta multipla con ESATTAMENTE 3 risposte per domanda (1 corretta, 2 sbagliate)
+
+FORMATO OUTPUT - Rispondi SOLO con JSON puro (no markdown, no commenti):
+{
+  "thematicArea": "nome breve e descrittivo dell'argomento (es: Storia Romana, Equazioni, Verbi Inglesi)",
+  "questions": [
+    {
+      "question": "testo della domanda chiaro e preciso",
+      "answers": [
+        {"text": "risposta corretta", "isCorrect": true},
+        {"text": "risposta sbagliata plausibile", "isCorrect": false},
+        {"text": "altra risposta sbagliata plausibile", "isCorrect": false}
+      ],
+      "difficulty": "facile"|"media"|"difficile"
+    }
+  ]
+}
+
+REGOLE IMPORTANTI:
+- Una sola risposta corretta per domanda
+- Esattamente 3 risposte per domanda
+- Risposte sbagliate plausibili (non ovvie)
+- Domande varie e progressive in difficoltà
+- ThematicArea conciso (max 50 caratteri)
 {
   "thematicArea": "nome dell'area tematica",
   "questions": [
@@ -38,58 +86,40 @@ Importante:
 - Difficulty può essere: "facile", "media", "difficile"
 - Non aggiungere markdown, commenti o testo extra, solo JSON puro`;
 
-		// Usa OpenAI API
-		const OPENAI_API_KEY = process.env.OPENAI_API_KEY || '';
+		// Chiama OpenAI con il nuovo SDK
+		console.log(`🤖 Generazione flashcard per prompt: "${prompt.substring(0, 100)}..."`);
 		
-		if (!OPENAI_API_KEY) {
-			return res.status(500).json({ 
-				error: 'API Key non configurata. Aggiungi OPENAI_API_KEY nelle variabili d\'ambiente.',
-				fallback: true 
-			});
-		}
-
-		const response = await fetch('https://api.openai.com/v1/chat/completions', {
-			method: 'POST',
-			headers: {
-				'Authorization': `Bearer ${OPENAI_API_KEY}`,
-				'Content-Type': 'application/json'
-			},
-			body: JSON.stringify({
-				model: 'gpt-3.5-turbo',
-				messages: [
-					{ role: 'system', content: systemPrompt },
-					{ role: 'user', content: prompt }
-				],
-				temperature: 0.7,
-				max_tokens: 2000
-			})
+		const completion = await client.chat.completions.create({
+			model: 'gpt-3.5-turbo',
+			messages: [
+				{ role: 'system', content: systemPrompt },
+				{ role: 'user', content: prompt }
+			],
+			temperature: 0.7,
+			max_tokens: 2500,
+			response_format: { type: "json_object" }
 		});
 
-		if (!response.ok) {
-			const errorData = await response.json().catch(() => ({}));
-			console.error('Errore API OpenAI:', response.status, response.statusText, errorData);
-			return res.status(500).json({ 
-				error: 'Errore nella generazione del test con AI',
-				details: errorData.error?.message || 'Errore sconosciuto'
-			});
-		}
-
-		const aiResponse = await response.json();
-		console.log('Risposta OpenAI:', aiResponse);
-
-		let generatedText = aiResponse.choices?.[0]?.message?.content || '';
+		let generatedText = completion.choices?.[0]?.message?.content || '';
 		
 		if (!generatedText) {
 			throw new Error('Risposta vuota dall\'AI');
 		}
 
-		// Estrai JSON dalla risposta
-		const jsonMatch = generatedText.match(/\{[\s\S]*\}/);
-		if (!jsonMatch) {
-			throw new Error('Impossibile estrarre JSON dalla risposta AI');
+		console.log('✓ Risposta AI ricevuta, parsing JSON...');
+		
+		// Estrai e valida JSON
+		let testData;
+		try {
+			testData = JSON.parse(generatedText);
+		} catch (parseError) {
+			// Fallback: cerca JSON nel testo
+			const jsonMatch = generatedText.match(/\{[\s\S]*\}/);
+			if (!jsonMatch) {
+				throw new Error('Impossibile estrarre JSON dalla risposta AI');
+			}
+			testData = JSON.parse(jsonMatch[0]);
 		}
-
-		const testData = JSON.parse(jsonMatch[0]);
 
 		// Valida il formato
 		if (!testData.thematicArea || !Array.isArray(testData.questions)) {
@@ -133,47 +163,35 @@ const chatWithAI = async (req, res) => {
 			return res.status(400).json({ error: 'Messaggio richiesto' });
 		}
 
-		const OPENAI_API_KEY = process.env.OPENAI_API_KEY || '';
-		
-		if (!OPENAI_API_KEY) {
+		const client = initOpenAI();
+		if (!client) {
 			return res.json({
 				reply: 'Ciao! Sono il tuo assistente AI. Per usarmi, l\'amministratore deve configurare una API key (OPENAI_API_KEY). Nel frattempo, descrivi il test che vuoi creare e ti aiuterò con suggerimenti!'
 			});
 		}
 
-		const response = await fetch('https://api.openai.com/v1/chat/completions', {
-			method: 'POST',
-			headers: {
-				'Authorization': `Bearer ${OPENAI_API_KEY}`,
-				'Content-Type': 'application/json'
-			},
-			body: JSON.stringify({
-				model: 'gpt-3.5-turbo',
-				messages: [
-					{ 
-						role: 'system', 
-						content: 'Sei un assistente educativo che aiuta a creare quiz e test. Rispondi in modo amichevole e conciso in italiano.' 
-					},
-					{ role: 'user', content: message }
-				],
-				temperature: 0.8,
-				max_tokens: 500
-			})
+		console.log(`💬 Chat AI: "${message.substring(0, 80)}..."`);
+
+		const completion = await client.chat.completions.create({
+			model: 'gpt-3.5-turbo',
+			messages: [
+				{ 
+					role: 'system', 
+					content: 'Sei un assistente educativo che aiuta a studiare e creare flashcard. Rispondi in modo amichevole, conciso e incoraggiante in italiano.' 
+				},
+				{ role: 'user', content: message }
+			],
+			temperature: 0.8,
+			max_tokens: 500
 		});
 
-		if (!response.ok) {
-			const errorData = await response.json().catch(() => ({}));
-			console.error('Errore API OpenAI:', errorData);
-			throw new Error('Errore API OpenAI');
-		}
+		const reply = completion.choices?.[0]?.message?.content || '';
 
-		const aiResponse = await response.json();
-		const reply = aiResponse.choices?.[0]?.message?.content || '';
-
+		console.log('✓ Chat risposta inviata');
 		res.json({ reply: reply.trim() || 'Mi dispiace, non sono riuscito a generare una risposta.' });
 
 	} catch (err) {
-		console.error('Errore chatWithAI:', err);
+		console.error('❌ Errore chatWithAI:', err.message);
 		res.status(500).json({ error: 'Errore nella chat con AI', details: err.message });
 	}
 };
