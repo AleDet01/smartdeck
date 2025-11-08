@@ -1,8 +1,10 @@
 import React, { useState, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import API_HOST from '../utils/apiHost';
 import '../css/LandingPage.css';
 
 export default function LandingPage() {
+  const navigate = useNavigate();
   const [mode, setMode] = useState('login');
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -28,13 +30,16 @@ export default function LandingPage() {
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data?.error || 'Errore di autenticazione');
-      window.location.href = '/#/dashboard';
+      
+      console.log('✓ Login effettuato, reindirizzamento...');
+      navigate('/dashboard');
     } catch (err) {
+      console.error('❌ Errore login:', err);
       setError(err.message || 'Errore');
     } finally {
       setLoading(false);
     }
-  }, [mode, username, password]);
+  }, [mode, username, password, navigate]);
 
   return (
     <div className="landing-container">
