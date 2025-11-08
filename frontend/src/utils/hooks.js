@@ -22,6 +22,13 @@ export const useFetch = (url, options = {}) => {
           credentials: options.credentials || 'include'
         });
         
+        // Se sessione scaduta (401), reindirizza al login
+        if (res.status === 401) {
+          console.log('🔒 Sessione scaduta, reindirizzamento al login...');
+          window.location.href = '/#/';
+          return;
+        }
+        
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const json = await res.json();
         setData(json);

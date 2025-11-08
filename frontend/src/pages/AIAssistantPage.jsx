@@ -22,12 +22,12 @@ const AIAssistantPage = () => {
 	}, [messages]);
 
 	const quickPrompts = [
-		'Crea un test di storia sulla seconda guerra mondiale (10 domande)',
-		'Genera un quiz di matematica sulle equazioni di secondo grado (8 domande)',
-		'Genera test di geografia sull\'Europa (12 domande, livello medio)',
-		'Crea un quiz di biologia sul corpo umano (7 domande, livello facile)',
-		'Crea test di letteratura italiana sul Decadentismo (10 domande)',
-		'Genera quiz di fisica sulla meccanica classica (9 domande, livello avanzato)'
+		'Storia: Seconda Guerra Mondiale',
+		'Matematica: Equazioni di secondo grado',
+		'Geografia: Capitali europee',
+		'Biologia: Corpo umano',
+		'Fisica: Meccanica classica',
+		'Letteratura: Decadentismo italiano'
 	];
 
 	const handleSendMessage = async (text = inputMessage) => {
@@ -44,8 +44,8 @@ const AIAssistantPage = () => {
 		setIsLoading(true);
 		setShowQuickActions(false);
 
-		// Determina se l'utente vuole generare un test
-		const isTestGeneration = /crea|genera|fai|voglio|prepara/i.test(text);
+		// SEMPRE prova a generare il test - l'AI è abbastanza smart da capire qualsiasi input
+		const isTestGeneration = true;
 
 		try {
 			if (isTestGeneration) {
@@ -57,22 +57,26 @@ const AIAssistantPage = () => {
 					body: JSON.stringify({ prompt: text })
 				});
 
+				if (res.status === 401) {
+					window.location.href = '/#/';
+					return;
+				}
+
 				const data = await res.json();
 
 				if (data.success) {
 					const assistantMessage = {
 						role: 'assistant',
-						content: `Perfetto! Ho generato il test "${data.testData.thematicArea}" con ${data.createdCount} domande.\n\nPuoi trovarlo nella tua Dashboard. Vuoi fare subito il test o generarne un altro?`,
+						content: `✅ Perfetto! Ho creato "${data.testData.thematicArea}" con ${data.createdCount} flashcard.\n\nLe trovi nella Dashboard. Vuoi iniziare subito il test?`,
 						timestamp: new Date(),
 						testGenerated: true,
 						testArea: data.testData.thematicArea
 					};
 					setMessages(prev => [...prev, assistantMessage]);
-				} else if (data.fallback) {
-					// Fallback: mostra comunque un messaggio di conferma
+				} else if (data.error) {
 					const assistantMessage = {
 						role: 'assistant',
-						content: `Ho capito! Vuoi creare un test su: "${text}".\n\nPosso generarlo per te in automatico. Quante domande desideri e che livello di difficoltà?`,
+						content: `⚠️ ${data.error}\n\nProva a riformulare la richiesta in modo più specifico. Ad esempio: "Storia romana, 8 domande livello medio"`,
 						timestamp: new Date()
 					};
 					setMessages(prev => [...prev, assistantMessage]);
@@ -86,6 +90,11 @@ const AIAssistantPage = () => {
 					body: JSON.stringify({ message: text })
 				});
 
+				if (res.status === 401) {
+					window.location.href = '/#/';
+					return;
+				}
+
 				const data = await res.json();
 				const assistantMessage = {
 					role: 'assistant',
@@ -95,10 +104,10 @@ const AIAssistantPage = () => {
 				setMessages(prev => [...prev, assistantMessage]);
 			}
 		} catch (err) {
-			console.error('Errore comunicazione AI:', err);
+			console.error('❌ Errore comunicazione AI:', err);
 			const errorMessage = {
 				role: 'assistant',
-				content: 'Ops! C\'è stato un errore. Per favore riprova oppure specifica materia, argomento e numero di domande e lo genererò per te.',
+				content: `❌ Errore di connessione. Verifica la tua connessione e riprova.\n\nSe il problema persiste, descrivi cosa vuoi studiare in modo dettagliato (es: "Crea 10 domande sulla Rivoluzione Francese, livello medio").`,
 				timestamp: new Date()
 			};
 			setMessages(prev => [...prev, errorMessage]);
@@ -164,7 +173,7 @@ const AIAssistantPage = () => {
 
 					{showQuickActions && messages.length === 0 && (
 						<div className="quick-actions">
-							<div className="quick-title">Esempi di generazione automatica:</div>
+							<div className="quick-title">💡 Prova questi argomenti:</div>
 							<div className="quick-buttons">
 								{quickPrompts.map((prompt, idx) => (
 									<button 
@@ -182,7 +191,7 @@ const AIAssistantPage = () => {
 					<div className="input-area">
 						<textarea
 							className="message-input"
-							placeholder="Descrivi il test che vuoi creare..."
+							placeholder="Scrivi qualsiasi argomento... (es: storia romana, equazioni, verbi inglesi)"
 							value={inputMessage}
 							onChange={(e) => setInputMessage(e.target.value)}
 							onKeyPress={handleKeyPress}
@@ -193,8 +202,9 @@ const AIAssistantPage = () => {
 							className="send-btn"
 							onClick={() => handleSendMessage()}
 							disabled={isLoading || !inputMessage.trim()}
+							title={isLoading ? 'Generazione in corso...' : 'Invia'}
 						>
-							{isLoading ? 'Invio…' : 'Invia'}
+							{isLoading ? '⏳' : '➤'}
 						</button>
 					</div>
 				</div>
