@@ -10,6 +10,7 @@ import { makeConceptImageUrl, makeGradientDataUrl } from '../utils/imageUtils';
 const DashboardPage = () => {
 	const navigate = useNavigate();
 	const { data, loading } = useFetch(`${API_HOST}/flash/areas/list`);
+	const [currentIndex, setCurrentIndex] = useState(0);
 
 	const areas = useMemo(() => {
 		if (!data) return null;
@@ -21,6 +22,14 @@ const DashboardPage = () => {
 	}, [data]);
 
 	useAdaptiveFontSize('.area-title', [areas]);
+
+	const handlePrev = () => {
+		setCurrentIndex(prev => Math.max(0, prev - 1));
+	};
+
+	const handleNext = () => {
+		setCurrentIndex(prev => Math.min((areas?.length || 0) - 1, prev + 1));
+	};
 
 	if (loading || areas === null) {
 		return (
@@ -38,46 +47,89 @@ const DashboardPage = () => {
 		<div className="dashboard-page">
 			<PageBackground />
 			<Topbar />
-			<div className="areas-grid">
-				{areas.length === 0 && <div>Nessuna area disponibile con flashcards.</div>}
-				{areas.map((area, idx) => (
-					<div key={area.name} className="area-box">
-						<img 
-							className="area-bg" 
-							src={area.img} 
-							alt={area.name} 
-							onError={(e) => { 
-								e.currentTarget.onerror = null; 
-								e.currentTarget.src = area.fallback; 
-							}} 
-						/>
-						<div className="area-title">{area.name}</div>
-						<div className="area-content">
-							<button 
-								className="area-play-btn-icon" 
-								onClick={() => navigate(`/pretest/${area.name}`)} 
-								aria-label={`Play ${area.name}`}
-							>
-								{(() => {
-									const gradId = `playGrad_${idx}`;
-									return (
-										<svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
-									<defs>
-											<linearGradient id={gradId} x1="0%" y1="0%" x2="100%" y2="0%">
-											<stop offset="0%" stopColor="#ffe066"/>
-											<stop offset="100%" stopColor="#ffd60a"/>
-										</linearGradient>
-									</defs>
-										<circle cx="14" cy="14" r="14" fill={`url(#${gradId})`}/>
-									<polygon points="11,9 20,14 11,19" fill="#23272f"/>
-									</svg>
-									);
-								})()}
-							</button>
-						</div>
+			
+			{areas && areas.length === 0 ? (
+				<div className="empty-state">Nessuna area disponibile con flashcards.</div>
+			) : (
+				<div className="carousel-container">
+					<button 
+						className="carousel-nav carousel-prev" 
+						onClick={handlePrev}
+						disabled={currentIndex === 0}
+						aria-label="Precedente"
+					>
+						<svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+							<path d="M15 18l-6-6 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+						</svg>
+					</button>
+
+					<div className="carousel-track">
+						{areas && areas.map((area, idx) => {
+							const offset = idx - currentIndex;
+							const isActive = offset === 0;
+							const isVisible = Math.abs(offset) <= 2;
+							
+							return (
+								<div 
+									key={area.name} 
+									className={`carousel-card ${isActive ? 'active' : ''}`}
+									style={{
+										transform: `translateX(${offset * 110}%) scale(${isActive ? 1 : 0.85})`,
+										opacity: isVisible ? (isActive ? 1 : 0.4) : 0,
+										pointerEvents: isActive ? 'auto' : 'none',
+										filter: isActive ? 'blur(0)' : 'blur(2px)',
+										zIndex: isActive ? 10 : 1
+									}}
+								>
+									<img 
+										className="card-bg" 
+										src={area.img} 
+										alt={area.name} 
+										onError={(e) => { 
+											e.currentTarget.onerror = null; 
+											e.currentTarget.src = area.fallback; 
+										}} 
+									/>
+									<div className="card-content">
+										<h3 className="area-title">{area.name}</h3>
+										<button 
+											className="play-btn" 
+											onClick={() => navigate(`/pretest/${area.name}`)} 
+											aria-label={`Inizia ${area.name}`}
+										>
+											<svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+												<path d="M6 4l10 6-10 6V4z" fill="currentColor"/>
+											</svg>
+										</button>
+									</div>
+								</div>
+							);
+						})}
 					</div>
-				))}
-			</div>
+
+					<button 
+						className="carousel-nav carousel-next" 
+						onClick={handleNext}
+						disabled={currentIndex === (areas?.length || 0) - 1}
+						aria-label="Successivo"
+					>
+						<svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+							<path d="M9 18l6-6-6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+						</svg>
+					</button>
+
+					<div className="carousel-indicators">
+						{areas && areas.map((_, idx) => (
+							<button
+								key={idx}
+								className={`indicator ${idx === currentIndex ? 'active' : ''}`}
+								onClick={() => setCurrentIndex(idx)}
+								aria-label={`Vai a ${idx + 1}`}
+							/>
+						))}
+					</div>
+				</div>
+			)}
 		</div>
 	);
 };
