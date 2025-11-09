@@ -38,6 +38,75 @@
   z-index: 0;
 }
 
+/* Quick Select Menu */
+.quick-select-menu {
+  position: absolute;
+  top: 120px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 90%;
+  max-width: 800px;
+  z-index: 5;
+}
+
+.quick-select-scroll {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding: 12px 20px;
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(10px);
+  border-radius: 20px;
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.06);
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 122, 255, 0.3) transparent;
+}
+
+.quick-select-scroll::-webkit-scrollbar {
+  height: 6px;
+}
+
+.quick-select-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.quick-select-scroll::-webkit-scrollbar-thumb {
+  background: rgba(0, 122, 255, 0.3);
+  border-radius: 3px;
+}
+
+.quick-select-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 122, 255, 0.5);
+}
+
+.quick-select-item {
+  flex-shrink: 0;
+  padding: 8px 18px;
+  border: none;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.6);
+  color: #333;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.quick-select-item:hover {
+  background: rgba(255, 255, 255, 0.9);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+.quick-select-item.active {
+  background: #007AFF;
+  color: white;
+  box-shadow: 0 3px 10px rgba(0, 122, 255, 0.3);
+  font-weight: 600;
+}
+
 /* Carousel Container */
 .carousel-container {
   position: relative;
@@ -240,6 +309,22 @@
 
 /* Responsive */
 @media (max-width: 900px) {
+  .quick-select-menu {
+    top: 110px;
+    width: 95%;
+    max-width: 600px;
+  }
+  
+  .quick-select-scroll {
+    padding: 10px 16px;
+    gap: 8px;
+  }
+  
+  .quick-select-item {
+    padding: 7px 15px;
+    font-size: 0.85rem;
+  }
+  
   .carousel-container {
     padding: 0 60px;
   }
@@ -278,6 +363,23 @@
 }
 
 @media (max-width: 600px) {
+  .quick-select-menu {
+    top: 100px;
+    width: 95%;
+  }
+  
+  .quick-select-scroll {
+    padding: 8px 12px;
+    gap: 6px;
+    border-radius: 16px;
+  }
+  
+  .quick-select-item {
+    padding: 6px 12px;
+    font-size: 0.8rem;
+    border-radius: 12px;
+  }
+  
   .carousel-container {
     padding: 0 50px;
   }

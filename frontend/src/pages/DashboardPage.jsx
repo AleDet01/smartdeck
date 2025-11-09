@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../css/DashboardPage.css';
 import Topbar from '../components/Topbar';
@@ -10,7 +10,6 @@ import { makeConceptImageUrl, makeGradientDataUrl } from '../utils/imageUtils';
 const DashboardPage = () => {
 	const navigate = useNavigate();
 	const { data, loading } = useFetch(`${API_HOST}/flash/areas/list`);
-	const [currentIndex, setCurrentIndex] = useState(0);
 
 	const areas = useMemo(() => {
 		if (!data) return null;
@@ -20,6 +19,16 @@ const DashboardPage = () => {
 			return { name: safeName, img: makeConceptImageUrl(safeName, idx), fallback: makeGradientDataUrl(idx) };
 		});
 	}, [data]);
+
+	// Inizia dalla card centrale
+	const [currentIndex, setCurrentIndex] = useState(0);
+
+	// Aggiorna quando le aree vengono caricate
+	useEffect(() => {
+		if (areas && areas.length > 0) {
+			setCurrentIndex(Math.floor(areas.length / 2));
+		}
+	}, [areas]);
 
 	useAdaptiveFontSize('.area-title', [areas]);
 
@@ -51,17 +60,34 @@ const DashboardPage = () => {
 			{areas && areas.length === 0 ? (
 				<div className="empty-state">Nessuna area disponibile con flashcards.</div>
 			) : (
-				<div className="carousel-container">
-					<button 
-						className="carousel-nav carousel-prev" 
-						onClick={handlePrev}
-						disabled={currentIndex === 0}
-						aria-label="Precedente"
-					>
-						<svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-							<path d="M15 18l-6-6 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-						</svg>
-					</button>
+				<>
+					{/* Menu selezione rapida */}
+					<div className="quick-select-menu">
+						<div className="quick-select-scroll">
+							{areas && areas.map((area, idx) => (
+								<button
+									key={idx}
+									className={`quick-select-item ${idx === currentIndex ? 'active' : ''}`}
+									onClick={() => setCurrentIndex(idx)}
+									title={area.name}
+								>
+									{area.name}
+								</button>
+							))}
+						</div>
+					</div>
+
+					<div className="carousel-container">
+						<button 
+							className="carousel-nav carousel-prev" 
+							onClick={handlePrev}
+							disabled={currentIndex === 0}
+							aria-label="Precedente"
+						>
+							<svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+								<path d="M15 18l-6-6 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+							</svg>
+						</button>
 
 					<div className="carousel-track">
 						{areas && areas.map((area, idx) => {
@@ -129,6 +155,7 @@ const DashboardPage = () => {
 						))}
 					</div>
 				</div>
+				</>
 			)}
 		</div>
 	);
