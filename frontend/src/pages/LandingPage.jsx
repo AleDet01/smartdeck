@@ -21,21 +21,39 @@ export default function LandingPage() {
     e.preventDefault();
     setError('');
     setLoading(true);
+    
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 secondi timeout
+    
     try {
+      console.log(`📡 Tentativo ${mode} su ${API_HOST}/auth/${mode}`);
+      
       const res = await fetch(`${API_HOST}/auth/${mode}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify({ username: username.trim(), password })
+        body: JSON.stringify({ username: username.trim(), password }),
+        signal: controller.signal
       });
+      
+      clearTimeout(timeoutId);
+      
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data?.error || 'Errore di autenticazione');
       
       console.log('✓ Login effettuato, reindirizzamento...');
       navigate('/dashboard');
     } catch (err) {
+      clearTimeout(timeoutId);
       console.error('❌ Errore login:', err);
-      setError(err.message || 'Errore');
+      
+      if (err.name === 'AbortError') {
+        setError('Timeout: il server non risponde. Verifica la connessione.');
+      } else if (err.message.includes('Failed to fetch')) {
+        setError('Impossibile contattare il server. Verifica che il backend sia attivo.');
+      } else {
+        setError(err.message || 'Errore di connessione');
+      }
     } finally {
       setLoading(false);
     }
