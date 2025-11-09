@@ -10,7 +10,9 @@ const AIAssistantPage = () => {
 	const [inputMessage, setInputMessage] = useState('');
 	const [isLoading, setIsLoading] = useState(false);
 	const [showQuickActions, setShowQuickActions] = useState(true);
+	const [attachedFiles, setAttachedFiles] = useState([]);
 	const messagesEndRef = useRef(null);
+	const fileInputRef = useRef(null);
 	const navigate = useNavigate();
 
 	const scrollToBottom = () => {
@@ -128,11 +130,36 @@ const AIAssistantPage = () => {
 		handleSendMessage(prompt);
 	};
 
+	const handleFileSelect = (e) => {
+		const files = Array.from(e.target.files);
+		const validFiles = files.filter(file => {
+			const validTypes = ['text/plain', 'application/pdf', 'image/png', 'image/jpeg'];
+			const maxSize = 10 * 1024 * 1024; // 10MB
+			return validTypes.includes(file.type) && file.size <= maxSize;
+		});
+		setAttachedFiles(prev => [...prev, ...validFiles]);
+	};
+
+	const removeFile = (index) => {
+		setAttachedFiles(prev => prev.filter((_, i) => i !== index));
+	};
+
+	const formatFileSize = (bytes) => {
+		if (bytes < 1024) return bytes + ' B';
+		if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+		return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+	};
+
 	return (
 		<div className="ai-assistant-page">
 			<PageBackground />
 			<Topbar />
 			<div className="ai-container">
+				<div className="chat-header">
+					<h1 className="chat-title">✨ AI Assistant</h1>
+					<p className="chat-subtitle">Genera flashcard intelligenti da qualsiasi argomento</p>
+				</div>
+
 				<div className="chat-container">
 					<div className="messages-area">
 						{messages.map((msg, idx) => (
@@ -173,7 +200,7 @@ const AIAssistantPage = () => {
 
 					{showQuickActions && messages.length === 0 && (
 						<div className="quick-actions">
-							<div className="quick-title">💡 Prova questi argomenti:</div>
+							<div className="quick-title">💡 Esempi rapidi</div>
 							<div className="quick-buttons">
 								{quickPrompts.map((prompt, idx) => (
 									<button 
@@ -188,48 +215,75 @@ const AIAssistantPage = () => {
 						</div>
 					)}
 
+					{/* File Attachments Preview */}
+					{attachedFiles.length > 0 && (
+						<div className="attached-files-preview">
+							{attachedFiles.map((file, idx) => (
+								<div key={idx} className="attached-file">
+									<div className="file-info">
+										<span className="file-icon">📄</span>
+										<div className="file-details">
+											<span className="file-name">{file.name}</span>
+											<span className="file-size">{formatFileSize(file.size)}</span>
+										</div>
+									</div>
+									<button 
+										className="remove-file-btn"
+										onClick={() => removeFile(idx)}
+										title="Rimuovi file"
+									>
+										✕
+									</button>
+								</div>
+							))}
+						</div>
+					)}
+
 					<div className="input-area">
+						<input
+							type="file"
+							ref={fileInputRef}
+							onChange={handleFileSelect}
+							multiple
+							accept=".txt,.pdf,.png,.jpg,.jpeg"
+							style={{ display: 'none' }}
+						/>
+						
+						<button 
+							className="attach-btn"
+							onClick={() => fileInputRef.current?.click()}
+							disabled={isLoading}
+							title="Allega file (PDF, TXT, Immagini)"
+						>
+							<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+								<path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"/>
+							</svg>
+						</button>
+
 						<textarea
 							className="message-input"
-							placeholder="Scrivi qualsiasi argomento... (es: storia romana, equazioni, verbi inglesi)"
+							placeholder="Descrivi l'argomento o carica un file... 💬"
 							value={inputMessage}
 							onChange={(e) => setInputMessage(e.target.value)}
 							onKeyPress={handleKeyPress}
-							rows={2}
+							rows={1}
 							disabled={isLoading}
 						/>
+
 						<button 
 							className="send-btn"
 							onClick={() => handleSendMessage()}
-							disabled={isLoading || !inputMessage.trim()}
+							disabled={isLoading || (!inputMessage.trim() && attachedFiles.length === 0)}
 							title={isLoading ? 'Generazione in corso...' : 'Invia'}
 						>
-							{isLoading ? '⏳' : '➤'}
+							{isLoading ? (
+								<div className="loading-spinner"></div>
+							) : (
+								<svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+									<path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+								</svg>
+							)}
 						</button>
-					</div>
-				</div>
-
-				<div className="ai-info">
-					<div className="info-card">
-						<div className="info-icon"></div>
-						<div className="info-text">
-							<strong>Come funziona?</strong>
-							<p>Descrivi il tipo di test che vuoi (materia, argomento, numero domande) e l'AI lo creerà per te automaticamente!</p>
-						</div>
-					</div>
-					<div className="info-card">
-						<div className="info-icon"></div>
-						<div className="info-text">
-							<strong>Veloce e preciso</strong>
-							<p>L'AI genera test in pochi secondi con domande pertinenti e risposte accurate.</p>
-						</div>
-					</div>
-					<div className="info-card">
-						<div className="info-icon"></div>
-						<div className="info-text">
-							<strong>Personalizzabile</strong>
-							<p>Specifica difficoltà, numero domande e argomenti specifici per test su misura.</p>
-						</div>
 					</div>
 				</div>
 			</div>
