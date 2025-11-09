@@ -1,15 +1,13 @@
 .ai-assistant-page {
 	width: 100%;
-	height: 100vh;
+	min-height: 100vh;
 	display: flex;
-	flex-direction: column;
+	align-items: center;
+	justify-content: center;
 	background: var(--color-gray-50);
-	position: fixed;
-	top: 0;
-	left: 0;
-	right: 0;
-	bottom: 0;
-	overflow: hidden;
+	position: relative;
+	padding: 100px 16px 40px;
+	box-sizing: border-box;
 }
 
 .ai-assistant-page::before {
@@ -48,16 +46,14 @@
 }
 
 .ai-container {
-	position: absolute;
-	top: 50%;
-	left: 50%;
-	transform: translate(-50%, -50%);
+	position: relative;
 	z-index: 1;
 	max-width: 800px;
-	width: calc(100% - 32px);
+	width: 100%;
 	display: flex;
 	flex-direction: column;
 	box-sizing: border-box;
+	margin: 0 auto;
 }
 
 .ai-header {
@@ -95,9 +91,10 @@
 	display: flex;
 	flex-direction: column;
 	width: 100%;
-	height: 600px;
+	height: 70vh;
+	max-height: 650px;
+	min-height: 500px;
 	overflow: hidden;
-	position: static;
 }
 
 /* Messages Area */
@@ -395,12 +392,13 @@
 
 /* Responsive */
 @media (max-width: 900px) {
-	.ai-container {
-		width: calc(100% - 24px);
+	.ai-assistant-page {
+		padding: 90px 12px 30px;
 	}
 
 	.chat-container {
-		height: 550px;
+		height: 65vh;
+		max-height: 600px;
 	}
 
 	.message-content {
@@ -409,12 +407,14 @@
 }
 
 @media (max-width: 600px) {
-	.ai-container {
-		width: calc(100% - 16px);
+	.ai-assistant-page {
+		padding: 85px 12px 24px;
 	}
 
 	.chat-container {
-		height: 500px;
+		height: 60vh;
+		max-height: 550px;
+		min-height: 450px;
 	}
 
 	.messages-area {

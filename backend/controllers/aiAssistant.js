@@ -145,10 +145,37 @@ GENERA SEMPRE contenuti di qualità, educativi e ben bilanciati.`;
 		});
 
 	} catch (err) {
-		console.error('Errore generateTestWithAI:', err);
+		console.error('❌ Errore generateTestWithAI:', err.message);
+		console.error('Dettagli errore:', JSON.stringify(err, null, 2));
+		
+		// Gestisci errori specifici di OpenAI
+		if (err.status === 401 || err.message?.includes('Incorrect API key')) {
+			return res.status(500).json({ 
+				error: 'Chiave API OpenAI non valida o scaduta. Contatta l\'amministratore.',
+				details: 'API Key Error',
+				fallback: true
+			});
+		}
+		
+		if (err.status === 429 || err.message?.includes('rate limit')) {
+			return res.status(500).json({ 
+				error: 'Troppe richieste. Riprova tra qualche secondo.',
+				details: 'Rate limit exceeded',
+				fallback: true
+			});
+		}
+
+		if (err.status === 402 || err.message?.includes('insufficient_quota')) {
+			return res.status(500).json({ 
+				error: 'Account OpenAI senza crediti. Contatta l\'amministratore.',
+				details: 'Insufficient quota',
+				fallback: true
+			});
+		}
+		
 		res.status(500).json({ 
 			error: 'Errore nella generazione del test', 
-			details: err.message,
+			details: err.message || 'Errore sconosciuto',
 			fallback: true
 		});
 	}
