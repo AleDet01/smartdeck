@@ -44,7 +44,7 @@ export default function LandingPage() {
   return (
     <div className="landing-container">
       <div className="form-section">
-          <h2 className="section-title" style={{ userSelect: 'none' }}>{mode === 'login' ? 'Benvenuto' : 'Crea un account'}</h2>
+          <h2 className="section-title" style={{ userSelect: 'none' }}>{mode === 'login' ? 'Benvenuto' : 'Registrati'}</h2>
           <div className="mode-switch" role="tablist" aria-label="Scegli modalità">
             <button
               type="button"
