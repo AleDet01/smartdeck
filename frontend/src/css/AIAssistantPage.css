@@ -56,7 +56,7 @@
 	flex-direction: column;
 	box-sizing: border-box;
 	margin: 0 auto;
-	padding: 110px 20px 20px;
+	padding: 90px 20px 20px;
 	gap: 16px;
 }
 
@@ -499,7 +499,7 @@
 /* Responsive */
 @media (max-width: 900px) {
 	.ai-container {
-		padding: 100px 16px 16px;
+		padding: 85px 16px 16px;
 	}
 
 	.chat-title {
@@ -513,7 +513,7 @@
 
 @media (max-width: 600px) {
 	.ai-container {
-		padding: 90px 12px 12px;
+		padding: 80px 12px 12px;
 		gap: 12px;
 	}
 
