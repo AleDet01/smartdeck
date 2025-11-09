@@ -155,11 +155,6 @@ const AIAssistantPage = () => {
 			<PageBackground />
 			<Topbar />
 			<div className="ai-container">
-				<div className="chat-header">
-					<h1 className="chat-title">✨ AI Assistant</h1>
-					<p className="chat-subtitle">Genera flashcard intelligenti da qualsiasi argomento</p>
-				</div>
-
 				<div className="chat-container">
 					<div className="messages-area">
 						{messages.map((msg, idx) => (
@@ -284,6 +279,10 @@ const AIAssistantPage = () => {
 								</svg>
 							)}
 						</button>
+					</div>
+
+					<div className="openai-disclaimer">
+						Powered by OpenAI ChatGPT. Le risposte sono generate da intelligenza artificiale.
 					</div>
 				</div>
 			</div>

@@ -1,9 +1,11 @@
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useTheme } from '../utils/themeContext';
 import '../css/Topbar.css';
 
 export default function Topbar() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { theme, toggleTheme } = useTheme();
   
   const isActive = (path) => location.pathname === path || location.pathname.startsWith(path);
   
@@ -26,6 +28,15 @@ export default function Topbar() {
         onClick={() => navigate('/statistiche')}
       >
         Statistiche
+      </button>
+      
+      <button 
+        className="theme-toggle-btn"
+        onClick={toggleTheme}
+        aria-label="Cambia tema"
+        title={theme === 'light' ? 'Passa al tema scuro' : 'Passa al tema chiaro'}
+      >
+        {theme === 'light' ? '🌙' : '☀️'}
       </button>
     </div>
   );

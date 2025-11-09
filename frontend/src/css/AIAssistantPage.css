@@ -4,11 +4,12 @@
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	background: var(--color-gray-50);
+	background: var(--bg-secondary);
 	position: relative;
 	padding: 0;
 	box-sizing: border-box;
 	overflow: hidden;
+	transition: background-color 0.3s ease;
 }
 
 .ai-assistant-page::before {
@@ -57,52 +58,25 @@
 	box-sizing: border-box;
 	margin: 0 auto;
 	padding: 90px 20px 20px;
-	gap: 16px;
-}
-
-/* Chat Header */
-.chat-header {
-	text-align: center;
-	flex-shrink: 0;
-	padding: 0 0 12px;
-}
-
-.chat-title {
-	font-size: 2rem;
-	color: var(--color-gray-800);
-	margin: 0 0 6px 0;
-	font-weight: 700;
-	letter-spacing: -0.03em;
-	background: linear-gradient(135deg, #007AFF 0%, #5856D6 100%);
-	-webkit-background-clip: text;
-	-webkit-text-fill-color: transparent;
-	background-clip: text;
-}
-
-.chat-subtitle {
-	font-size: 0.95rem;
-	color: var(--color-gray-600);
-	margin: 0;
-	line-height: 1.4;
-	font-weight: 500;
 }
 
 /* Chat Container */
 .chat-container {
-	background: rgba(255, 255, 255, 0.98);
+	background: var(--glass-bg);
 	backdrop-filter: blur(20px);
 	-webkit-backdrop-filter: blur(20px);
-	border: 1px solid rgba(0, 0, 0, 0.06);
+	border: 1px solid var(--border-light);
 	border-radius: 24px;
 	box-shadow: 
-		0 8px 16px rgba(0, 0, 0, 0.04),
-		0 20px 40px rgba(0, 0, 0, 0.08);
+		0 8px 16px var(--shadow-color),
+		0 20px 40px var(--shadow-color);
 	display: flex;
 	flex-direction: column;
 	width: 100%;
 	flex: 1;
 	overflow: hidden;
 	min-height: 0;
+	transition: all 0.3s ease;
 }
 
 /* Messages Area */
@@ -191,15 +165,16 @@
 }
 
 .message-text {
-	background: #F2F2F7;
+	background: var(--bg-tertiary);
 	padding: 10px 16px;
 	border-radius: 18px;
-	color: var(--color-gray-800);
+	color: var(--text-primary);
 	line-height: 1.5;
 	white-space: pre-wrap;
 	word-wrap: break-word;
 	box-shadow: none;
 	font-size: 0.938rem;
+	transition: all 0.3s ease;
 }
 
 .message.user .message-text {
@@ -275,18 +250,20 @@
 /* Quick Actions */
 .quick-actions {
 	padding: 16px 20px;
-	border-top: 1px solid rgba(0, 0, 0, 0.04);
-	background: linear-gradient(to bottom, rgba(249, 250, 251, 0.5), rgba(249, 250, 251, 0.8));
+	border-top: 1px solid var(--border-light);
+	background: var(--bg-tertiary);
 	backdrop-filter: blur(10px);
 	flex-shrink: 0;
+	transition: all 0.3s ease;
 }
 
 .quick-title {
 	font-size: 0.813rem;
-	color: var(--color-gray-600);
+	color: var(--text-secondary);
 	font-weight: 600;
 	margin-bottom: 12px;
 	letter-spacing: 0.02em;
+	transition: color 0.3s ease;
 }
 
 .quick-buttons {
@@ -296,7 +273,7 @@
 }
 
 .quick-btn {
-	background: white;
+	background: var(--bg-primary);
 	border: 1.5px solid rgba(0, 122, 255, 0.15);
 	color: var(--color-blue);
 	padding: 8px 16px;
@@ -305,7 +282,7 @@
 	cursor: pointer;
 	transition: all 0.2s;
 	font-weight: 500;
-	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+	box-shadow: 0 1px 3px var(--shadow-color);
 }
 
 .quick-btn:hover {
@@ -388,10 +365,11 @@
 	align-items: center;
 	gap: 10px;
 	padding: 16px 20px;
-	border-top: 1px solid rgba(0, 0, 0, 0.06);
-	background: rgba(255, 255, 255, 0.98);
+	border-top: 1px solid var(--border-light);
+	background: var(--bg-primary);
 	backdrop-filter: blur(10px);
 	flex-shrink: 0;
+	transition: all 0.3s ease;
 }
 
 .attach-btn {
@@ -423,7 +401,7 @@
 .message-input {
 	flex: 1;
 	border: 2px solid transparent;
-	background: var(--color-gray-100);
+	background: var(--bg-tertiary);
 	border-radius: 22px;
 	padding: 11px 18px;
 	font-size: 0.938rem;
@@ -434,10 +412,11 @@
 	line-height: 1.5;
 	max-height: 100px;
 	min-height: 44px;
+	color: var(--text-primary);
 }
 
 .message-input:focus {
-	background: white;
+	background: var(--bg-primary);
 	border-color: var(--color-blue);
 	box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.08);
 }
@@ -448,7 +427,7 @@
 }
 
 .message-input::placeholder {
-	color: var(--color-gray-400);
+	color: var(--text-tertiary);
 }
 
 .send-btn {
@@ -496,14 +475,24 @@
 	to { transform: rotate(360deg); }
 }
 
+/* OpenAI Disclaimer */
+.openai-disclaimer {
+	padding: 12px 20px;
+	text-align: center;
+	font-size: 0.75rem;
+	color: var(--text-tertiary);
+	background: var(--bg-tertiary);
+	border-top: 1px solid var(--border-light);
+	line-height: 1.4;
+	font-weight: 400;
+	flex-shrink: 0;
+	transition: all 0.3s ease;
+}
+
 /* Responsive */
 @media (max-width: 900px) {
 	.ai-container {
 		padding: 85px 16px 16px;
-	}
-
-	.chat-title {
-		font-size: 1.75rem;
 	}
 
 	.message-content {
@@ -514,15 +503,6 @@
 @media (max-width: 600px) {
 	.ai-container {
 		padding: 80px 12px 12px;
-		gap: 12px;
-	}
-
-	.chat-title {
-		font-size: 1.5rem;
-	}
-
-	.chat-subtitle {
-		font-size: 0.875rem;
 	}
 
 	.messages-area {

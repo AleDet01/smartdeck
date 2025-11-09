@@ -4,10 +4,11 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background: var(--color-gray-50);
+  background: var(--bg-secondary);
   position: relative;
   overflow: hidden;
   padding: 0;
+  transition: background-color 0.3s ease;
 }
 
 .dashboard-page::before {
@@ -54,12 +55,13 @@
   gap: 10px;
   overflow-x: auto;
   padding: 12px 20px;
-  background: rgba(255, 255, 255, 0.7);
+  background: var(--glass-bg);
   backdrop-filter: blur(10px);
   border-radius: 20px;
-  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 2px 16px var(--shadow-color);
   scrollbar-width: thin;
   scrollbar-color: rgba(0, 122, 255, 0.3) transparent;
+  transition: all 0.3s ease;
 }
 
 .quick-select-scroll::-webkit-scrollbar {
@@ -84,20 +86,20 @@
   padding: 8px 18px;
   border: none;
   border-radius: 14px;
-  background: rgba(255, 255, 255, 0.6);
-  color: #333;
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
   font-size: 0.9rem;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
   white-space: nowrap;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 1px 3px var(--shadow-color);
 }
 
 .quick-select-item:hover {
-  background: rgba(255, 255, 255, 0.9);
+  background: var(--bg-primary);
   transform: translateY(-1px);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 2px 6px var(--shadow-color);
 }
 
 .quick-select-item.active {

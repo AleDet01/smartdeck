@@ -1,10 +1,12 @@
 import React, { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTheme } from '../utils/themeContext';
 import API_HOST from '../utils/apiHost';
 import '../css/LandingPage.css';
 
 export default function LandingPage() {
   const navigate = useNavigate();
+  const { theme, toggleTheme } = useTheme();
   const [mode, setMode] = useState('login');
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -61,6 +63,17 @@ export default function LandingPage() {
 
   return (
     <div className="landing-container">
+      <div className="marble-background"></div>
+      
+      <button 
+        className="landing-theme-toggle"
+        onClick={toggleTheme}
+        aria-label="Cambia tema"
+        title={theme === 'light' ? 'Passa al tema scuro' : 'Passa al tema chiaro'}
+      >
+        {theme === 'light' ? '🌙' : '☀️'}
+      </button>
+
       <div className="form-section">
           <h2 className="section-title" style={{ userSelect: 'none' }}>{mode === 'login' ? 'Benvenuto' : 'Registrati'}</h2>
           <div className="mode-switch" role="tablist" aria-label="Scegli modalità">
