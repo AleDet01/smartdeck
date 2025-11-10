@@ -78,18 +78,19 @@ const DashboardPage = () => {
 					</div>
 
 					<div className="carousel-container">
-						<button 
-							className="carousel-nav carousel-prev" 
-							onClick={handlePrev}
-							disabled={currentIndex === 0}
-							aria-label="Precedente"
-						>
-							<svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-								<path d="M15 18l-6-6 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-							</svg>
-						</button>
+						<div className="carousel-wrapper">
+							<button 
+								className="carousel-nav carousel-prev" 
+								onClick={handlePrev}
+								disabled={currentIndex === 0}
+								aria-label="Precedente"
+							>
+								<svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+									<path d="M15 18l-6-6 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+								</svg>
+							</button>
 
-					<div className="carousel-track">
+						<div className="carousel-track">
 						{areas && areas.map((area, idx) => {
 							const offset = idx - currentIndex;
 							const isActive = offset === 0;
@@ -131,18 +132,19 @@ const DashboardPage = () => {
 								</div>
 							);
 						})}
-					</div>
+						</div>
 
-					<button 
-						className="carousel-nav carousel-next" 
-						onClick={handleNext}
-						disabled={currentIndex === (areas?.length || 0) - 1}
-						aria-label="Successivo"
-					>
-						<svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-							<path d="M9 18l6-6-6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-						</svg>
-					</button>
+						<button 
+							className="carousel-nav carousel-next" 
+							onClick={handleNext}
+							disabled={currentIndex === (areas?.length || 0) - 1}
+							aria-label="Successivo"
+						>
+							<svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+								<path d="M9 18l6-6-6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+							</svg>
+						</button>
+					</div>
 
 					<div className="carousel-indicators">
 						{areas && areas.map((_, idx) => (
