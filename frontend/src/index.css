@@ -114,16 +114,22 @@ html {
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
   scroll-behavior: smooth;
+  overflow-x: hidden;
+  overflow-y: scroll;
+  height: 100%;
 }
 
 body {
   margin: 0;
+  padding: 0;
   font-family: var(--font-system);
   font-weight: 400;
   line-height: 1.5;
   color: var(--text-primary);
   background-color: var(--bg-primary);
   overflow-x: hidden;
+  overflow-y: visible;
+  height: 100%;
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
@@ -156,6 +162,12 @@ a {
 
 a:hover {
   opacity: 0.7;
+}
+
+/* Root Container */
+#root {
+  width: 100%;
+  min-height: 100%;
 }
 
 /* Buttons - Apple Style */
