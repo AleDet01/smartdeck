@@ -1,14 +1,15 @@
 .ai-assistant-page {
 	width: 100%;
 	min-height: 100vh;
+	background: var(--bg-secondary);
+	position: relative;
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	background: var(--bg-secondary);
-	position: relative;
-	padding: 80px 0 20px;
+	padding: 100px 20px 30px;
 	box-sizing: border-box;
 	transition: background-color 0.3s ease;
+	overflow: hidden;
 }
 
 .ai-assistant-page::before {
@@ -51,13 +52,11 @@
 	z-index: 1;
 	max-width: 900px;
 	width: 100%;
-	max-height: 85vh;
-	height: 700px;
+	height: calc(100vh - 160px);
+	max-height: 750px;
 	display: flex;
 	flex-direction: column;
 	box-sizing: border-box;
-	margin: 0 auto;
-	padding: 0 20px;
 }
 
 /* Chat Container */
@@ -492,14 +491,12 @@
 /* Responsive */
 @media (max-width: 900px) {
 	.ai-assistant-page {
-		padding: 70px 0 15px;
+		padding: 90px 16px 20px;
 	}
 
 	.ai-container {
-		margin: 0 auto;
-		padding: 0 16px;
-		max-height: 80vh;
-		height: 600px;
+		height: calc(100vh - 140px);
+		max-height: 650px;
 	}
 
 	.message-content {
@@ -509,14 +506,12 @@
 
 @media (max-width: 600px) {
 	.ai-assistant-page {
-		padding: 60px 0 10px;
+		padding: 80px 12px 15px;
 	}
 
 	.ai-container {
-		margin: 0 auto;
-		padding: 0 12px;
-		max-height: 75vh;
-		height: 500px;
+		height: calc(100vh - 120px);
+		max-height: 550px;
 	}
 
 	.messages-area {
