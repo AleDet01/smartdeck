@@ -148,7 +148,7 @@ const DashboardPage = () => {
 						{areas && areas.map((_, idx) => (
 							<button
 								key={idx}
-								className={`indicator ${idx === currentIndex ? 'active' : ''}`}
+								className={`indicator-dot ${idx === currentIndex ? 'active' : ''}`}
 								onClick={() => setCurrentIndex(idx)}
 								aria-label={`Vai a ${idx + 1}`}
 							/>
