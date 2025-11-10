@@ -3,7 +3,10 @@
 	min-height: 100vh;
 	background: var(--bg-secondary);
 	position: relative;
-	padding: 120px 20px 40px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 100px 20px 20px;
 	box-sizing: border-box;
 	transition: background-color 0.3s ease;
 	overflow: hidden;
@@ -49,12 +52,11 @@
 	z-index: 1;
 	max-width: 900px;
 	width: 100%;
-	height: calc(100vh - 180px);
-	max-height: 700px;
+	height: 80vh;
+	max-height: 650px;
 	display: flex;
 	flex-direction: column;
 	box-sizing: border-box;
-	margin: 0 auto;
 }
 
 /* Chat Container */
@@ -489,12 +491,12 @@
 /* Responsive */
 @media (max-width: 900px) {
 	.ai-assistant-page {
-		padding: 100px 16px 30px;
+		padding: 90px 16px 15px;
 	}
 
 	.ai-container {
-		height: calc(100vh - 150px);
-		max-height: 650px;
+		height: 75vh;
+		max-height: 600px;
 	}
 
 	.message-content {
@@ -504,12 +506,12 @@
 
 @media (max-width: 600px) {
 	.ai-assistant-page {
-		padding: 90px 12px 20px;
+		padding: 80px 12px 10px;
 	}
 
 	.ai-container {
-		height: calc(100vh - 130px);
-		max-height: 550px;
+		height: 70vh;
+		max-height: 500px;
 	}
 
 	.messages-area {
