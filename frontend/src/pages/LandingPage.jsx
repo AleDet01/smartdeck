@@ -75,7 +75,18 @@ export default function LandingPage() {
       </button>
 
       <div className="form-section">
-          <h2 className="section-title" style={{ userSelect: 'none' }}>{mode === 'login' ? 'Benvenuto' : 'Registrati'}</h2>
+          <div className="brand-header">
+            <div className="brand-logo">
+              <span className="logo-icon">📚</span>
+              <span className="logo-text">SmartDeck</span>
+            </div>
+            <p className="brand-tagline">
+              {mode === 'login' 
+                ? 'Bentornato! Accedi per continuare il tuo percorso di apprendimento' 
+                : 'Inizia il tuo viaggio verso un apprendimento più intelligente'}
+            </p>
+          </div>
+
           <div className="mode-switch" role="tablist" aria-label="Scegli modalità">
             <button
               type="button"
@@ -93,7 +104,7 @@ export default function LandingPage() {
               className={`mode-btn${mode === 'register' ? ' active' : ''}`}
               onClick={() => { setMode('register'); setError(''); }}
             >
-              Registrati
+              Crea Account
             </button>
           </div>
           <form onSubmit={handleSubmit} className="auth-form">
@@ -135,10 +146,24 @@ export default function LandingPage() {
 
             {error ? <div className="error" role="alert" aria-live="polite">{error}</div> : null}
             <button className="modern-btn" type="submit" disabled={loading}>
-              {loading ? 'Attendere…' : (mode === 'login' ? 'Entra' : 'Registrati')}
+              {loading ? (
+                <span className="btn-content">
+                  <span className="spinner"></span>
+                  Caricamento...
+                </span>
+              ) : (
+                mode === 'login' ? 'Accedi' : 'Crea Account'
+              )}
             </button>
           </form>
-          {/* Link alternativo rimosso in favore del selettore a pill */}
+          
+          <div className="form-footer">
+            <p className="footer-text">
+              {mode === 'login' 
+                ? 'Flashcard intelligenti potenziate da AI' 
+                : 'Nessuna carta di credito richiesta'}
+            </p>
+          </div>
       </div>
     </div>
   );

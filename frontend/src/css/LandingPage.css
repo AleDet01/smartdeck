@@ -137,48 +137,100 @@
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  padding: var(--space-6);
-  border-radius: var(--radius-xl);
+  padding: var(--space-7) var(--space-6) var(--space-6);
+  border-radius: 20px;
   background: var(--glass-bg);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
   border: 1px solid var(--glass-border);
-  box-shadow: 0 20px 60px var(--shadow-color);
+  box-shadow: 
+    0 20px 60px var(--shadow-color),
+    0 0 0 1px rgba(255, 255, 255, 0.1) inset;
   transition: all var(--transition-base);
   width: 100%;
-  max-width: 380px;
+  max-width: 420px;
   animation: riseIn 520ms cubic-bezier(0.22, 1, 0.36, 1) both;
   position: relative;
   z-index: 1;
 }
 
 .form-section:hover, .register-wrapper:hover {
-  border-color: rgba(0,122,255,0.25);
-  box-shadow: 0 24px 72px var(--shadow-color);
-  transform: translateY(-2px);
+  border-color: rgba(0,122,255,0.3);
+  box-shadow: 
+    0 24px 72px var(--shadow-color),
+    0 0 0 1px rgba(0, 122, 255, 0.2) inset;
+  transform: translateY(-4px);
 }
 
-.section-title {
-  margin-bottom: var(--space-4);
-  color: var(--text-primary);
-  font-size: 1.375rem;
-  font-weight: 600;
-  letter-spacing: -0.02em;
+/* Brand Header */
+.brand-header {
   text-align: center;
+  margin-bottom: var(--space-5);
+  animation: fadeInDown 0.6s ease-out;
+}
+
+.brand-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
+}
+
+.logo-icon {
+  font-size: 2.5rem;
+  filter: drop-shadow(0 2px 4px rgba(0, 122, 255, 0.2));
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+.logo-text {
+  font-size: 2rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  background: linear-gradient(135deg, var(--color-blue) 0%, var(--color-blue-light) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  user-select: none;
+}
+
+.brand-tagline {
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  line-height: 1.5;
+  font-weight: 400;
+  margin: 0;
+  padding: 0 var(--space-2);
   transition: color 0.3s ease;
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 
 .mode-switch {
   display: inline-flex;
   align-items: center;
-  gap: 3px;
+  gap: 4px;
   background: var(--bg-tertiary);
   border: 1px solid var(--border-light);
   border-radius: 999px;
-  padding: 5px;
-  margin: 0 auto var(--space-4);
-  box-shadow: 0 4px 16px var(--shadow-color);
+  padding: 4px;
+  margin: 0 auto var(--space-5);
+  box-shadow: 0 2px 8px var(--shadow-color);
   width: fit-content;
   transition: all 0.3s ease;
 }
@@ -189,7 +241,7 @@
   color: var(--text-secondary);
   font-weight: 500;
   font-size: 0.875rem;
-  padding: 8px 16px;
+  padding: 9px 20px;
   border-radius: 999px;
   cursor: pointer;
   transition: all var(--transition-fast);
@@ -197,14 +249,17 @@
 }
 
 .mode-btn:hover { 
-  color: var(--text-primary); 
+  color: var(--text-primary);
+  background: rgba(0, 122, 255, 0.05);
 }
 
 .mode-btn.active {
   background: var(--bg-primary);
-  border: 1px solid rgba(0,122,255,0.18);
   color: var(--text-primary);
-  box-shadow: 0 2px 8px var(--shadow-color);
+  box-shadow: 
+    0 1px 3px var(--shadow-color),
+    0 0 0 1px rgba(0, 122, 255, 0.1);
+  font-weight: 600;
 }
 
 .mode-btn:focus-visible {
@@ -233,13 +288,16 @@ form {
 
 .floating-label {
   position: absolute;
-  left: 12px;
+  left: 14px;
   top: 50%;
   transform: translateY(-50%);
   color: var(--text-tertiary);
-  font-size: 0.95rem;
+  font-size: 0.938rem;
   transition: all var(--transition-fast);
   pointer-events: none;
+  background: var(--bg-primary);
+  padding: 0 4px;
+  border-radius: 4px;
 }
 
 .field .modern-input {
@@ -248,17 +306,18 @@ form {
 
 .field .modern-input:focus + .floating-label,
 .field .modern-input:not(:placeholder-shown) + .floating-label {
-  top: 6px;
+  top: -1px;
   font-size: 0.75rem;
-  color: var(--text-secondary);
+  color: var(--color-blue);
+  font-weight: 500;
 }
 
 
 .modern-input {
-  padding: var(--space-3) var(--space-4);
-  border: 1px solid var(--border-color);
+  padding: 13px var(--space-4);
+  border: 1.5px solid var(--border-color);
   border-radius: var(--radius-md);
-  font-size: 1rem;
+  font-size: 0.938rem;
   font-weight: 400;
   background: var(--bg-primary);
   color: var(--text-primary);
@@ -271,50 +330,58 @@ form {
 }
 
 .modern-input:hover {
-  border-color: var(--color-gray-400);
+  border-color: var(--text-tertiary);
 }
 
 .modern-input:focus {
   border-color: var(--color-blue);
-  box-shadow: 0 0 0 4px rgba(0, 122, 255, 0.08);
+  box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.12);
   background: var(--bg-primary);
 }
 
 .pass-toggle {
   position: absolute;
-  right: 8px;
+  right: 10px;
   top: 50%;
   transform: translateY(-50%);
   background: var(--bg-tertiary);
   border: 1px solid var(--border-light);
-  color: var(--text-primary);
-  padding: 6px 10px;
-  border-radius: 10px;
-  font-size: 0.813rem;
+  color: var(--text-secondary);
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 0.75rem;
+  font-weight: 500;
   cursor: pointer;
   transition: all var(--transition-fast);
 }
 
 .pass-toggle:hover {
   background: var(--bg-secondary);
+  color: var(--text-primary);
+  border-color: var(--border-color);
+}
+
+.pass-toggle:active {
+  transform: translateY(-50%) scale(0.95);
 }
 
 
 .modern-btn {
-  background: linear-gradient(90deg, #007AFF, #5AC8FA);
+  background: linear-gradient(135deg, #007AFF 0%, #5AC8FA 100%);
   color: var(--color-white);
   border: none;
   border-radius: var(--radius-md);
-  padding: var(--space-3) var(--space-5);
-  font-size: 1.063rem;
-  font-weight: 500;
+  padding: 14px var(--space-6);
+  font-size: 1rem;
+  font-weight: 600;
   letter-spacing: -0.01em;
   cursor: pointer;
-  margin-top: var(--space-2);
-  box-shadow: var(--shadow-sm);
+  margin-top: var(--space-3);
+  box-shadow: 0 4px 12px rgba(0, 122, 255, 0.25);
   transition: all var(--transition-base);
   position: relative;
   overflow: hidden;
+  width: 100%;
 }
 
 .modern-btn::before {
@@ -322,34 +389,56 @@ form {
   position: absolute;
   inset: 0;
   background:
-    linear-gradient(180deg, rgba(255,255,255,0.12) 0%, transparent 100%),
-    linear-gradient(120deg, transparent 0%, rgba(255,255,255,0.20) 35%, transparent 55%);
-  opacity: 0.0;
+    linear-gradient(180deg, rgba(255,255,255,0.15) 0%, transparent 100%),
+    linear-gradient(120deg, transparent 0%, rgba(255,255,255,0.25) 40%, transparent 60%);
+  opacity: 0;
   transition: opacity var(--transition-fast), transform 400ms ease;
-  transform: translateX(-20%);
+  transform: translateX(-100%);
 }
 
 .modern-btn:hover {
-  background: linear-gradient(90deg, #0066CC, #4AB6E6);
-  box-shadow: var(--shadow-lg);
-  transform: translateY(-1px);
+  background: linear-gradient(135deg, #0066CC 0%, #4AB6E6 100%);
+  box-shadow: 0 6px 20px rgba(0, 122, 255, 0.35);
+  transform: translateY(-2px);
 }
 
 .modern-btn:hover::before {
   opacity: 1;
-  transform: translateX(0);
+  transform: translateX(100%);
 }
 
 .modern-btn:active {
-  background: #0055AA;
+  background: linear-gradient(135deg, #0055AA 0%, #3A9FD8 100%);
   transform: translateY(0);
-  box-shadow: var(--shadow-sm);
+  box-shadow: 0 2px 8px rgba(0, 122, 255, 0.3);
 }
 
 .modern-btn:disabled {
-  background: var(--color-gray-300);
+  background: var(--bg-tertiary);
+  color: var(--text-tertiary);
   cursor: not-allowed;
   transform: none;
+  box-shadow: none;
+}
+
+.btn-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+}
+
+.spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }
 
 
@@ -386,20 +475,38 @@ form {
 }
 
 
+/* Form Footer */
+.form-footer {
+  margin-top: var(--space-4);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--border-light);
+  text-align: center;
+}
+
+.footer-text {
+  font-size: 0.813rem;
+  color: var(--text-tertiary);
+  margin: 0;
+  font-weight: 400;
+  line-height: 1.4;
+  transition: color 0.3s ease;
+}
+
 .link-btn {
   margin-top: var(--space-3);
   background: transparent;
   border: none;
   color: var(--color-blue);
-  font-size: 0.938rem;
-  font-weight: 400;
+  font-size: 0.875rem;
+  font-weight: 500;
   cursor: pointer;
   padding: var(--space-2) 0;
-  transition: opacity var(--transition-fast);
+  transition: all var(--transition-fast);
 }
 
 .link-btn:hover {
   opacity: 0.7;
+  text-decoration: underline;
 }
 
 
