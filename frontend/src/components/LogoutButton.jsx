@@ -1,14 +1,15 @@
+import { memo, useCallback } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import API_HOST from '../utils/apiHost';
 import '../css/LogoutButton.css';
 
 const HIDDEN_PATHS = ['/', '/login'];
 
-export default function LogoutButton() {
+const LogoutButton = memo(() => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const handleLogout = async () => {
+  const handleLogout = useCallback(async () => {
     try {
       await fetch(`${API_HOST}/auth/logout`, {
         method: 'POST',
@@ -18,7 +19,7 @@ export default function LogoutButton() {
     } catch (err) {
     }
     navigate('/');
-  };
+  }, [navigate]);
 
   if (HIDDEN_PATHS.includes(location.pathname)) return null;
 
@@ -32,4 +33,8 @@ export default function LogoutButton() {
       Esci
     </button>
   );
-}
+});
+
+LogoutButton.displayName = 'LogoutButton';
+
+export default LogoutButton;

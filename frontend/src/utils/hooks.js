@@ -1,10 +1,13 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import API_HOST from './apiHost';
 
 export const useFetch = (url, options = {}) => {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  // Memoizza options per evitare re-fetch inutili
+  const memoizedOptions = useMemo(() => options, [JSON.stringify(options)]);
 
   useEffect(() => {
     if (!url) {
@@ -17,9 +20,9 @@ export const useFetch = (url, options = {}) => {
     (async () => {
       try {
         const res = await fetch(url, { 
-          ...options, 
+          ...memoizedOptions, 
           signal: controller.signal,
-          credentials: options.credentials || 'include'
+          credentials: memoizedOptions.credentials || 'include'
         });
         
         // Se sessione scaduta (401), reindirizza al login
@@ -44,7 +47,7 @@ export const useFetch = (url, options = {}) => {
     })();
 
     return () => controller.abort();
-  }, [url]);
+  }, [url, memoizedOptions]);
 
   return { data, loading, error };
 };

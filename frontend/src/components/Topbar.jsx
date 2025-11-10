@@ -1,8 +1,9 @@
+import { memo, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useTheme } from '../utils/themeContext';
 import '../css/Topbar.css';
 
-export default function Topbar() {
+const Topbar = memo(() => {
   const navigate = useNavigate();
   const location = useLocation();
   const { theme, toggleTheme } = useTheme();
@@ -40,4 +41,8 @@ export default function Topbar() {
       </button>
     </div>
   );
-}
+});
+
+Topbar.displayName = 'Topbar';
+
+export default Topbar;

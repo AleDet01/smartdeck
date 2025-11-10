@@ -23,6 +23,7 @@
   animation: float 25s ease-in-out infinite;
   pointer-events: none;
   z-index: 0;
+  will-change: transform;
 }
 
 .dashboard-page::after {
@@ -37,6 +38,7 @@
   animation: float 30s ease-in-out infinite reverse;
   pointer-events: none;
   z-index: 0;
+  will-change: transform;
 }
 
 /* Quick Select Menu */
@@ -66,10 +68,6 @@
 
 .quick-select-scroll::-webkit-scrollbar {
   height: 6px;
-}
-
-.quick-select-scroll::-webkit-scrollbar-track {
-  background: transparent;
 }
 
 .quick-select-scroll::-webkit-scrollbar-thumb {

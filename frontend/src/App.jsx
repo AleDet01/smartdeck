@@ -1,14 +1,16 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, lazy, Suspense } from 'react';
 import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { ThemeProvider } from './utils/themeContext';
-import DashboardPage from './pages/DashboardPage';
 import LandingPage from './pages/LandingPage';
-import PreTestPage from './pages/PreTestPage';
-import TestPage from './pages/TestPage';
-import StatisticsPage from './pages/StatisticsPage';
-import AIAssistantPage from './pages/AIAssistantPage';
 import LogoutButton from './components/LogoutButton';
 import API_HOST from './utils/apiHost';
+
+// Lazy loading per le pagine principali
+const DashboardPage = lazy(() => import('./pages/DashboardPage'));
+const PreTestPage = lazy(() => import('./pages/PreTestPage'));
+const TestPage = lazy(() => import('./pages/TestPage'));
+const StatisticsPage = lazy(() => import('./pages/StatisticsPage'));
+const AIAssistantPage = lazy(() => import('./pages/AIAssistantPage'));
 
 function RequireAuth({ children }) {
   const [state, setState] = useState({ loading: true, ok: false });
@@ -35,16 +37,18 @@ export default function App() {
   return (
     <ThemeProvider>
       <HashRouter>
-        <Routes>
-          <Route path="/" element={<LandingPage />} />
-          <Route path="/login" element={<Navigate to="/" />} />
-          <Route path="/dashboard" element={<RequireAuth><DashboardPage /></RequireAuth>} />
-          <Route path="/statistiche" element={<RequireAuth><StatisticsPage /></RequireAuth>} />
-          <Route path="/ai-assistant" element={<RequireAuth><AIAssistantPage /></RequireAuth>} />
-          <Route path="/pretest/:area" element={<RequireAuth><PreTestPage /></RequireAuth>} />
-          <Route path="/test/:area/:num" element={<RequireAuth><TestPage /></RequireAuth>} />
-          <Route path="*" element={<Navigate to="/" />} />
-        </Routes>
+        <Suspense fallback={<div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', fontSize: '1.2rem' }}>Caricamento...</div>}>
+          <Routes>
+            <Route path="/" element={<LandingPage />} />
+            <Route path="/login" element={<Navigate to="/" />} />
+            <Route path="/dashboard" element={<RequireAuth><DashboardPage /></RequireAuth>} />
+            <Route path="/statistiche" element={<RequireAuth><StatisticsPage /></RequireAuth>} />
+            <Route path="/ai-assistant" element={<RequireAuth><AIAssistantPage /></RequireAuth>} />
+            <Route path="/pretest/:area" element={<RequireAuth><PreTestPage /></RequireAuth>} />
+            <Route path="/test/:area/:num" element={<RequireAuth><TestPage /></RequireAuth>} />
+            <Route path="*" element={<Navigate to="/" />} />
+          </Routes>
+        </Suspense>
         <LogoutButton />
       </HashRouter>
     </ThemeProvider>

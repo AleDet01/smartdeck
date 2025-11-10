@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../css/DashboardPage.css';
 import Topbar from '../components/Topbar';
@@ -32,13 +32,13 @@ const DashboardPage = () => {
 
 	useAdaptiveFontSize('.area-title', [areas]);
 
-	const handlePrev = () => {
+	const handlePrev = useCallback(() => {
 		setCurrentIndex(prev => Math.max(0, prev - 1));
-	};
+	}, []);
 
-	const handleNext = () => {
+	const handleNext = useCallback(() => {
 		setCurrentIndex(prev => Math.min((areas?.length || 0) - 1, prev + 1));
-	};
+	}, [areas]);
 
 	if (loading || areas === null) {
 		return (
@@ -111,7 +111,8 @@ const DashboardPage = () => {
 									<img 
 										className="card-bg" 
 										src={area.img} 
-										alt={area.name} 
+										alt={area.name}
+										loading="lazy"
 										onError={(e) => { 
 											e.currentTarget.onerror = null; 
 											e.currentTarget.src = area.fallback; 

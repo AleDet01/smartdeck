@@ -24,6 +24,7 @@
 	animation: float 20s ease-in-out infinite;
 	pointer-events: none;
 	z-index: 0;
+	will-change: transform;
 }
 
 .ai-assistant-page::after {
@@ -38,14 +39,10 @@
 	animation: float 25s ease-in-out infinite reverse;
 	pointer-events: none;
 	z-index: 0;
+	will-change: transform;
 }
 
-@keyframes float {
-	0%, 100% { transform: translate(0, 0) scale(1); }
-	25% { transform: translate(30px, -30px) scale(1.05); }
-	50% { transform: translate(-20px, 20px) scale(0.95); }
-	75% { transform: translate(20px, 30px) scale(1.02); }
-}
+/* Animation già definita in index.css - rimossa duplicazione */
 
 .ai-container {
 	position: relative;
@@ -94,18 +91,13 @@
 	width: 8px;
 }
 
-.messages-area::-webkit-scrollbar-track {
-	background: #f1f5f9;
-	border-radius: 4px;
-}
-
 .messages-area::-webkit-scrollbar-thumb {
-	background: #cbd5e1;
+	background: var(--color-gray-300);
 	border-radius: 4px;
 }
 
 .messages-area::-webkit-scrollbar-thumb:hover {
-	background: #94a3b8;
+	background: var(--color-gray-400);
 }
 
 /* Message */

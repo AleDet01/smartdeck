@@ -117,7 +117,7 @@ export default function TestPage() {
   if (!questions.length) return (
     <div className="test-page">
       <div className="page-bg-wrapper" aria-hidden="true">
-        <img className="page-bg" src={process.env.PUBLIC_URL + '/sfondo_pages.jpg'} alt="" />
+        <img className="page-bg" src={process.env.PUBLIC_URL + '/sfondo_pages.jpg'} alt="" loading="lazy" />
       </div>
       <Topbar />
       <div style={{ padding: 24 }}>Caricamento domande...</div>
@@ -136,7 +136,7 @@ export default function TestPage() {
     return (
       <div className="test-page">
         <div className="page-bg-wrapper" aria-hidden="true">
-          <img className="page-bg" src={process.env.PUBLIC_URL + '/sfondo_pages.jpg'} alt="" />
+          <img className="page-bg" src={process.env.PUBLIC_URL + '/sfondo_pages.jpg'} alt="" loading="lazy" />
         </div>
         <Topbar />
         <div style={{ paddingTop: 88 }}>
@@ -187,7 +187,7 @@ export default function TestPage() {
   return (
     <div className="test-page">
       <div className="page-bg-wrapper" aria-hidden="true">
-        <img className="page-bg" src={process.env.PUBLIC_URL + '/sfondo_pages.jpg'} alt="" />
+        <img className="page-bg" src={process.env.PUBLIC_URL + '/sfondo_pages.jpg'} alt="" loading="lazy" />
       </div>
       <Topbar />
       <div className="test-content">
