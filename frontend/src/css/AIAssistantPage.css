@@ -56,7 +56,7 @@
 	display: flex;
 	flex-direction: column;
 	box-sizing: border-box;
-	margin: 80px auto 80px;
+	margin: 0 auto;
 	padding: 0 20px;
 }
 
@@ -492,7 +492,7 @@
 /* Responsive */
 @media (max-width: 900px) {
 	.ai-container {
-		margin: 70px auto 70px;
+		margin: 0 auto;
 		padding: 0 16px;
 		height: calc(100vh - 140px);
 	}
@@ -504,7 +504,7 @@
 
 @media (max-width: 600px) {
 	.ai-container {
-		margin: 60px auto 60px;
+		margin: 0 auto;
 		padding: 0 12px;
 		height: calc(100vh - 120px);
 	}
