@@ -52,12 +52,12 @@
 	z-index: 1;
 	max-width: 900px;
 	width: 100%;
-	height: calc(100vh - 100px);
+	height: calc(100vh - 160px);
 	display: flex;
 	flex-direction: column;
 	box-sizing: border-box;
-	margin: 0 auto;
-	padding: 20px;
+	margin: 80px auto 80px;
+	padding: 0 20px;
 }
 
 /* Chat Container */
@@ -492,7 +492,9 @@
 /* Responsive */
 @media (max-width: 900px) {
 	.ai-container {
-		padding: 85px 16px 16px;
+		margin: 70px auto 70px;
+		padding: 0 16px;
+		height: calc(100vh - 140px);
 	}
 
 	.message-content {
@@ -502,7 +504,9 @@
 
 @media (max-width: 600px) {
 	.ai-container {
-		padding: 80px 12px 12px;
+		margin: 60px auto 60px;
+		padding: 0 12px;
+		height: calc(100vh - 120px);
 	}
 
 	.messages-area {
