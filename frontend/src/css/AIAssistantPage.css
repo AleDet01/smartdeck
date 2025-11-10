@@ -1,12 +1,15 @@
 .ai-assistant-page {
 	width: 100%;
-	height: 100vh;
+	min-height: 100vh;
 	background: var(--bg-secondary);
 	position: relative;
 	box-sizing: border-box;
 	transition: background-color 0.3s ease;
 	overflow: hidden;
-	padding-top: 80px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 0 20px;
 }
 
 .ai-assistant-page::before {
@@ -45,18 +48,15 @@
 }
 
 .ai-container {
-	position: absolute;
+	position: relative;
 	z-index: 1;
-	top: calc(50% + 40px);
-	left: 50%;
-	transform: translate(-50%, -50%);
 	max-width: 900px;
-	width: calc(100% - 40px);
-	height: 70vh;
-	max-height: 650px;
+	width: 100%;
+	height: 650px;
 	display: flex;
 	flex-direction: column;
 	box-sizing: border-box;
+	margin-top: 80px;
 }
 
 /* Chat Container */
@@ -490,10 +490,13 @@
 
 /* Responsive */
 @media (max-width: 900px) {
+	.ai-assistant-page {
+		padding: 0 16px;
+	}
+
 	.ai-container {
-		width: calc(100% - 32px);
-		height: 65vh;
-		max-height: 600px;
+		height: 600px;
+		margin-top: 70px;
 	}
 
 	.message-content {
@@ -502,10 +505,13 @@
 }
 
 @media (max-width: 600px) {
+	.ai-assistant-page {
+		padding: 0 12px;
+	}
+
 	.ai-container {
-		width: calc(100% - 24px);
-		height: 60vh;
-		max-height: 500px;
+		height: 500px;
+		margin-top: 60px;
 	}
 
 	.messages-area {
