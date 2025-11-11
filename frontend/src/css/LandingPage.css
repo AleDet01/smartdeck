@@ -474,6 +474,69 @@ form {
   border: 1px solid rgba(52, 199, 89, 0.2);
 }
 
+/* Field-level Errors */
+.field-error {
+  display: block;
+  color: var(--color-red);
+  font-size: 0.75rem;
+  margin-top: var(--space-1);
+  font-weight: 500;
+}
+
+.input-error {
+  border-color: var(--color-red) !important;
+  box-shadow: 0 0 0 3px rgba(255, 59, 48, 0.1) !important;
+}
+
+/* Password Strength Indicator */
+.password-strength {
+  margin-top: var(--space-2);
+}
+
+.strength-bar {
+  width: 100%;
+  height: 4px;
+  background: var(--bg-tertiary);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+  margin-bottom: var(--space-1);
+}
+
+.strength-fill {
+  height: 100%;
+  transition: all 0.3s ease;
+  border-radius: var(--radius-full);
+}
+
+.strength-fill.strength-weak {
+  background: linear-gradient(90deg, var(--color-red) 0%, #ff6b6b 100%);
+}
+
+.strength-fill.strength-medium {
+  background: linear-gradient(90deg, var(--color-orange) 0%, #ffd93d 100%);
+}
+
+.strength-fill.strength-strong {
+  background: linear-gradient(90deg, var(--color-green) 0%, #6bcf7f 100%);
+}
+
+.strength-text {
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.strength-text.strength-weak {
+  color: var(--color-red);
+}
+
+.strength-text.strength-medium {
+  color: var(--color-orange);
+}
+
+.strength-text.strength-strong {
+  color: var(--color-green);
+}
+
 
 /* Form Footer */
 .form-footer {

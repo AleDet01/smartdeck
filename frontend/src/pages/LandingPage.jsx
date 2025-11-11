@@ -1,8 +1,19 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTheme } from '../utils/themeContext';
 import API_HOST from '../utils/apiHost';
+import { 
+  validatePasswordStrength, 
+  validateEmail, 
+  validateUsername,
+  sanitizeInput,
+  RateLimiter,
+  generateFingerprint
+} from '../utils/security';
 import '../css/LandingPage.css';
+
+const loginLimiter = new RateLimiter(5, 15 * 60 * 1000); // 5 attempts per 15 min
+const registerLimiter = new RateLimiter(3, 60 * 60 * 1000); // 3 attempts per hour
 
 export default function LandingPage() {
   const navigate = useNavigate();
@@ -13,28 +24,107 @@ export default function LandingPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [passwordStrength, setPasswordStrength] = useState(null);
+  const [validationErrors, setValidationErrors] = useState({});
+  const fingerprintRef = useRef(null);
+
+  // Generate fingerprint on mount
+  useEffect(() => {
+    generateFingerprint().then(fp => {
+      fingerprintRef.current = fp;
+    });
+  }, []);
 
   const toggleMode = useCallback(() => {
     setMode(prev => (prev === 'login' ? 'register' : 'login'));
     setError('');
+    setValidationErrors({});
+    setPasswordStrength(null);
   }, []);
+
+  // Real-time password validation for register mode
+  useEffect(() => {
+    if (mode === 'register' && password.length > 0) {
+      const validation = validatePasswordStrength(password);
+      setPasswordStrength(validation);
+    } else {
+      setPasswordStrength(null);
+    }
+  }, [password, mode]);
+
+  // Validate inputs
+  const validateInputs = useCallback(() => {
+    const errors = {};
+
+    // Username validation
+    if (mode === 'register') {
+      const usernameCheck = validateUsername(username);
+      if (!usernameCheck.isValid) {
+        errors.username = usernameCheck.message;
+      }
+    } else {
+      if (!username || username.trim().length === 0) {
+        errors.username = 'Username richiesto';
+      }
+    }
+
+    // Password validation
+    if (mode === 'register') {
+      const passwordCheck = validatePasswordStrength(password);
+      if (!passwordCheck.isValid) {
+        errors.password = passwordCheck.message;
+      }
+    } else {
+      if (!password || password.length === 0) {
+        errors.password = 'Password richiesta';
+      }
+    }
+
+    setValidationErrors(errors);
+    return Object.keys(errors).length === 0;
+  }, [mode, username, password]);
 
   const handleSubmit = useCallback(async (e) => {
     e.preventDefault();
     setError('');
+    
+    // Client-side validation
+    if (!validateInputs()) {
+      return;
+    }
+
+    // Rate limiting
+    const limiter = mode === 'login' ? loginLimiter : registerLimiter;
+    const rateLimitKey = mode === 'login' ? 'login' : 'register';
+    const rateLimitCheck = limiter.canAttempt(rateLimitKey);
+
+    if (!rateLimitCheck.allowed) {
+      setError(`Troppi tentativi. Riprova tra ${rateLimitCheck.resetIn} minuti.`);
+      return;
+    }
+
     setLoading(true);
     
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 secondi timeout
+    const timeoutId = setTimeout(() => controller.abort(), 15000);
     
     try {
       console.log(`📡 Tentativo ${mode} su ${API_HOST}/auth/${mode}`);
       
+      // Sanitize inputs
+      const sanitizedUsername = sanitizeInput(username.trim());
+      
       const res = await fetch(`${API_HOST}/auth/${mode}`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'X-Client-Fingerprint': fingerprintRef.current || 'unknown'
+        },
         credentials: 'include',
-        body: JSON.stringify({ username: username.trim(), password }),
+        body: JSON.stringify({ 
+          username: sanitizedUsername, 
+          password 
+        }),
         signal: controller.signal
       });
       
@@ -43,11 +133,18 @@ export default function LandingPage() {
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data?.error || 'Errore di autenticazione');
       
-      console.log('✓ Login effettuato, reindirizzamento...');
+      console.log('✓ Autenticazione effettuata, reindirizzamento...');
+      
+      // Reset rate limiter on success
+      limiter.reset(rateLimitKey);
+      
+      // Store session timestamp
+      sessionStorage.setItem('sessionStart', Date.now().toString());
+      
       navigate('/dashboard');
     } catch (err) {
       clearTimeout(timeoutId);
-      console.error('❌ Errore login:', err);
+      console.error('❌ Errore autenticazione:', err);
       
       if (err.name === 'AbortError') {
         setError('Timeout: il server non risponde. Verifica la connessione.');
@@ -59,7 +156,7 @@ export default function LandingPage() {
     } finally {
       setLoading(false);
     }
-  }, [mode, username, password, navigate]);
+  }, [mode, username, password, navigate, validateInputs]);
 
   return (
     <div className="landing-container">
@@ -111,27 +208,38 @@ export default function LandingPage() {
             <div className="field">
               <input
                 id="username"
-                className="modern-input"
+                className={`modern-input ${validationErrors.username ? 'input-error' : ''}`}
                 type="text"
                 placeholder=" "
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 autoComplete="username"
+                maxLength={30}
                 required
+                aria-invalid={!!validationErrors.username}
+                aria-describedby={validationErrors.username ? "username-error" : undefined}
               />
               <label htmlFor="username" className="floating-label">Username</label>
+              {validationErrors.username && (
+                <span id="username-error" className="field-error" role="alert">
+                  {validationErrors.username}
+                </span>
+              )}
             </div>
 
             <div className="field">
               <input
                 id="password"
-                className="modern-input"
+                className={`modern-input ${validationErrors.password ? 'input-error' : ''}`}
                 type={showPassword ? 'text' : 'password'}
                 placeholder=" "
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
+                maxLength={128}
                 required
+                aria-invalid={!!validationErrors.password}
+                aria-describedby={validationErrors.password ? "password-error" : undefined}
               />
               <label htmlFor="password" className="floating-label">Password</label>
               <button
@@ -142,6 +250,24 @@ export default function LandingPage() {
               >
                 {showPassword ? 'Nascondi' : 'Mostra'}
               </button>
+              {mode === 'register' && passwordStrength && (
+                <div className="password-strength">
+                  <div className="strength-bar">
+                    <div 
+                      className={`strength-fill strength-${passwordStrength.strength}`}
+                      style={{ width: `${passwordStrength.score}%` }}
+                    />
+                  </div>
+                  <span className={`strength-text strength-${passwordStrength.strength}`}>
+                    {passwordStrength.message}
+                  </span>
+                </div>
+              )}
+              {validationErrors.password && (
+                <span id="password-error" className="field-error" role="alert">
+                  {validationErrors.password}
+                </span>
+              )}
             </div>
 
             {error ? <div className="error" role="alert" aria-live="polite">{error}</div> : null}
