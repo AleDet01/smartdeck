@@ -190,7 +190,7 @@ export const generateFingerprint = async () => {
 
   const fingerprint = {
     canvas: hashCode(canvasFingerprint),
-    screen: `${screen.width}x${screen.height}x${screen.colorDepth}`,
+    screen: `${window.screen.width}x${window.screen.height}x${window.screen.colorDepth}`,
     timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
     language: navigator.language,
     platform: navigator.platform,
