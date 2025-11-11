@@ -3,6 +3,7 @@ import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { ThemeProvider } from './utils/themeContext';
 import LandingPage from './pages/LandingPage';
 import LogoutButton from './components/LogoutButton';
+import CookieBanner from './components/CookieBanner';
 import API_HOST from './utils/apiHost';
 
 // Lazy loading per le pagine principali
@@ -11,6 +12,8 @@ const PreTestPage = lazy(() => import('./pages/PreTestPage'));
 const TestPage = lazy(() => import('./pages/TestPage'));
 const StatisticsPage = lazy(() => import('./pages/StatisticsPage'));
 const AIAssistantPage = lazy(() => import('./pages/AIAssistantPage'));
+const PrivacyPolicyPage = lazy(() => import('./pages/PrivacyPolicyPage'));
+const TermsOfServicePage = lazy(() => import('./pages/TermsOfServicePage'));
 
 function RequireAuth({ children }) {
   const [state, setState] = useState({ loading: true, ok: false });
@@ -41,6 +44,8 @@ export default function App() {
           <Routes>
             <Route path="/" element={<LandingPage />} />
             <Route path="/login" element={<Navigate to="/" />} />
+            <Route path="/privacy" element={<PrivacyPolicyPage />} />
+            <Route path="/terms" element={<TermsOfServicePage />} />
             <Route path="/dashboard" element={<RequireAuth><DashboardPage /></RequireAuth>} />
             <Route path="/statistiche" element={<RequireAuth><StatisticsPage /></RequireAuth>} />
             <Route path="/ai-assistant" element={<RequireAuth><AIAssistantPage /></RequireAuth>} />
@@ -50,6 +55,7 @@ export default function App() {
           </Routes>
         </Suspense>
         <LogoutButton />
+        <CookieBanner />
       </HashRouter>
     </ThemeProvider>
   );

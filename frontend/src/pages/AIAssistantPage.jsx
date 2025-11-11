@@ -282,7 +282,12 @@ const AIAssistantPage = () => {
 					</div>
 
 					<div className="openai-disclaimer">
-						Powered by OpenAI ChatGPT. Le risposte sono generate da intelligenza artificiale.
+						⚠️ <strong>Disclaimer:</strong> Powered by OpenAI ChatGPT. Le risposte sono generate da intelligenza artificiale 
+						e possono contenere errori o imprecisioni. Non sostituiscono consulenza professionale. 
+						Verifica sempre le informazioni con fonti autorevoli. 
+						<a href="/#/terms" style={{ color: 'inherit', textDecoration: 'underline', fontWeight: 500 }}>
+							Termini AI
+						</a>
 					</div>
 				</div>
 			</div>

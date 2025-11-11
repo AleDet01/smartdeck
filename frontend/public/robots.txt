@@ -1,3 +1,20 @@
+# SmartDeck - Robots.txt
 # https://www.robotstxt.org/robotstxt.html
+
 User-agent: *
-Disallow:
+Allow: /
+Disallow: /dashboard
+Disallow: /statistiche
+Disallow: /ai-assistant
+Disallow: /pretest/
+Disallow: /test/
+
+# Allow legal pages
+Allow: /privacy
+Allow: /terms
+
+# Sitemap (update URL quando disponibile)
+# Sitemap: https://smartdeck.app/sitemap.xml
+
+# Crawl-delay for polite bots
+Crawl-delay: 1

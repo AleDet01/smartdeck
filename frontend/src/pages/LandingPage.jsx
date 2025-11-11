@@ -163,6 +163,11 @@ export default function LandingPage() {
                 ? 'Flashcard intelligenti potenziate da AI' 
                 : 'Nessuna carta di credito richiesta'}
             </p>
+            <div className="legal-links">
+              <a href="/#/privacy" className="legal-link">Privacy Policy</a>
+              <span className="legal-separator">•</span>
+              <a href="/#/terms" className="legal-link">Termini di Servizio</a>
+            </div>
           </div>
       </div>
     </div>
