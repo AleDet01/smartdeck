@@ -19,6 +19,7 @@ console.log('✓ CORS allowedOrigins:', allowedOrigins);
 
 app.use(cors({
   origin: (origin, callback) => {
+    // Allow requests with no origin (like mobile apps or curl requests)
     if (!origin) return callback(null, true);
     
     if (allowedOrigins.includes(origin)) {
@@ -26,7 +27,8 @@ app.use(cors({
     }
     
     console.warn(`⚠ CORS blocked origin: ${origin}`);
-    callback(new Error('Not allowed by CORS'));
+    // Return false instead of error to properly handle CORS rejection
+    callback(null, false);
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
@@ -42,7 +44,9 @@ app.use(cors({
     'Access-Control-Request-Method',
     'Access-Control-Request-Headers'
   ],
-  exposedHeaders: ['Set-Cookie']
+  exposedHeaders: ['Set-Cookie'],
+  preflightContinue: false,
+  optionsSuccessStatus: 204
 }));
 
 app.use(express.json());
