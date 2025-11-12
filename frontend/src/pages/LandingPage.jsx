@@ -10,6 +10,7 @@ import {
   RateLimiter,
   generateFingerprint
 } from '../utils/security';
+import LoadingAnimation from '../components/LoadingAnimation';
 import '../css/LandingPage.css';
 
 const loginLimiter = new RateLimiter(5, 15 * 60 * 1000); // 5 attempts per 15 min
@@ -156,19 +157,26 @@ export default function LandingPage() {
   }, [mode, username, password, navigate, validateInputs]);
 
   return (
-    <div className="landing-container">
-      <div className="marble-background"></div>
+    <>
+      {loading && (
+        <LoadingAnimation 
+          message={mode === 'login' ? 'Autenticazione in corso...' : 'Creazione account...'}
+        />
+      )}
       
-      <button 
-        className="landing-theme-toggle"
-        onClick={toggleTheme}
-        aria-label="Cambia tema"
-        title={theme === 'light' ? 'Passa al tema scuro' : 'Passa al tema chiaro'}
-      >
-        {theme === 'light' ? '🌙' : '☀️'}
-      </button>
+      <div className="landing-container">
+        <div className="marble-background"></div>
+        
+        <button 
+          className="landing-theme-toggle"
+          onClick={toggleTheme}
+          aria-label="Cambia tema"
+          title={theme === 'light' ? 'Passa al tema scuro' : 'Passa al tema chiaro'}
+        >
+          {theme === 'light' ? '🌙' : '☀️'}
+        </button>
 
-      <div className="form-section">
+        <div className="form-section">
           <div className="brand-header">
             <div className="brand-logo">
               <span className="logo-icon">📚</span>
@@ -292,7 +300,8 @@ export default function LandingPage() {
               <a href="/#/terms" className="legal-link">Termini di Servizio</a>
             </div>
           </div>
+        </div>
       </div>
-    </div>
+    </>
   );
 }
