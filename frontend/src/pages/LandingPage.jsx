@@ -102,6 +102,7 @@ export default function LandingPage() {
     }
 
     setLoading(true);
+    window.authStartTime = Date.now(); // Track start time for minimum animation duration
     
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 45000); // 45s per cold start Render
@@ -139,7 +140,14 @@ export default function LandingPage() {
       // Store session timestamp
       sessionStorage.setItem('sessionStart', Date.now().toString());
       
-      navigate('/dashboard');
+      // Delay navigation to show complete animation (minimum 2 seconds)
+      const minLoadTime = 2000;
+      const elapsed = Date.now() - (window.authStartTime || Date.now());
+      const remainingTime = Math.max(0, minLoadTime - elapsed);
+      
+      setTimeout(() => {
+        navigate('/dashboard');
+      }, remainingTime);
     } catch (err) {
       clearTimeout(timeoutId);
       console.error('❌ Errore autenticazione:', err);

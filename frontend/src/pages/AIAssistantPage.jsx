@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Topbar from '../components/Topbar';
 import PageBackground from '../components/PageBackground';
+import LEDEffect from '../components/LEDEffect';
 import '../css/AIAssistantPage.css';
 import API_HOST from '../utils/apiHost';
 
@@ -177,6 +178,7 @@ const AIAssistantPage = () => {
 	return (
 		<div className="ai-assistant-page">
 			<PageBackground />
+			<LEDEffect variant="floating" color="purple" />
 			<Topbar />
 			<div className="ai-container">
 				<div className="ai-header">

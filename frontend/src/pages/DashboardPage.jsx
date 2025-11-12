@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import '../css/DashboardPage.css';
 import Topbar from '../components/Topbar';
 import PageBackground from '../components/PageBackground';
+import LEDEffect from '../components/LEDEffect';
 import API_HOST from '../utils/apiHost';
 import { useFetch, useAdaptiveFontSize } from '../utils/hooks';
 import { makeConceptImageUrl, makeGradientDataUrl } from '../utils/imageUtils';
@@ -55,6 +56,7 @@ const DashboardPage = () => {
 	return (
 		<div className="dashboard-page">
 			<PageBackground />
+			<LEDEffect variant="corner" color="blue" />
 			<Topbar />
 			
 			{areas && areas.length === 0 ? (

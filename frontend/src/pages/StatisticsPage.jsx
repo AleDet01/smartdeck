@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Topbar from '../components/Topbar';
 import PageBackground from '../components/PageBackground';
+import LEDEffect from '../components/LEDEffect';
 import '../css/StatisticsPage.css';
 import API_HOST from '../utils/apiHost';
 
@@ -239,6 +240,7 @@ const StatisticsPage = () => {
 	return (
 		<div className="statistics-page">
 			<PageBackground />
+			<LEDEffect variant="corner" color="green" />
 			<Topbar />
 			<div className="stats-container">
 				<div className="stats-header">
