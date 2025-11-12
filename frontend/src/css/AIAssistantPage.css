@@ -61,7 +61,6 @@
 	gap: 20px;
 	flex: 1;
 	box-sizing: border-box;
-	overflow-y: auto;
 	min-height: 0;
 }
 
@@ -676,7 +675,6 @@
 
 	.ai-container {
 		padding: 16px 12px;
-		overflow-y: auto;
 	}
 
 	.ai-header {
