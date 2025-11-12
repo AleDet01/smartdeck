@@ -57,26 +57,23 @@ export default function LandingPage() {
     const errors = {};
 
     // Username validation
-    if (mode === 'register') {
-      const usernameCheck = validateUsername(username);
+    const trimmedUsername = username.trim();
+    if (!trimmedUsername || trimmedUsername.length === 0) {
+      errors.username = 'Username richiesto';
+    } else if (mode === 'register') {
+      const usernameCheck = validateUsername(trimmedUsername);
       if (!usernameCheck.isValid) {
         errors.username = usernameCheck.message;
-      }
-    } else {
-      if (!username || username.trim().length === 0) {
-        errors.username = 'Username richiesto';
       }
     }
 
     // Password validation
-    if (mode === 'register') {
+    if (!password || password.length === 0) {
+      errors.password = 'Password richiesta';
+    } else if (mode === 'register') {
       const passwordCheck = validatePasswordStrength(password);
       if (!passwordCheck.isValid) {
         errors.password = passwordCheck.message;
-      }
-    } else {
-      if (!password || password.length === 0) {
-        errors.password = 'Password richiesta';
       }
     }
 
