@@ -150,11 +150,67 @@ const AIAssistantPage = () => {
 		return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
 	};
 
+	const clearChat = () => {
+		if (window.confirm('Vuoi cancellare tutta la cronologia della chat?')) {
+			setMessages([]);
+			setShowQuickActions(true);
+		}
+	};
+
+	const exportChat = () => {
+		const chatText = messages.map(msg => 
+			`[${msg.timestamp.toLocaleString('it-IT')}] ${msg.role === 'user' ? 'Tu' : 'AI'}: ${msg.content}`
+		).join('\n\n');
+		
+		const blob = new Blob([chatText], { type: 'text/plain' });
+		const url = URL.createObjectURL(blob);
+		const a = document.createElement('a');
+		a.href = url;
+		a.download = `chat-ai-${new Date().toISOString().split('T')[0]}.txt`;
+		a.click();
+		URL.revokeObjectURL(url);
+	};
+
 	return (
 		<div className="ai-assistant-page">
 			<PageBackground />
 			<Topbar />
 			<div className="ai-container">
+				<div className="ai-header">
+					<div className="ai-title">
+						<span className="ai-title-icon">🤖</span>
+						<div className="ai-title-text">
+							<h1>AI Assistant</h1>
+							<p>Genera flashcard intelligenti con l'AI</p>
+						</div>
+					</div>
+					<div className="ai-utilities">
+						<button 
+							className="utility-btn"
+							onClick={exportChat}
+							disabled={messages.length === 0}
+							title="Esporta chat"
+						>
+							<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+								<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+								<polyline points="7 10 12 15 17 10"/>
+								<line x1="12" y1="15" x2="12" y2="3"/>
+							</svg>
+						</button>
+						<button 
+							className="utility-btn"
+							onClick={clearChat}
+							disabled={messages.length === 0}
+							title="Cancella cronologia"
+						>
+							<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+								<polyline points="3 6 5 6 21 6"/>
+								<path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+							</svg>
+						</button>
+					</div>
+				</div>
+				
 				<div className="chat-container">
 					<div className="messages-area">
 						{messages.map((msg, idx) => (
