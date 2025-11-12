@@ -20,7 +20,10 @@ const AIAssistantPage = () => {
 	};
 
 	useEffect(() => {
-		scrollToBottom();
+		// Scroll only when there are messages
+		if (messages.length > 0) {
+			scrollToBottom();
+		}
 	}, [messages]);
 
 	const quickPrompts = [

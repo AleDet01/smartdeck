@@ -1,6 +1,7 @@
 .ai-assistant-page {
 	width: 100%;
 	min-height: 100vh;
+	height: 100vh;
 	background: var(--bg-secondary);
 	position: relative;
 	box-sizing: border-box;
@@ -8,6 +9,7 @@
 	display: flex;
 	flex-direction: column;
 	padding-top: 80px;
+	overflow: hidden;
 }
 
 .ai-assistant-page::before {
@@ -59,6 +61,8 @@
 	gap: 20px;
 	flex: 1;
 	box-sizing: border-box;
+	overflow-y: auto;
+	min-height: 0;
 }
 
 /* Header with utilities */
@@ -667,10 +671,12 @@
 @media (max-width: 600px) {
 	.ai-assistant-page {
 		padding-top: 70px;
+		height: 100vh;
 	}
 
 	.ai-container {
 		padding: 16px 12px;
+		overflow-y: auto;
 	}
 
 	.ai-header {
