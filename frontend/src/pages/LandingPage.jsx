@@ -106,7 +106,7 @@ export default function LandingPage() {
     setLoading(true);
     
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 15000);
+    const timeoutId = setTimeout(() => controller.abort(), 45000); // 45s per cold start Render
     
     try {
       console.log(`📡 Tentativo ${mode} su ${API_HOST}/auth/${mode}`);
@@ -147,9 +147,9 @@ export default function LandingPage() {
       console.error('❌ Errore autenticazione:', err);
       
       if (err.name === 'AbortError') {
-        setError('Timeout: il server non risponde. Verifica la connessione.');
+        setError('Timeout: il server sta avviandosi (attendi 30-60s per il primo accesso). Riprova.');
       } else if (err.message.includes('Failed to fetch')) {
-        setError('Impossibile contattare il server. Verifica che il backend sia attivo.');
+        setError('Errore di rete. Verifica CORS e che il backend sia attivo su Render.');
       } else {
         setError(err.message || 'Errore di connessione');
       }
