@@ -8,6 +8,7 @@
     "dev": "NODE_ENV=development node index.js",
     "prod": "NODE_ENV=production node index.js",
     "optimize-db": "node scripts/optimize-db.js",
+    "test-cors": "node scripts/test-cors.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],

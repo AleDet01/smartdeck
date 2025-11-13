@@ -63,11 +63,17 @@ app.use(mongoSanitize({
 // Protect against HTTP Parameter Pollution
 app.use(hpp());
 
+// Configure allowed origins with production defaults
 const allowedOrigins = process.env.ALLOW_ORIGINS 
   ? process.env.ALLOW_ORIGINS.split(',').map(s => s.trim())
-  : ['http://localhost:3001', 'http://localhost:3000'];
+  : [
+      'http://localhost:3001', 
+      'http://localhost:3000',
+      'https://smartdeck-frontend.onrender.com' // Always allow production frontend
+    ];
 
-if (process.env.NODE_ENV === 'production') {
+// Ensure production frontend is always in the list
+if (process.env.NODE_ENV === 'production' && !allowedOrigins.includes('https://smartdeck-frontend.onrender.com')) {
   allowedOrigins.push('https://smartdeck-frontend.onrender.com');
 }
 
@@ -79,10 +85,12 @@ app.use(cors({
     if (!origin) return callback(null, true);
     
     if (allowedOrigins.includes(origin)) {
+      console.log(`✓ CORS allowed origin: ${origin}`);
       return callback(null, true);
     }
     
-    console.warn(`⚠ CORS blocked origin: ${origin}`);
+    console.warn(`⚠️ CORS blocked origin: ${origin}`);
+    console.warn(`   Expected one of: ${allowedOrigins.join(', ')}`);
     // Return false instead of error to properly handle CORS rejection
     callback(null, false);
   },
@@ -104,6 +112,9 @@ app.use(cors({
   preflightContinue: false,
   optionsSuccessStatus: 204
 }));
+
+// Explicit OPTIONS handler for preflight requests
+app.options('*', cors());
 
 // Root endpoint
 app.get('/', (req, res) => {
