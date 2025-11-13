@@ -3,7 +3,6 @@ const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
 const compression = require('compression');
-const mongoSanitize = require('express-mongo-sanitize');
 const hpp = require('hpp');
 const morgan = require('morgan');
 const connectDB = require('./db');
@@ -102,13 +101,40 @@ app.use(express.json({
 }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// Sanitize data contro NoSQL injection
-app.use(mongoSanitize({
-  replaceWith: '_',
-  onSanitize: ({ req, key }) => {
-    console.warn(`⚠️ Sanitized key detected: ${key} from IP: ${req.ip}`);
+// Sanitize data contro NoSQL injection (custom implementation for Express 5)
+app.use((req, res, next) => {
+  // Sanitize body
+  if (req.body && typeof req.body === 'object') {
+    req.body = sanitizeObject(req.body);
   }
-}));
+  // Sanitize params
+  if (req.params && typeof req.params === 'object') {
+    req.params = sanitizeObject(req.params);
+  }
+  next();
+});
+
+// Helper function to sanitize objects
+function sanitizeObject(obj) {
+  if (obj === null || typeof obj !== 'object') {
+    return obj;
+  }
+  
+  if (Array.isArray(obj)) {
+    return obj.map(item => sanitizeObject(item));
+  }
+  
+  const sanitized = {};
+  for (const key in obj) {
+    // Remove keys starting with $ or containing .
+    if (key.startsWith('$') || key.includes('.')) {
+      console.warn(`⚠️ Sanitized dangerous key: ${key}`);
+      continue;
+    }
+    sanitized[key] = sanitizeObject(obj[key]);
+  }
+  return sanitized;
+}
 
 // Protect against HTTP Parameter Pollution
 app.use(hpp());
