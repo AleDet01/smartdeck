@@ -21,34 +21,82 @@ const getTokenFromReq = (req) => {
 
 const register = async (req, res) => {
   const { username, password } = req.body;
-  if (!username || !password) return res.status(400).json({ error: 'Username e password obbligatori' });
   
   try {
-    if (await User.findOne({ username })) return res.status(409).json({ error: 'Utente già registrato' });
+    // Check if user already exists
+    const existingUser = await User.findOne({ username }).lean();
+    if (existingUser) {
+      return res.status(409).json({ error: 'Utente già registrato' });
+    }
     
-    const user = await User.create({ username, password: await bcrypt.hash(password, 10) });
-    const token = jwt.sign({ id: user._id, username }, JWT_SECRET, { expiresIn: TOKEN_EXPIRY });
+    // Hash password with 12 rounds (sicurezza ottimale)
+    const hashedPassword = await bcrypt.hash(password, 12);
+    
+    // Create user
+    const user = await User.create({ 
+      username: username.toLowerCase(), // Normalizza username
+      password: hashedPassword 
+    });
+    
+    // Generate JWT token
+    const token = jwt.sign(
+      { id: user._id, username: user.username }, 
+      JWT_SECRET, 
+      { expiresIn: TOKEN_EXPIRY }
+    );
     
     setAuthCookie(res, token);
-    res.status(201).json({ message: 'Registrazione avvenuta con successo', userId: user._id, token });
+    
+    console.log(`✓ New user registered: ${username} from IP: ${req.ip}`);
+    
+    res.status(201).json({ 
+      message: 'Registrazione avvenuta con successo', 
+      userId: user._id, 
+      token 
+    });
   } catch (err) {
-    res.status(500).json({ error: 'Errore server', details: err.message });
+    console.error('❌ Registration error:', err);
+    res.status(500).json({ error: 'Errore durante la registrazione' });
   }
 };
 
 const login = async (req, res) => {
   const { username, password } = req.body;
-  if (!username || !password) return res.status(400).json({ error: 'Username e password obbligatori' });
   
   try {
-    const user = await User.findOne({ username });
-    if (!user?.password || !(await bcrypt.compare(password, user.password))) return res.status(401).json({ error: 'Credenziali non valide' });
+    // Find user (case insensitive)
+    const user = await User.findOne({ 
+      username: { $regex: new RegExp(`^${username}$`, 'i') } 
+    }).select('+password').lean();
     
-    const token = jwt.sign({ id: user._id, username }, JWT_SECRET, { expiresIn: TOKEN_EXPIRY });
+    if (!user) {
+      // Generic error per security (non rivelare se utente esiste)
+      console.warn(`⚠️ Login attempt for non-existent user: ${username} from IP: ${req.ip}`);
+      return res.status(401).json({ error: 'Credenziali non valide' });
+    }
+    
+    // Compare password (timing-safe)
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
+      console.warn(`⚠️ Failed login for user: ${username} from IP: ${req.ip}`);
+      return res.status(401).json({ error: 'Credenziali non valide' });
+    }
+    
+    // Generate JWT token
+    const token = jwt.sign(
+      { id: user._id, username: user.username }, 
+      JWT_SECRET, 
+      { expiresIn: TOKEN_EXPIRY }
+    );
+    
     setAuthCookie(res, token);
+    
+    console.log(`✓ User logged in: ${username} from IP: ${req.ip}`);
+    
     res.json({ token });
   } catch (err) {
-    res.status(500).json({ error: 'Errore server', details: err.message });
+    console.error('❌ Login error:', err);
+    res.status(500).json({ error: 'Errore durante il login' });
   }
 };
 
