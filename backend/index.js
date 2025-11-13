@@ -25,44 +25,6 @@ if (process.env.NODE_ENV !== 'production') {
   }));
 }
 
-// Security middleware
-app.use(helmetConfig);
-
-// Compression middleware per gzip
-app.use(compression({
-  filter: (req, res) => {
-    if (req.headers['x-no-compression']) {
-      return false;
-    }
-    return compression.filter(req, res);
-  },
-  level: 6 // Bilanciamento tra velocità e compressione
-}));
-
-// Body parser con limite dimensione
-app.use(express.json({ 
-  limit: '10mb',
-  verify: (req, res, buf) => {
-    try {
-      JSON.parse(buf);
-    } catch (e) {
-      throw new Error('Invalid JSON');
-    }
-  }
-}));
-app.use(express.urlencoded({ extended: true, limit: '10mb' }));
-
-// Sanitize data contro NoSQL injection
-app.use(mongoSanitize({
-  replaceWith: '_',
-  onSanitize: ({ req, key }) => {
-    console.warn(`⚠️ Sanitized key detected: ${key} from IP: ${req.ip}`);
-  }
-}));
-
-// Protect against HTTP Parameter Pollution
-app.use(hpp());
-
 // Configure allowed origins with production defaults
 const allowedOrigins = process.env.ALLOW_ORIGINS 
   ? process.env.ALLOW_ORIGINS.split(',').map(s => s.trim())
@@ -112,6 +74,44 @@ app.use(cors({
   preflightContinue: false,
   optionsSuccessStatus: 204
 }));
+
+// Security middleware (AFTER CORS to avoid conflicts)
+app.use(helmetConfig);
+
+// Compression middleware per gzip
+app.use(compression({
+  filter: (req, res) => {
+    if (req.headers['x-no-compression']) {
+      return false;
+    }
+    return compression.filter(req, res);
+  },
+  level: 6 // Bilanciamento tra velocità e compressione
+}));
+
+// Body parser con limite dimensione
+app.use(express.json({ 
+  limit: '10mb',
+  verify: (req, res, buf) => {
+    try {
+      JSON.parse(buf);
+    } catch (e) {
+      throw new Error('Invalid JSON');
+    }
+  }
+}));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// Sanitize data contro NoSQL injection
+app.use(mongoSanitize({
+  replaceWith: '_',
+  onSanitize: ({ req, key }) => {
+    console.warn(`⚠️ Sanitized key detected: ${key} from IP: ${req.ip}`);
+  }
+}));
+
+// Protect against HTTP Parameter Pollution
+app.use(hpp());
 
 // Root endpoint
 app.get('/', (req, res) => {

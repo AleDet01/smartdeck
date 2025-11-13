@@ -17,10 +17,10 @@ const helmetConfig = helmet({
     },
   },
   
-  // Cross-Origin policies
-  crossOriginEmbedderPolicy: false, // Disabilitato per compatibilità
-  crossOriginResourcePolicy: { policy: "cross-origin" },
-  crossOriginOpenerPolicy: { policy: "same-origin-allow-popups" },
+  // Cross-Origin policies - Permissive per CORS
+  crossOriginEmbedderPolicy: false,
+  crossOriginResourcePolicy: false, // Disabilitato per permettere CORS
+  crossOriginOpenerPolicy: false,
   
   // DNS Prefetch Control
   dnsPrefetchControl: { allow: false },
