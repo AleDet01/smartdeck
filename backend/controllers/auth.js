@@ -64,16 +64,26 @@ const login = async (req, res) => {
   const { username, password } = req.body;
   
   try {
-    // Find user (case insensitive)
+    console.log(`🔍 Login attempt - Username: ${username}, IP: ${req.ip}`);
+    
+    // Validazione input
+    if (!username || !password) {
+      console.warn(`⚠️ Missing credentials from IP: ${req.ip}`);
+      return res.status(400).json({ error: 'Username e password richiesti' });
+    }
+    
+    // Find user (case insensitive) - username è già normalizzato lowercase nel DB
     const user = await User.findOne({ 
-      username: { $regex: new RegExp(`^${username}$`, 'i') } 
-    }).select('+password').lean();
+      username: username.toLowerCase() 
+    }).select('+password');
     
     if (!user) {
       // Generic error per security (non rivelare se utente esiste)
       console.warn(`⚠️ Login attempt for non-existent user: ${username} from IP: ${req.ip}`);
       return res.status(401).json({ error: 'Credenziali non valide' });
     }
+    
+    console.log(`🔍 User found: ${user.username}, checking password...`);
     
     // Compare password (timing-safe)
     const isPasswordValid = await bcrypt.compare(password, user.password);
@@ -96,6 +106,7 @@ const login = async (req, res) => {
     res.json({ token });
   } catch (err) {
     console.error('❌ Login error:', err);
+    console.error('Error stack:', err.stack);
     res.status(500).json({ error: 'Errore durante il login' });
   }
 };

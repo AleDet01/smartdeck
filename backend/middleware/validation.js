@@ -5,11 +5,13 @@ const handleValidationErrors = (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     const firstError = errors.array()[0];
+    console.warn(`⚠️ Validation error: ${firstError.msg} (field: ${firstError.path}) from IP: ${req.ip}`);
     return res.status(400).json({ 
       error: firstError.msg,
       field: firstError.path 
     });
   }
+  console.log(`✓ Validation passed for ${req.method} ${req.path}`);
   next();
 };
 
