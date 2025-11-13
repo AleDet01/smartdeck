@@ -113,9 +113,6 @@ app.use(cors({
   optionsSuccessStatus: 204
 }));
 
-// Explicit OPTIONS handler for preflight requests
-app.options('*', cors());
-
 // Root endpoint
 app.get('/', (req, res) => {
   res.json({ 
