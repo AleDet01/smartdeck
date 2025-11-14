@@ -75,7 +75,7 @@ const login = async (req, res) => {
   const { username, password } = req.body;
   
   try {
-    console.log(`🔍 Login attempt - Username: ${username}, IP: ${req.ip}`);
+    console.log(`🔍 [LOGIN START] Username: ${username}, IP: ${req.ip}`);
     
     // Validazione input
     if (!username || !password) {
@@ -83,8 +83,12 @@ const login = async (req, res) => {
       return res.status(400).json({ error: 'Username e password richiesti' });
     }
     
+    console.log(`✓ [LOGIN] Credentials validated`);
+    
     // Check if MongoDB is connected
     const mongoose = require('mongoose');
+    console.log(`🔍 [LOGIN] MongoDB readyState: ${mongoose.connection.readyState}`);
+    
     if (mongoose.connection.readyState !== 1) {
       console.error('❌ MongoDB not connected, cannot process login');
       return res.status(503).json({ 
@@ -92,38 +96,53 @@ const login = async (req, res) => {
       });
     }
     
+    console.log(`✓ [LOGIN] MongoDB connected, querying user...`);
+    
     // Find user (case insensitive) - username è già normalizzato lowercase nel DB
     const user = await User.findOne({ 
       username: username.toLowerCase() 
     }).select('+password');
     
+    console.log(`🔍 [LOGIN] User query result: ${user ? 'Found' : 'Not found'}`);
+    
     if (!user) {
       // Generic error per security (non rivelare se utente esiste)
-      console.warn(`⚠️ Login attempt for non-existent user: ${username} from IP: ${req.ip}`);
+      console.warn(`⚠️ [LOGIN] User not found: ${username} from IP: ${req.ip}`);
       return res.status(401).json({ error: 'Credenziali non valide' });
     }
     
-    console.log(`🔍 User found: ${user.username}, checking password...`);
+    console.log(`✓ [LOGIN] User found: ${user.username}, checking password...`);
     
     // Compare password (timing-safe)
+    console.log(`🔍 [LOGIN] Comparing password...`);
     const isPasswordValid = await bcrypt.compare(password, user.password);
+    console.log(`🔍 [LOGIN] Password valid: ${isPasswordValid}`);
+    
     if (!isPasswordValid) {
-      console.warn(`⚠️ Failed login for user: ${username} from IP: ${req.ip}`);
+      console.warn(`⚠️ [LOGIN] Invalid password for user: ${username} from IP: ${req.ip}`);
       
       // Incrementa failed attempts e blocca account se necessario
+      console.log(`🔍 [LOGIN] Incrementing failed attempts...`);
       await incrementFailedAttempts(username);
       
-      logger.logAuth('login_failed', username, false, {
-        reason: 'invalid_password',
-        ip: req.ip
-      });
+      console.log(`🔍 [LOGIN] Logging auth failure...`);
+      try {
+        logger.logAuth('login_failed', username, false, {
+          reason: 'invalid_password',
+          ip: req.ip
+        });
+      } catch (logErr) {
+        console.error('❌ [LOGIN] Logger error:', logErr.message);
+      }
       
       return res.status(401).json({ error: 'Credenziali non valide' });
     }
     
+    console.log(`✓ [LOGIN] Password correct, resetting failed attempts...`);
     // Password corretta - resetta failed attempts
     await resetFailedAttempts(username);
     
+    console.log(`🔍 [LOGIN] Generating JWT token...`);
     // Generate JWT token
     const token = jwt.sign(
       { id: user._id, username: user.username }, 
@@ -131,27 +150,37 @@ const login = async (req, res) => {
       { expiresIn: TOKEN_EXPIRY }
     );
     
+    console.log(`🔍 [LOGIN] Setting auth cookie...`);
     setAuthCookie(res, token);
     
-    console.log(`✓ User logged in: ${username} from IP: ${req.ip}`);
+    console.log(`✓ [LOGIN SUCCESS] User logged in: ${username} from IP: ${req.ip}`);
     
-    logger.logAuth('login_success', username, true, {
-      userId: user._id,
-      ip: req.ip
-    });
+    try {
+      logger.logAuth('login_success', username, true, {
+        userId: user._id,
+        ip: req.ip
+      });
+    } catch (logErr) {
+      console.error('❌ [LOGIN] Logger error:', logErr.message);
+    }
     
     res.json({ token });
   } catch (err) {
-    console.error('❌ Login error:', err);
+    console.error('❌❌❌ [LOGIN EXCEPTION] ❌❌❌');
+    console.error('Error:', err);
     console.error('Error stack:', err.stack);
     console.error('Error name:', err.name);
     console.error('Error message:', err.message);
+    console.error('Error code:', err.code);
+    console.error('Request body:', JSON.stringify(req.body));
+    console.error('Request IP:', req.ip);
+    console.error('❌❌❌ [END LOGIN EXCEPTION] ❌❌❌');
     
     // Log più dettagliato per debugging
     try {
       logger.logError(err, req);
     } catch (logErr) {
-      console.error('Failed to log error:', logErr);
+      console.error('Failed to log error:', logErr.message);
     }
     
     res.status(500).json({ 

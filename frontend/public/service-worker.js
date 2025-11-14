@@ -1,6 +1,6 @@
 /* eslint-disable no-restricted-globals */
 
-const CACHE_NAME = 'smartdeck-v1';
+const CACHE_NAME = 'smartdeck-v2'; // Incrementato per forzare refresh
 const urlsToCache = [
   '/',
   '/index.html',
