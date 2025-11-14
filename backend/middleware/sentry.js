@@ -57,6 +57,11 @@ const initSentry = (app) => {
 
 // Error handler deve essere DOPO tutte le routes
 const sentryErrorHandler = () => {
+  // Se Sentry non è configurato, ritorna middleware vuoto
+  if (process.env.NODE_ENV !== 'production' || !process.env.SENTRY_DSN) {
+    return (err, req, res, next) => next(err);
+  }
+  
   return Sentry.Handlers.errorHandler({
     shouldHandleError(error) {
       // Cattura solo errori 5xx
