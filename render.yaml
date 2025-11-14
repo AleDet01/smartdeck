@@ -26,7 +26,7 @@ staticSites:
   - name: smartdeck-frontend
     branch: main
     plan: free
-    buildCommand: "cd frontend && CI=false npm install --legacy-peer-deps && CI=false npm run build"
+    buildCommand: "echo 'No build needed - using pre-built files'"
     publishPath: "frontend/build"
     autoDeploy: true
     rewrites:
