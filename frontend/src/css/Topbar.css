@@ -43,6 +43,19 @@
   font-weight: 600;
 }
 
+/* Language selector in topbar */
+.dashboard-topbar .language-selector {
+  position: relative;
+  margin-left: 4px;
+}
+
+.dashboard-topbar .language-toggle {
+  padding: 6px 10px;
+  min-width: 70px;
+  font-size: 0.85rem;
+  border-radius: var(--radius-full);
+}
+
 .theme-toggle-btn {
   background: transparent;
   border: none;

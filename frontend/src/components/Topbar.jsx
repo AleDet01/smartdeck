@@ -1,12 +1,15 @@
 import { memo, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../utils/themeContext';
+import LanguageSelector from './LanguageSelector';
 import '../css/Topbar.css';
 
 const Topbar = memo(() => {
   const navigate = useNavigate();
   const location = useLocation();
   const { theme, toggleTheme } = useTheme();
+  const { t } = useTranslation();
   
   const isActive = (path) => location.pathname === path || location.pathname.startsWith(path);
   
@@ -16,26 +19,28 @@ const Topbar = memo(() => {
         className={`topbar-btn${isActive('/dashboard') ? ' active' : ''}`} 
         onClick={() => navigate('/dashboard')}
       >
-        Test
+        {t('topbar.home')}
       </button>
       <button 
         className={`topbar-btn${isActive('/ai-assistant') ? ' active' : ''}`} 
         onClick={() => navigate('/ai-assistant')}
       >
-        AI Assistant
+        {t('topbar.aiAssistant')}
       </button>
       <button 
         className={`topbar-btn${isActive('/statistiche') ? ' active' : ''}`} 
         onClick={() => navigate('/statistiche')}
       >
-        Statistiche
+        {t('topbar.statistics')}
       </button>
+      
+      <LanguageSelector />
       
       <button 
         className="theme-toggle-btn"
         onClick={toggleTheme}
-        aria-label="Cambia tema"
-        title={theme === 'light' ? 'Passa al tema scuro' : 'Passa al tema chiaro'}
+        aria-label={t('landing.changeTheme')}
+        title={theme === 'light' ? t('landing.darkTheme') : t('landing.lightTheme')}
       >
         {theme === 'light' ? '🌙' : '☀️'}
       </button>

@@ -1,5 +1,6 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../utils/themeContext';
 import API_HOST from '../utils/apiHost';
 import { 
@@ -11,6 +12,7 @@ import {
   generateFingerprint
 } from '../utils/security';
 import LoadingAnimation from '../components/LoadingAnimation';
+import LanguageSelector from '../components/LanguageSelector';
 import '../css/LandingPage.css';
 
 const loginLimiter = new RateLimiter(5, 15 * 60 * 1000); // 5 attempts per 15 min
@@ -19,6 +21,7 @@ const registerLimiter = new RateLimiter(3, 60 * 60 * 1000); // 3 attempts per ho
 export default function LandingPage() {
   const navigate = useNavigate();
   const { theme, toggleTheme } = useTheme();
+  const { t } = useTranslation();
   const [mode, setMode] = useState('login');
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -168,18 +171,20 @@ export default function LandingPage() {
     <>
       {loading && (
         <LoadingAnimation 
-          message={mode === 'login' ? 'Autenticazione in corso...' : 'Creazione account...'}
+          message={mode === 'login' ? t('landing.loggingIn') : t('landing.creatingAccount')}
         />
       )}
       
       <div className="landing-container">
         <div className="marble-background"></div>
         
+        <LanguageSelector />
+        
         <button 
           className="landing-theme-toggle"
           onClick={toggleTheme}
-          aria-label="Cambia tema"
-          title={theme === 'light' ? 'Passa al tema scuro' : 'Passa al tema chiaro'}
+          aria-label={t('landing.changeTheme')}
+          title={theme === 'light' ? t('landing.darkTheme') : t('landing.lightTheme')}
         >
           {theme === 'light' ? '🌙' : '☀️'}
         </button>
@@ -192,8 +197,8 @@ export default function LandingPage() {
             </div>
             <p className="brand-tagline">
               {mode === 'login' 
-                ? 'Bentornato! Accedi per continuare il tuo percorso di apprendimento' 
-                : 'Inizia il tuo viaggio verso un apprendimento più intelligente'}
+                ? t('landing.welcome')
+                : t('landing.welcomeRegister')}
             </p>
           </div>
 
@@ -205,7 +210,7 @@ export default function LandingPage() {
               className={`mode-btn${mode === 'login' ? ' active' : ''}`}
               onClick={() => { setMode('login'); setError(''); }}
             >
-              Accedi
+              {t('landing.login')}
             </button>
             <button
               type="button"
@@ -214,7 +219,7 @@ export default function LandingPage() {
               className={`mode-btn${mode === 'register' ? ' active' : ''}`}
               onClick={() => { setMode('register'); setError(''); }}
             >
-              Crea Account
+              {t('landing.register')}
             </button>
           </div>
           <form onSubmit={handleSubmit} className="auth-form">
@@ -232,7 +237,7 @@ export default function LandingPage() {
                 aria-invalid={!!validationErrors.username}
                 aria-describedby={validationErrors.username ? "username-error" : undefined}
               />
-              <label htmlFor="username" className="floating-label">Username</label>
+              <label htmlFor="username" className="floating-label">{t('landing.username')}</label>
               {validationErrors.username && (
                 <span id="username-error" className="field-error" role="alert">
                   {validationErrors.username}
@@ -254,14 +259,14 @@ export default function LandingPage() {
                 aria-invalid={!!validationErrors.password}
                 aria-describedby={validationErrors.password ? "password-error" : undefined}
               />
-              <label htmlFor="password" className="floating-label">Password</label>
+              <label htmlFor="password" className="floating-label">{t('landing.password')}</label>
               <button
                 type="button"
                 className="pass-toggle"
-                aria-label={showPassword ? 'Nascondi password' : 'Mostra password'}
+                aria-label={showPassword ? t('landing.hidePassword') : t('landing.showPassword')}
                 onClick={() => setShowPassword(v => !v)}
               >
-                {showPassword ? 'Nascondi' : 'Mostra'}
+                {showPassword ? t('landing.hidePassword') : t('landing.showPassword')}
               </button>
               {mode === 'register' && passwordStrength && (
                 <div className="password-strength">
@@ -288,10 +293,10 @@ export default function LandingPage() {
               {loading ? (
                 <span className="btn-content">
                   <span className="spinner"></span>
-                  Caricamento...
+                  {t('landing.loading')}
                 </span>
               ) : (
-                mode === 'login' ? 'Accedi' : 'Crea Account'
+                mode === 'login' ? t('landing.login') : t('landing.register')
               )}
             </button>
           </form>
@@ -299,13 +304,13 @@ export default function LandingPage() {
           <div className="form-footer">
             <p className="footer-text">
               {mode === 'login' 
-                ? 'Flashcard intelligenti potenziate da AI' 
-                : 'Nessuna carta di credito richiesta'}
+                ? t('landing.tagline')
+                : t('landing.noCreditCard')}
             </p>
             <div className="legal-links">
-              <a href="/#/privacy" className="legal-link">Privacy Policy</a>
+              <a href="/#/privacy" className="legal-link">{t('landing.privacyPolicy')}</a>
               <span className="legal-separator">•</span>
-              <a href="/#/terms" className="legal-link">Termini di Servizio</a>
+              <a href="/#/terms" className="legal-link">{t('landing.terms')}</a>
             </div>
           </div>
         </div>

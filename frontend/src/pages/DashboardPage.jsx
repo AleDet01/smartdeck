@@ -1,5 +1,6 @@
 import { useState, useMemo, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import '../css/DashboardPage.css';
 import Topbar from '../components/Topbar';
 import PageBackground from '../components/PageBackground';
@@ -10,6 +11,7 @@ import { makeConceptImageUrl, makeGradientDataUrl } from '../utils/imageUtils';
 
 const DashboardPage = () => {
 	const navigate = useNavigate();
+	const { t } = useTranslation();
 	const { data, loading } = useFetch(`${API_HOST}/flash/areas/list`);
 
 	const areas = useMemo(() => {
@@ -47,7 +49,7 @@ const DashboardPage = () => {
 				<PageBackground />
 				<Topbar />
 				<div className="areas-grid" id="tests">
-					<div>Caricamento aree...</div>
+					<div>{t('dashboard.loadingAreas')}</div>
 				</div>
 			</div>
 		);
@@ -60,7 +62,7 @@ const DashboardPage = () => {
 			<Topbar />
 			
 			{areas && areas.length === 0 ? (
-				<div className="empty-state">Nessuna area disponibile con flashcards.</div>
+				<div className="empty-state">{t('dashboard.noAreas')}</div>
 			) : (
 				<>
 					{/* Menu selezione rapida */}
@@ -85,7 +87,7 @@ const DashboardPage = () => {
 								className="carousel-nav carousel-prev" 
 								onClick={handlePrev}
 								disabled={currentIndex === 0}
-								aria-label="Precedente"
+								aria-label={t('dashboard.previous')}
 							>
 								<svg width="24" height="24" viewBox="0 0 24 24" fill="none">
 									<path d="M15 18l-6-6 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -141,7 +143,7 @@ const DashboardPage = () => {
 							className="carousel-nav carousel-next" 
 							onClick={handleNext}
 							disabled={currentIndex === (areas?.length || 0) - 1}
-							aria-label="Successivo"
+							aria-label={t('dashboard.next')}
 						>
 							<svg width="24" height="24" viewBox="0 0 24 24" fill="none">
 								<path d="M9 18l6-6-6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>

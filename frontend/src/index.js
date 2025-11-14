@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
+import './i18n'; // Initialize i18n before App
 import App from './App.jsx';
 import { reportWebVitals } from './utils/reportWebVitals';
 import * as serviceWorkerRegistration from './utils/serviceWorkerRegistration';
