@@ -75,6 +75,8 @@ const createFlashcards = async (req, res) => {
 const listThematicAreas = async (req, res) => {
 	try {
 		const userId = getUserId(req);
+		console.log(`🔍 [listThematicAreas] Query for userId: ${userId}`);
+		
 		// Aggregation pipeline per contare flashcard per area (più veloce di distinct + count separati)
 		const areasWithCount = await Flashcard.aggregate([
 			{ $match: buildUserQuery(userId, { isActive: { $ne: false } }) },
@@ -86,6 +88,9 @@ const listThematicAreas = async (req, res) => {
 			{ $sort: { count: -1 } }, // Aree con più flashcard prima
 			{ $project: { area: '$_id', count: 1, lastCreated: 1, _id: 0 }}
 		]);
+		
+		console.log(`✓ [listThematicAreas] Found ${areasWithCount.length} areas for userId: ${userId}`);
+		console.log(`   Areas:`, areasWithCount.map(a => `${a.area} (${a.count})`).join(', '));
 		
 		res.json({ 
 			areas: areasWithCount.map(a => a.area), // Retrocompatibilità

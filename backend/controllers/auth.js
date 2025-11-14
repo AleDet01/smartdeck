@@ -142,6 +142,13 @@ const login = async (req, res) => {
     // Password corretta - resetta failed attempts
     await resetFailedAttempts(username);
     
+    console.log(`🔍 [LOGIN] User details:`, {
+      _id: user._id,
+      username: user.username,
+      createdAt: user.createdAt,
+      lastLogin: user.lastLogin
+    });
+    
     console.log(`🔍 [LOGIN] Generating JWT token...`);
     // Generate JWT token
     const token = jwt.sign(
@@ -150,10 +157,15 @@ const login = async (req, res) => {
       { expiresIn: TOKEN_EXPIRY }
     );
     
+    console.log(`🔍 [LOGIN] Token generated for userId: ${user._id}`);
     console.log(`🔍 [LOGIN] Setting auth cookie...`);
     setAuthCookie(res, token);
     
-    console.log(`✓ [LOGIN SUCCESS] User logged in: ${username} from IP: ${req.ip}`);
+    // Update last login
+    user.lastLogin = new Date();
+    await user.save();
+    
+    console.log(`✓ [LOGIN SUCCESS] User logged in: ${username} (userId: ${user._id}) from IP: ${req.ip}`);
     
     try {
       logger.logAuth('login_success', username, true, {
@@ -213,13 +225,22 @@ const optionalAuthMiddleware = (req, res, next) => {
 };
 
 const me = (req, res) => {
+  console.log(`🔍 [/auth/me] Checking authentication from IP: ${req.ip}`);
+  
   const token = getTokenFromReq(req);
-  if (!token) return res.json({ authenticated: false, user: null });
+  if (!token) {
+    console.log(`⚠️ [/auth/me] No token found`);
+    return res.json({ authenticated: false, user: null });
+  }
+  
+  console.log(`🔍 [/auth/me] Token found, verifying...`);
   
   try {
     const { id, username } = jwt.verify(token, JWT_SECRET);
+    console.log(`✓ [/auth/me] Token valid - userId: ${id}, username: ${username}`);
     res.json({ authenticated: true, user: { id, username } });
-  } catch {
+  } catch (err) {
+    console.warn(`⚠️ [/auth/me] Token invalid or expired: ${err.message}`);
     res.json({ authenticated: false, user: null });
   }
 };
