@@ -7,14 +7,21 @@
     "start": "node index.js",
     "dev": "NODE_ENV=development node index.js",
     "prod": "NODE_ENV=production node index.js",
+    "init-indexes": "node scripts/init-indexes.js",
+    "backup-db": "node scripts/backup-db.js",
     "optimize-db": "node scripts/optimize-db.js",
     "test-cors": "node scripts/test-cors.js",
+    "logs": "tail -f logs/application-*.log",
+    "logs:error": "tail -f logs/error-*.log",
+    "health-check": "curl http://localhost:3000/health",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@sentry/node": "^10.25.0",
+    "@sentry/profiling-node": "^10.25.0",
     "bcrypt": "^6.0.0",
     "compression": "^1.8.1",
     "cors": "^2.8.5",
@@ -25,9 +32,13 @@
     "express-validator": "^7.3.0",
     "helmet": "^8.1.0",
     "hpp": "^0.2.3",
+    "ioredis": "^5.8.2",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.18.1",
     "morgan": "^1.10.1",
-    "openai": "^4.20.0"
+    "openai": "^4.20.0",
+    "rate-limit-redis": "^4.2.3",
+    "winston": "^3.18.3",
+    "winston-daily-rotate-file": "^5.0.0"
   }
 }

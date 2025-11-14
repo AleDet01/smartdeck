@@ -8,19 +8,25 @@ const morgan = require('morgan');
 const connectDB = require('./db');
 const helmetConfig = require('./middleware/security');
 const { apiLimiter } = require('./middleware/rateLimiter');
+const { initSentry, sentryErrorHandler } = require('./middleware/sentry');
+const logger = require('./utils/logger');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Initialize Sentry (deve essere PRIMA di tutto)
+initSentry(app);
+
 // Trust proxy for rate limiting behind reverse proxy (Render)
 app.set('trust proxy', 1);
 
-// Logging middleware (only in development)
+// Logging middleware con Winston
 if (process.env.NODE_ENV !== 'production') {
   app.use(morgan('dev'));
 } else {
   app.use(morgan('combined', {
-    skip: (req, res) => res.statusCode < 400 // Log solo errori in produzione
+    stream: logger.stream,
+    skip: (req, res) => res.statusCode < 400
   }));
 }
 
@@ -150,7 +156,7 @@ app.get('/', (req, res) => {
 });
 
 // Health check endpoint (SEMPRE 200 per evitare timeout su Render)
-app.get('/health', (req, res) => {
+app.get('/health', async (req, res) => {
   const mongoState = mongoose.connection.readyState;
   const mongoStateMap = {
     0: 'disconnected',
@@ -159,19 +165,43 @@ app.get('/health', (req, res) => {
     3: 'disconnecting'
   };
   
+  const memUsage = process.memoryUsage();
+  
   const health = {
-    status: mongoState === 1 ? 'ok' : 'starting',
+    status: mongoState === 1 ? 'healthy' : 'degraded',
     timestamp: new Date().toISOString(),
-    uptime: process.uptime(),
+    uptime: Math.round(process.uptime()),
+    environment: process.env.NODE_ENV || 'development',
+    version: require('./package.json').version || '1.0.0',
     database: {
       state: mongoStateMap[mongoState] || 'unknown',
-      connected: mongoState === 1
+      connected: mongoState === 1,
+      ...(mongoState === 1 && {
+        name: mongoose.connection.name,
+        host: mongoose.connection.host
+      })
     },
     memory: {
-      used: Math.round(process.memoryUsage().heapUsed / 1024 / 1024) + ' MB',
-      total: Math.round(process.memoryUsage().heapTotal / 1024 / 1024) + ' MB'
+      heapUsed: Math.round(memUsage.heapUsed / 1024 / 1024) + ' MB',
+      heapTotal: Math.round(memUsage.heapTotal / 1024 / 1024) + ' MB',
+      rss: Math.round(memUsage.rss / 1024 / 1024) + ' MB',
+      external: Math.round(memUsage.external / 1024 / 1024) + ' MB'
+    },
+    cpu: {
+      user: Math.round(process.cpuUsage().user / 1000),
+      system: Math.round(process.cpuUsage().system / 1000)
     }
   };
+  
+  // Aggiungi metriche DB se connesso
+  if (mongoState === 1) {
+    try {
+      const collections = await mongoose.connection.db.listCollections().toArray();
+      health.database.collections = collections.length;
+    } catch (err) {
+      logger.warn('Health check: impossibile leggere collections', { error: err.message });
+    }
+  }
   
   // SEMPRE 200 OK anche se DB non connesso - Render needs this!
   res.status(200).json(health);
@@ -186,8 +216,16 @@ app.use('/flash', require('./routes/flash'));
 app.use('/statistics', require('./routes/statistics'));
 app.use('/ai-assistant', require('./routes/aiAssistant'));
 
+// Sentry error handler (PRIMA del nostro error handler)
+app.use(sentryErrorHandler());
+
 // 404 handler
 app.use((req, res) => {
+  logger.warn('404 Not Found', {
+    path: req.path,
+    method: req.method,
+    ip: req.ip
+  });
   res.status(404).json({ 
     error: 'Endpoint non trovato',
     path: req.path,
@@ -197,7 +235,8 @@ app.use((req, res) => {
 
 // Global error handler
 app.use((err, req, res, next) => {
-  console.error('❌ Error:', err);
+  // Log error con Winston
+  logger.logError(err, req);
   
   // Mongoose validation error
   if (err.name === 'ValidationError') {
@@ -225,12 +264,13 @@ app.use((err, req, res, next) => {
   }
   
   // Invalid JSON
-  if (err.message === 'Invalid JSON') {
+  if (err.type === 'entity.parse.failed') {
     return res.status(400).json({ error: 'JSON non valido' });
   }
   
   // Default error
-  res.status(err.status || 500).json({ 
+  const statusCode = err.status || err.statusCode || 500;
+  res.status(statusCode).json({ 
     error: process.env.NODE_ENV === 'production' 
       ? 'Errore interno del server' 
       : err.message,
@@ -280,6 +320,12 @@ let server;
 
 // Avvia server prima di MongoDB per rispondere subito ad health checks
 server = app.listen(PORT, () => {
+  logger.info(`Server avviato su porta ${PORT}`, {
+    environment: process.env.NODE_ENV || 'development',
+    corsOrigins: allowedOrigins,
+    nodeVersion: process.version,
+    pid: process.pid
+  });
   console.log(`✓ Server avviato su porta ${PORT}`);
   console.log(`✓ Ambiente: ${process.env.NODE_ENV || 'development'}`);
   console.log(`✓ CORS origins: ${allowedOrigins.join(', ')}`);
@@ -289,9 +335,11 @@ server = app.listen(PORT, () => {
 // Connetti MongoDB in background (non blocca startup)
 connectDB()
   .then(() => {
+    logger.info('MongoDB connesso con successo');
     console.log('✓ MongoDB connesso con successo');
   })
   .catch(err => {
+    logger.error('Errore connessione MongoDB', { error: err.message });
     console.error('❌ Errore connessione MongoDB:', err.message);
     console.error('⚠️ Server attivo ma database non disponibile');
     process.exit(1);
