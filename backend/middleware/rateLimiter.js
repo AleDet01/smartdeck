@@ -42,15 +42,24 @@ const authLimiter = rateLimit({
   skipSuccessfulRequests: false,
   store, // Redis se disponibile, altrimenti memory
   handler: (req, res) => {
-    logger.warn('Rate limit exceeded', { 
-      type: 'auth', 
-      ip: req.ip,
-      endpoint: req.originalUrl 
-    });
+    console.log(`⚠️ [AUTH_RATE_LIMIT] Rate limit exceeded for IP: ${req.ip}, endpoint: ${req.originalUrl}`);
+    try {
+      logger.warn('Rate limit exceeded', { 
+        type: 'auth', 
+        ip: req.ip,
+        endpoint: req.originalUrl 
+      });
+    } catch (err) {
+      console.warn(`⚠️ [AUTH_RATE_LIMIT] Logger failed: ${err.message}`);
+    }
     res.status(429).json({ 
       error: 'Troppi tentativi di login. Riprova tra 15 minuti.',
       retryAfter: Math.ceil(req.rateLimit.resetTime / 1000)
     });
+  },
+  skip: (req) => {
+    console.log(`🔍 [AUTH_RATE_LIMIT] Checking rate limit for IP: ${req.ip}, path: ${req.path}`);
+    return false; // Non skippa mai, applica sempre
   }
 });
 

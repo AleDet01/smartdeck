@@ -2,16 +2,19 @@ const { body, param, query, validationResult } = require('express-validator');
 
 // Middleware per gestire errori di validazione
 const handleValidationErrors = (req, res, next) => {
+  console.log(`🔍 [VALIDATION] Checking ${req.method} ${req.path}, Body:`, JSON.stringify(req.body));
+  
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     const firstError = errors.array()[0];
-    console.warn(`⚠️ Validation error: ${firstError.msg} (field: ${firstError.path}) from IP: ${req.ip}`);
+    console.warn(`⚠️ [VALIDATION] Error: ${firstError.msg} (field: ${firstError.path}) from IP: ${req.ip}`);
     return res.status(400).json({ 
       error: firstError.msg,
       field: firstError.path 
     });
   }
-  console.log(`✓ Validation passed for ${req.method} ${req.path}`);
+  
+  console.log(`✓ [VALIDATION] Passed for ${req.method} ${req.path}`);
   next();
 };
 

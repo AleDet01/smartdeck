@@ -95,34 +95,60 @@ const hppConfig = hpp({
  * Blocca account dopo troppi tentativi di login falliti
  */
 const accountLockout = async (req, res, next) => {
-  if (req.path !== '/api/auth/login' || req.method !== 'POST') {
+  // Questo middleware è applicato solo alla route /auth, quindi qui req.path sarà /login
+  console.log(`🔍 [ACCOUNT_LOCKOUT] Path: ${req.path}, Method: ${req.method}`);
+  
+  if (req.path !== '/login' || req.method !== 'POST') {
+    console.log(`✓ [ACCOUNT_LOCKOUT] Skipping - not a login request`);
     return next();
   }
 
   try {
     const { username } = req.body;
-    if (!username) return next();
+    console.log(`🔍 [ACCOUNT_LOCKOUT] Checking account lockout for username: ${username}`);
+    
+    if (!username) {
+      console.log(`⚠️ [ACCOUNT_LOCKOUT] No username provided, skipping check`);
+      return next();
+    }
 
     // Check if MongoDB is connected
     const mongoose = require('mongoose');
+    console.log(`🔍 [ACCOUNT_LOCKOUT] MongoDB readyState: ${mongoose.connection.readyState}`);
+    
     if (mongoose.connection.readyState !== 1) {
-      console.warn('⚠️ MongoDB not ready yet, skipping account lockout check');
+      console.warn('⚠️ [ACCOUNT_LOCKOUT] MongoDB not ready yet, skipping account lockout check');
       return next();
     }
 
     const User = require('../models/user');
-    const user = await User.findOne({ username });
+    console.log(`🔍 [ACCOUNT_LOCKOUT] Querying user...`);
+    
+    const user = await User.findOne({ username: username.toLowerCase() }).lean();
+    console.log(`🔍 [ACCOUNT_LOCKOUT] User found: ${user ? 'Yes' : 'No'}`);
 
-    if (!user) return next(); // User non esiste, procedi (fallirà dopo)
+    if (!user) {
+      console.log(`✓ [ACCOUNT_LOCKOUT] User not found, proceeding to controller`);
+      return next(); // User non esiste, procedi (fallirà dopo)
+    }
 
     // Controlla se account è bloccato
+    console.log(`🔍 [ACCOUNT_LOCKOUT] Checking lockUntil: ${user.lockUntil}, Now: ${Date.now()}`);
+    
     if (user.lockUntil && user.lockUntil > Date.now()) {
       const minutesLeft = Math.ceil((user.lockUntil - Date.now()) / 60000);
-      logger.warn(`Login attempt on locked account`, {
-        username,
-        ip: req.ip,
-        minutesLeft,
-      });
+      console.warn(`⚠️ [ACCOUNT_LOCKOUT] Account is locked for ${minutesLeft} minutes`);
+      
+      try {
+        logger.warn(`Login attempt on locked account`, {
+          username,
+          ip: req.ip,
+          minutesLeft,
+        });
+      } catch (logErr) {
+        console.warn(`⚠️ [ACCOUNT_LOCKOUT] Logger failed: ${logErr.message}`);
+      }
+      
       return res.status(423).json({
         error: 'Account temporaneamente bloccato',
         message: `Troppi tentativi falliti. Riprova tra ${minutesLeft} minuti.`,
@@ -130,9 +156,15 @@ const accountLockout = async (req, res, next) => {
       });
     }
 
+    console.log(`✓ [ACCOUNT_LOCKOUT] Account not locked, proceeding to controller`);
     next();
   } catch (error) {
-    logger.error('Error in accountLockout middleware:', error);
+    console.error('❌ [ACCOUNT_LOCKOUT] Exception:', error);
+    try {
+      logger.error('Error in accountLockout middleware:', error);
+    } catch (logErr) {
+      console.error('❌ [ACCOUNT_LOCKOUT] Logger failed:', logErr.message);
+    }
     next(); // In caso di errore, lascia passare (fail-open)
   }
 };
