@@ -223,7 +223,193 @@ const chatWithAI = async (req, res) => {
 	}
 };
 
+// Streaming chat avanzata
+const streamChatWithAI = async (req, res) => {
+	try {
+		const userId = req.user?.id;
+		if (!userId) {
+			return res.status(401).json({ error: 'Utente non autenticato' });
+		}
+
+		const { prompt, model = 'gpt-4o', conversationHistory = [], files = null } = req.body;
+
+		if (!prompt || prompt.trim().length === 0) {
+			return res.status(400).json({ error: 'Prompt richiesto' });
+		}
+
+		const client = initOpenAI();
+		if (!client) {
+			return res.status(500).json({ 
+				error: 'API Key OpenAI non configurata',
+				fallback: true 
+			});
+		}
+
+		// Headers per Server-Sent Events
+		res.setHeader('Content-Type', 'text/event-stream');
+		res.setHeader('Cache-Control', 'no-cache');
+		res.setHeader('Connection', 'keep-alive');
+
+		// Sistema prompt avanzato
+		const systemPrompt = `Sei un assistente AI educativo avanzato integrato in SmartDeck.
+
+CAPACITÀ PRINCIPALI:
+- Generare test e quiz intelligenti su qualsiasi argomento
+- Rispondere a domande educative con spiegazioni chiare
+- Analizzare documenti e creare flashcard
+- Fornire spiegazioni dettagliate e esempi pratici
+
+STILE DI RISPOSTA:
+- Professionale ma amichevole
+- Usa esempi concreti quando possibile
+- Struttura risposte con bullet points quando utile
+- Usa emoji occasionalmente per rendere il testo più vivace
+- Rispondi sempre in italiano eccellente
+
+FORMATTAZIONE:
+- Usa **grassetto** per concetti importanti
+- Usa elenchi puntati per liste
+- Usa numeri per passaggi sequenziali
+- Usa \`code\` per termini tecnici
+
+Se l'utente chiede di generare un test, crea un JSON strutturato con domande e risposte.`;
+
+		// Costruisci messaggi con contesto
+		const messages = [
+			{ role: 'system', content: systemPrompt },
+			...conversationHistory.slice(-10), // Ultimi 10 messaggi
+			{ role: 'user', content: prompt }
+		];
+
+		// Aggiungi file context se presenti
+		if (files && files.length > 0) {
+			const filesContext = `\n\n[File allegati: ${files.map(f => f.name).join(', ')}]\n\nAnalizza il contenuto e rispondi alla richiesta dell'utente.`;
+			messages[messages.length - 1].content += filesContext;
+		}
+
+		console.log(`🤖 Streaming ${model}: "${prompt.substring(0, 100)}..."`);
+
+		// Verifica se è una richiesta di generazione test
+		const isTestGeneration = /genera|crea|test|quiz|flashcard|domande|esercizi/i.test(prompt);
+
+		if (isTestGeneration) {
+			// Usa response_format JSON per test generation
+			try {
+				const completion = await client.chat.completions.create({
+					model: model === 'o1-preview' ? 'gpt-4o' : model,
+					messages,
+					temperature: 0.7,
+					response_format: { type: "json_object" },
+					max_tokens: 3000
+				});
+
+				const content = completion.choices?.[0]?.message?.content || '';
+				const testData = JSON.parse(content);
+
+				// Valida e salva
+				if (testData.thematicArea && Array.isArray(testData.questions)) {
+					const docs = testData.questions.map(q => ({
+						question: q.question,
+						answers: q.answers,
+						thematicArea: testData.thematicArea,
+						difficulty: q.difficulty || 'media',
+						createdBy: userId
+					}));
+
+					const created = await Flashcard.insertMany(docs);
+
+					// Invia risposta con test generato
+					const responseMessage = `✅ **Test Generato con Successo!**\n\n📚 **Argomento:** ${testData.thematicArea}\n📝 **Domande create:** ${created.length}\n\nIl test è stato salvato nella tua Dashboard. Puoi iniziare subito a studiare!`;
+
+					res.write(`data: ${JSON.stringify({ 
+						content: responseMessage,
+						testGenerated: true,
+						testData: { thematicArea: testData.thematicArea, questionCount: created.length },
+						tokens: { 
+							input: completion.usage?.prompt_tokens || 0,
+							output: completion.usage?.completion_tokens || 0,
+							total: completion.usage?.total_tokens || 0
+						}
+					})}\n\n`);
+				}
+
+				res.write('data: [DONE]\n\n');
+				res.end();
+
+			} catch (error) {
+				console.error('❌ Errore generazione test:', error);
+				res.write(`data: ${JSON.stringify({ error: 'Errore nella generazione del test. Prova a riformulare la richiesta.' })}\n\n`);
+				res.write('data: [DONE]\n\n');
+				res.end();
+			}
+
+		} else {
+			// Chat normale con streaming
+			try {
+				const stream = await client.chat.completions.create({
+					model: model === 'o1-preview' ? 'gpt-4o' : model,
+					messages,
+					temperature: 0.8,
+					max_tokens: 2000,
+					stream: true
+				});
+
+				let totalTokens = 0;
+				let inputTokens = 0;
+				let outputTokens = 0;
+
+				for await (const chunk of stream) {
+					const content = chunk.choices?.[0]?.delta?.content || '';
+					
+					if (content) {
+						res.write(`data: ${JSON.stringify({ content })}\n\n`);
+					}
+
+					// Aggiorna token count
+					if (chunk.usage) {
+						inputTokens = chunk.usage.prompt_tokens || inputTokens;
+						outputTokens = chunk.usage.completion_tokens || outputTokens;
+						totalTokens = chunk.usage.total_tokens || totalTokens;
+					}
+				}
+
+				// Invia token stats finali
+				res.write(`data: ${JSON.stringify({ 
+					tokens: { 
+						input: inputTokens,
+						output: outputTokens,
+						total: totalTokens
+					}
+				})}\n\n`);
+
+				res.write('data: [DONE]\n\n');
+				res.end();
+
+				console.log(`✓ Streaming completato - ${totalTokens} tokens`);
+
+			} catch (error) {
+				console.error('❌ Errore streaming:', error);
+				res.write(`data: ${JSON.stringify({ error: error.message || 'Errore di connessione' })}\n\n`);
+				res.write('data: [DONE]\n\n');
+				res.end();
+			}
+		}
+
+	} catch (err) {
+		console.error('❌ Errore streamChatWithAI:', err);
+		
+		if (!res.headersSent) {
+			res.status(500).json({ error: 'Errore nel servizio AI', details: err.message });
+		} else {
+			res.write(`data: ${JSON.stringify({ error: 'Errore interno del server' })}\n\n`);
+			res.write('data: [DONE]\n\n');
+			res.end();
+		}
+	}
+};
+
 module.exports = {
 	generateTestWithAI,
-	chatWithAI
+	chatWithAI,
+	streamChatWithAI
 };
