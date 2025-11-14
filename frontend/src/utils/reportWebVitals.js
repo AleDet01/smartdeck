@@ -1,4 +1,4 @@
-import { onCLS, onFID, onFCP, onLCP, onTTFB } from 'web-vitals';
+import { getCLS, getFID, getFCP, getLCP, getTTFB } from 'web-vitals';
 
 /**
  * Traccia Core Web Vitals e invia a Analytics/Monitoring
@@ -70,14 +70,14 @@ function getRating(metric, value) {
  * Funzione da chiamare in index.js per iniziare il tracking
  */
 export function reportWebVitals() {
-  onCLS(sendToAnalytics);  // Cumulative Layout Shift
-  onFID(sendToAnalytics);  // First Input Delay
-  onFCP(sendToAnalytics);  // First Contentful Paint
-  onLCP(sendToAnalytics);  // Largest Contentful Paint
-  onTTFB(sendToAnalytics); // Time to First Byte
+  getCLS(sendToAnalytics);  // Cumulative Layout Shift
+  getFID(sendToAnalytics);  // First Input Delay
+  getFCP(sendToAnalytics);  // First Contentful Paint
+  getLCP(sendToAnalytics);  // Largest Contentful Paint
+  getTTFB(sendToAnalytics); // Time to First Byte
 }
 
 /**
  * Export singole metriche per uso custom
  */
-export { onCLS, onFID, onFCP, onLCP, onTTFB };
+export { getCLS, getFID, getFCP, getLCP, getTTFB };
