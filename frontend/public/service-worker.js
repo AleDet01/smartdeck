@@ -4,8 +4,6 @@ const CACHE_NAME = 'smartdeck-v1';
 const urlsToCache = [
   '/',
   '/index.html',
-  '/static/css/main.css',
-  '/static/js/main.js',
   '/manifest.json',
 ];
 
@@ -15,9 +13,23 @@ self.addEventListener('install', (event) => {
     caches.open(CACHE_NAME)
       .then((cache) => {
         console.log('[ServiceWorker] Caching app shell');
-        return cache.addAll(urlsToCache);
+        // Use addAll with error handling for each URL
+        return Promise.allSettled(
+          urlsToCache.map(url => 
+            cache.add(url).catch(err => {
+              console.warn(`[ServiceWorker] Failed to cache ${url}:`, err.message);
+              return null;
+            })
+          )
+        );
       })
-      .then(() => self.skipWaiting())
+      .then(() => {
+        console.log('[ServiceWorker] Install complete');
+        return self.skipWaiting();
+      })
+      .catch(err => {
+        console.error('[ServiceWorker] Install failed:', err);
+      })
   );
 });
 

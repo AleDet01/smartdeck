@@ -25,6 +25,15 @@ const register = async (req, res) => {
   const { username, password } = req.body;
   
   try {
+    // Check if MongoDB is connected
+    const mongoose = require('mongoose');
+    if (mongoose.connection.readyState !== 1) {
+      console.error('❌ MongoDB not connected, cannot process registration');
+      return res.status(503).json({ 
+        error: 'Database non disponibile. Il server si sta avviando, riprova tra qualche secondo.' 
+      });
+    }
+    
     // Check if user already exists
     const existingUser = await User.findOne({ username }).lean();
     if (existingUser) {
@@ -72,6 +81,15 @@ const login = async (req, res) => {
     if (!username || !password) {
       console.warn(`⚠️ Missing credentials from IP: ${req.ip}`);
       return res.status(400).json({ error: 'Username e password richiesti' });
+    }
+    
+    // Check if MongoDB is connected
+    const mongoose = require('mongoose');
+    if (mongoose.connection.readyState !== 1) {
+      console.error('❌ MongoDB not connected, cannot process login');
+      return res.status(503).json({ 
+        error: 'Database non disponibile. Il server si sta avviando, riprova tra qualche secondo.' 
+      });
     }
     
     // Find user (case insensitive) - username è già normalizzato lowercase nel DB
@@ -126,7 +144,20 @@ const login = async (req, res) => {
   } catch (err) {
     console.error('❌ Login error:', err);
     console.error('Error stack:', err.stack);
-    res.status(500).json({ error: 'Errore durante il login' });
+    console.error('Error name:', err.name);
+    console.error('Error message:', err.message);
+    
+    // Log più dettagliato per debugging
+    try {
+      logger.logError(err, req);
+    } catch (logErr) {
+      console.error('Failed to log error:', logErr);
+    }
+    
+    res.status(500).json({ 
+      error: 'Errore interno del server',
+      ...(process.env.NODE_ENV !== 'production' && { details: err.message })
+    });
   }
 };
 

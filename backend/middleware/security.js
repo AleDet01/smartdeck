@@ -70,11 +70,15 @@ const helmetConfig = helmet({
 const mongoSanitizeConfig = mongoSanitize({
   replaceWith: '_',
   onSanitize: ({ req, key }) => {
-    logger.warn(`MongoDB injection attempt detected`, {
-      ip: req.ip,
-      key: key,
-      path: req.path,
-    });
+    try {
+      logger.warn(`MongoDB injection attempt detected`, {
+        ip: req.ip,
+        key: key,
+        path: req.path,
+      });
+    } catch (err) {
+      console.warn(`MongoDB injection attempt from ${req.ip} on ${req.path}`);
+    }
   },
 });
 
@@ -98,6 +102,13 @@ const accountLockout = async (req, res, next) => {
   try {
     const { username } = req.body;
     if (!username) return next();
+
+    // Check if MongoDB is connected
+    const mongoose = require('mongoose');
+    if (mongoose.connection.readyState !== 1) {
+      console.warn('⚠️ MongoDB not ready yet, skipping account lockout check');
+      return next();
+    }
 
     const User = require('../models/user');
     const user = await User.findOne({ username });
