@@ -16,10 +16,10 @@ const connectDB = async (retries = 5) => {
     maxPoolSize: 10,
     minPoolSize: 2,
     
-    // Timeouts
-    serverSelectionTimeoutMS: 5000,
+    // Timeouts (aggressivi per Render deploy speed)
+    serverSelectionTimeoutMS: 8000, // Era 5000
     socketTimeoutMS: 45000,
-    connectTimeoutMS: 10000,
+    connectTimeoutMS: 15000, // Era 10000
     
     // Auto index (false in produzione per performance)
     autoIndex: process.env.NODE_ENV !== 'production',

@@ -149,7 +149,7 @@ app.get('/', (req, res) => {
   });
 });
 
-// Health check endpoint
+// Health check endpoint (SEMPRE 200 per evitare timeout su Render)
 app.get('/health', (req, res) => {
   const mongoState = mongoose.connection.readyState;
   const mongoStateMap = {
@@ -160,7 +160,7 @@ app.get('/health', (req, res) => {
   };
   
   const health = {
-    status: mongoState === 1 ? 'ok' : 'degraded',
+    status: mongoState === 1 ? 'ok' : 'starting',
     timestamp: new Date().toISOString(),
     uptime: process.uptime(),
     database: {
@@ -173,7 +173,8 @@ app.get('/health', (req, res) => {
     }
   };
   
-  res.status(mongoState === 1 ? 200 : 503).json(health);
+  // SEMPRE 200 OK anche se DB non connesso - Render needs this!
+  res.status(200).json(health);
 });
 
 // Apply general API rate limiting
@@ -274,18 +275,24 @@ process.on('uncaughtException', (err) => {
   gracefulShutdown('UNCAUGHT_EXCEPTION');
 });
 
-// Start server
+// Start server IMMEDIATAMENTE (non aspettare MongoDB)
 let server;
+
+// Avvia server prima di MongoDB per rispondere subito ad health checks
+server = app.listen(PORT, () => {
+  console.log(`✓ Server avviato su porta ${PORT}`);
+  console.log(`✓ Ambiente: ${process.env.NODE_ENV || 'development'}`);
+  console.log(`✓ CORS origins: ${allowedOrigins.join(', ')}`);
+  console.log('⏳ Connessione MongoDB in corso...');
+});
+
+// Connetti MongoDB in background (non blocca startup)
 connectDB()
   .then(() => {
-    console.log('✓ MongoDB connesso');
-    server = app.listen(PORT, () => {
-      console.log(`✓ Server avviato su porta ${PORT}`);
-      console.log(`✓ Ambiente: ${process.env.NODE_ENV || 'development'}`);
-      console.log(`✓ CORS origins: ${allowedOrigins.join(', ')}`);
-    });
+    console.log('✓ MongoDB connesso con successo');
   })
   .catch(err => {
-    console.error('✗ Errore connessione MongoDB:', err.message);
+    console.error('❌ Errore connessione MongoDB:', err.message);
+    console.error('⚠️ Server attivo ma database non disponibile');
     process.exit(1);
   });
