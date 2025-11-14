@@ -318,11 +318,14 @@ Se l'utente chiede di generare un test, crea un JSON strutturato con domande e r
 
 					const created = await Flashcard.insertMany(docs);
 
-					// Invia risposta con test generato
-					const responseMessage = `✅ **Test Generato con Successo!**\n\n📚 **Argomento:** ${testData.thematicArea}\n📝 **Domande create:** ${created.length}\n\nIl test è stato salvato nella tua Dashboard. Puoi iniziare subito a studiare!`;
+					// CORRETTO: Invia il contenuto completo come streaming
+					const responseMessage = `Test Generato: ${testData.thematicArea}\n\n${created.length} domande create con successo!\n\nIl test è disponibile nella Dashboard.`;
 
+					// Invia contenuto
+					res.write(`data: ${JSON.stringify({ content: responseMessage })}\n\n`);
+					
+					// Poi invia metadata test
 					res.write(`data: ${JSON.stringify({ 
-						content: responseMessage,
 						testGenerated: true,
 						testData: { thematicArea: testData.thematicArea, questionCount: created.length },
 						tokens: { 
