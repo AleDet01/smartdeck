@@ -7,6 +7,7 @@ export const useFetch = (url, options = {}) => {
   const [error, setError] = useState(null);
 
   // Memoizza options per evitare re-fetch inutili
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const memoizedOptions = useMemo(() => options, [JSON.stringify(options)]);
 
   useEffect(() => {
@@ -99,5 +100,6 @@ export const useAdaptiveFontSize = (selector, deps = []) => {
       window.removeEventListener('resize', onResize);
       clearTimeout(retry);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, deps);
 };
