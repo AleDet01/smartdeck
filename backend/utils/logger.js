@@ -3,10 +3,21 @@ const DailyRotateFile = require('winston-daily-rotate-file');
 const fs = require('fs');
 const path = require('path');
 
-// Crea directory logs se non esiste
+// Crea directory logs se non esiste (solo in development o se writable)
 const logsDir = path.join(__dirname, '../logs');
-if (!fs.existsSync(logsDir)) {
-  fs.mkdirSync(logsDir, { recursive: true });
+let canWriteLogs = false;
+try {
+  if (!fs.existsSync(logsDir)) {
+    fs.mkdirSync(logsDir, { recursive: true });
+  }
+  // Test write permission
+  const testFile = path.join(logsDir, '.write-test');
+  fs.writeFileSync(testFile, 'test');
+  fs.unlinkSync(testFile);
+  canWriteLogs = true;
+} catch (err) {
+  console.warn('⚠️ Cannot write to logs directory, using console only:', err.message);
+  canWriteLogs = false;
 }
 
 // Formato custom per logs
@@ -65,12 +76,16 @@ const logger = winston.createLogger({
 });
 
 // Aggiungi transports in base all'ambiente
-if (process.env.NODE_ENV === 'production') {
+if (process.env.NODE_ENV === 'production' && canWriteLogs) {
   logger.add(fileRotateTransport);
   logger.add(errorFileTransport);
   console.log('✓ File logging attivo (logs/application-*.log)');
 } else {
+  // In production senza permessi di scrittura o in development, usa console
   logger.add(consoleTransport);
+  if (process.env.NODE_ENV === 'production') {
+    console.log('⚠️ File logging disabilitato - usando console transport');
+  }
 }
 
 // Stream per Morgan (HTTP logging)

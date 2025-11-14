@@ -95,8 +95,9 @@ const login = async (req, res) => {
       // Incrementa failed attempts e blocca account se necessario
       await incrementFailedAttempts(username);
       
-      logger.logAuth('login_failed', username, req.ip, {
-        reason: 'invalid_password'
+      logger.logAuth('login_failed', username, false, {
+        reason: 'invalid_password',
+        ip: req.ip
       });
       
       return res.status(401).json({ error: 'Credenziali non valide' });
@@ -116,8 +117,9 @@ const login = async (req, res) => {
     
     console.log(`✓ User logged in: ${username} from IP: ${req.ip}`);
     
-    logger.logAuth('login_success', username, req.ip, {
-      userId: user._id
+    logger.logAuth('login_success', username, true, {
+      userId: user._id,
+      ip: req.ip
     });
     
     res.json({ token });
