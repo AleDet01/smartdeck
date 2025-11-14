@@ -60,27 +60,27 @@
 
 .pretest-card h2 {
   margin-bottom: var(--space-5);
-  color: var(--color-gray-800);
+  color: #000000;
   font-size: 1.75rem;
-  font-weight: 600;
+  font-weight: 700;
   letter-spacing: -0.02em;
   line-height: 1.3;
 }
 
 .pretest-card .accent {
   color: var(--color-blue);
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .pretest-card label {
   font-size: 1.125rem;
-  color: var(--color-gray-700);
+  color: #1D1D1F;
   margin-bottom: var(--space-5);
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: var(--space-3);
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .quick-picks {
@@ -94,10 +94,10 @@
 .chip {
   padding: var(--space-2) var(--space-4);
   border-radius: var(--radius-full);
-  border: 1px solid var(--color-gray-300);
+  border: 2px solid var(--color-gray-300);
   background: var(--color-white);
-  color: var(--color-gray-700);
-  font-weight: 500;
+  color: #1D1D1F;
+  font-weight: 600;
   font-size: 0.938rem;
   cursor: pointer;
   transition: all var(--transition-fast);
@@ -121,14 +121,15 @@
   width: 140px;
   height: 48px;
   text-align: center;
-  font-size: 1.25rem;
-  border: 1px solid var(--color-gray-300);
+  font-size: 1.5rem;
+  border: 2px solid var(--color-gray-300);
   border-radius: var(--radius-md);
   padding: var(--space-2);
   background: var(--color-white);
   transition: all var(--transition-base);
-  font-weight: 500;
-  color: var(--color-gray-800);
+  font-weight: 700;
+  color: #000000;
+  font-family: 'SF Mono', Monaco, 'Courier New', monospace;
 }
 
 .pretest-card input[type=number]:focus {

@@ -138,15 +138,15 @@ h1, h2, h3, h4, h5, h6 {
   font-weight: 600;
   line-height: 1.2;
   letter-spacing: -0.015em;
-  color: var(--color-gray-800);
+  color: var(--text-primary);
 }
 
 h1 { font-size: 3rem; font-weight: 700; letter-spacing: -0.025em; }
-h2 { font-size: 2.25rem; font-weight: 600; }
-h3 { font-size: 1.75rem; }
-h4 { font-size: 1.5rem; }
-h5 { font-size: 1.25rem; }
-h6 { font-size: 1rem; }
+h2 { font-size: 2.25rem; font-weight: 700; }
+h3 { font-size: 1.75rem; font-weight: 600; }
+h4 { font-size: 1.5rem; font-weight: 600; }
+h5 { font-size: 1.25rem; font-weight: 600; }
+h6 { font-size: 1rem; font-weight: 600; }
 
 p {
   margin-bottom: var(--space-4);
@@ -189,22 +189,32 @@ button:disabled {
 input, textarea, select {
   font-family: var(--font-system);
   font-size: 1rem;
-  border: 1px solid var(--color-gray-300);
+  border: 2px solid var(--color-gray-300);
   border-radius: var(--radius-md);
   padding: var(--space-3) var(--space-4);
   outline: none;
   transition: all var(--transition-fast);
   background-color: var(--color-white);
-  color: var(--color-gray-700);
+  color: #1D1D1F;
+  font-weight: 600;
+}
+
+[data-theme="dark"] input,
+[data-theme="dark"] textarea,
+[data-theme="dark"] select {
+  color: var(--text-primary);
+  background-color: var(--bg-tertiary);
+  border-color: var(--border-color);
 }
 
 input:focus, textarea:focus, select:focus {
   border-color: var(--color-blue);
-  box-shadow: 0 0 0 4px rgba(0, 122, 255, 0.08);
+  box-shadow: 0 0 0 4px rgba(0, 122, 255, 0.12);
 }
 
 input::placeholder, textarea::placeholder {
   color: var(--color-gray-400);
+  font-weight: 500;
 }
 
 /* Scrollbar - Minimal */
