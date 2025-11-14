@@ -142,11 +142,18 @@ const accountLockout = async (req, res, next) => {
  * Da chiamare DOPO la verifica password fallita
  */
 const incrementFailedAttempts = async (username) => {
-  const User = require('../models/user');
-  const MAX_ATTEMPTS = 10;
-  const LOCK_TIME = 30 * 60 * 1000; // 30 minuti
-
   try {
+    // Check if MongoDB is connected
+    const mongoose = require('mongoose');
+    if (mongoose.connection.readyState !== 1) {
+      console.warn('⚠️ MongoDB not ready, skipping increment failed attempts');
+      return;
+    }
+
+    const User = require('../models/user');
+    const MAX_ATTEMPTS = 10;
+    const LOCK_TIME = 30 * 60 * 1000; // 30 minuti
+
     const user = await User.findOne({ username });
     if (!user) return;
 
@@ -154,15 +161,23 @@ const incrementFailedAttempts = async (username) => {
 
     if (user.failedLoginAttempts >= MAX_ATTEMPTS) {
       user.lockUntil = Date.now() + LOCK_TIME;
-      logger.warn(`Account locked due to failed attempts`, {
-        username,
-        attempts: user.failedLoginAttempts,
-      });
+      try {
+        logger.warn(`Account locked due to failed attempts`, {
+          username,
+          attempts: user.failedLoginAttempts,
+        });
+      } catch (logErr) {
+        console.warn(`Account locked: ${username}, attempts: ${user.failedLoginAttempts}`);
+      }
     }
 
     await user.save();
   } catch (error) {
-    logger.error('Error incrementing failed attempts:', error);
+    try {
+      logger.error('Error incrementing failed attempts:', error);
+    } catch (logErr) {
+      console.error('Error incrementing failed attempts:', error.message);
+    }
   }
 };
 
@@ -170,9 +185,16 @@ const incrementFailedAttempts = async (username) => {
  * Middleware per resettare failed attempts dopo login riuscito
  */
 const resetFailedAttempts = async (username) => {
-  const User = require('../models/user');
-  
   try {
+    // Check if MongoDB is connected
+    const mongoose = require('mongoose');
+    if (mongoose.connection.readyState !== 1) {
+      console.warn('⚠️ MongoDB not ready, skipping reset failed attempts');
+      return;
+    }
+
+    const User = require('../models/user');
+    
     await User.findOneAndUpdate(
       { username },
       { 
@@ -184,7 +206,11 @@ const resetFailedAttempts = async (username) => {
       }
     );
   } catch (error) {
-    logger.error('Error resetting failed attempts:', error);
+    try {
+      logger.error('Error resetting failed attempts:', error);
+    } catch (logErr) {
+      console.error('Error resetting failed attempts:', error.message);
+    }
   }
 };
 

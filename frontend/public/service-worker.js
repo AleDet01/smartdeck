@@ -51,6 +51,11 @@ self.addEventListener('activate', (event) => {
 
 // Fetch event - serve from cache, fallback to network
 self.addEventListener('fetch', (event) => {
+  // Skip non-http(s) schemes (chrome-extension, etc)
+  if (!event.request.url.startsWith('http')) {
+    return;
+  }
+
   // Skip API requests (sempre network-first)
   if (event.request.url.includes('/api/')) {
     return;
@@ -78,7 +83,9 @@ self.addEventListener('fetch', (event) => {
 
           caches.open(CACHE_NAME)
             .then((cache) => {
-              cache.put(event.request, responseToCache);
+              cache.put(event.request, responseToCache).catch(err => {
+                console.warn('[ServiceWorker] Failed to cache:', event.request.url, err.message);
+              });
             });
 
           return response;
