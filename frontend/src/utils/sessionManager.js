@@ -38,15 +38,19 @@ export const useSessionTimeout = (onWarning) => {
     const now = Date.now();
     const timeSinceActivity = now - lastActivityRef.current;
 
-    // Show warning
+    // Debug logging
+    console.log(`⏱️ Session check: ${Math.floor(timeSinceActivity / 1000)}s since last activity`);
+
+    // Show warning solo se sono passati ALMENO 25 minuti
     if (timeSinceActivity >= SESSION_TIMEOUT - WARNING_TIME && !warningShownRef.current) {
+      console.log(`⚠️ Mostrando warning: ${Math.floor(timeSinceActivity / 1000 / 60)}min di inattività`);
       warningShownRef.current = true;
       if (onWarning) {
         onWarning(Math.floor(WARNING_TIME / 1000 / 60)); // minutes remaining
       }
     }
 
-    // Auto logout
+    // Auto logout dopo 30 minuti totali
     if (timeSinceActivity >= SESSION_TIMEOUT) {
       console.log('🔒 Sessione scaduta per inattività');
       logout();
