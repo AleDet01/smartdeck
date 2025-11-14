@@ -32,6 +32,23 @@ initCache();
 // Trust proxy for rate limiting behind reverse proxy (Render)
 app.set('trust proxy', 1);
 
+// ULTRA LOGGING - Log EVERY request before anything else
+app.use((req, res, next) => {
+  console.log('');
+  console.log('='.repeat(80));
+  console.log(`🌐 [INCOMING REQUEST] ${new Date().toISOString()}`);
+  console.log(`   Method: ${req.method}`);
+  console.log(`   Path: ${req.path}`);
+  console.log(`   URL: ${req.url}`);
+  console.log(`   IP: ${req.ip}`);
+  console.log(`   Origin: ${req.headers.origin || 'No origin'}`);
+  console.log(`   Content-Type: ${req.headers['content-type'] || 'No content-type'}`);
+  console.log(`   User-Agent: ${req.headers['user-agent']?.substring(0, 50) || 'No user-agent'}`);
+  console.log('='.repeat(80));
+  console.log('');
+  next();
+});
+
 // Logging middleware con Winston
 if (process.env.NODE_ENV !== 'production') {
   app.use(morgan('dev'));
@@ -60,15 +77,21 @@ console.log('✓ CORS allowedOrigins:', allowedOrigins);
 
 app.use(cors({
   origin: (origin, callback) => {
-    // Allow requests with no origin (like mobile apps or curl requests)
-    if (!origin) return callback(null, true);
+    console.log(`🔍 [CORS] Checking origin: ${origin || 'No origin'}`);
+    console.log(`🔍 [CORS] Allowed origins: ${allowedOrigins.join(', ')}`);
     
-    if (allowedOrigins.includes(origin)) {
-      console.log(`✓ CORS allowed origin: ${origin}`);
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) {
+      console.log(`✓ [CORS] Allowing request with no origin`);
       return callback(null, true);
     }
     
-    console.warn(`⚠️ CORS blocked origin: ${origin}`);
+    if (allowedOrigins.includes(origin)) {
+      console.log(`✓ [CORS] Origin ALLOWED: ${origin}`);
+      return callback(null, true);
+    }
+    
+    console.warn(`❌ [CORS] Origin BLOCKED: ${origin}`);
     console.warn(`   Expected one of: ${allowedOrigins.join(', ')}`);
     // Return false instead of error to properly handle CORS rejection
     callback(null, false);
@@ -142,6 +165,15 @@ app.use(mongoSanitizeConfig);
 
 // HTTP Parameter Pollution Protection
 app.use(hppConfig);
+
+// Handle OPTIONS requests explicitly (CORS preflight)
+app.options('*', (req, res) => {
+  console.log(`🔍 [OPTIONS] Preflight request for ${req.path}`);
+  console.log(`   Origin: ${req.headers.origin}`);
+  console.log(`   Access-Control-Request-Method: ${req.headers['access-control-request-method']}`);
+  console.log(`   Access-Control-Request-Headers: ${req.headers['access-control-request-headers']}`);
+  res.status(204).end();
+});
 
 // Root endpoint
 app.get('/', (req, res) => {
