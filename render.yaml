@@ -26,7 +26,7 @@ staticSites:
   - name: smartdeck-frontend
     branch: main
     plan: free
-    buildCommand: "cd frontend && npm install && npm run build"
+    buildCommand: "cd frontend && npm install --legacy-peer-deps && npm run build"
     publishPath: "frontend/build"
     autoDeploy: true
     rewrites:
@@ -35,3 +35,5 @@ staticSites:
     envVars:
       - key: REACT_APP_API_HOST
         value: https://smartdeck.onrender.com
+      - key: CI
+        value: false
