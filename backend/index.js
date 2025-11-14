@@ -213,6 +213,47 @@ app.get('/', (req, res) => {
   });
 });
 
+// Debug endpoint to check database and collections
+app.get('/debug/db', async (req, res) => {
+  try {
+    const mongoState = mongoose.connection.readyState;
+    if (mongoState !== 1) {
+      return res.json({ error: 'MongoDB not connected', readyState: mongoState });
+    }
+    
+    const dbName = mongoose.connection.name;
+    const collections = await mongoose.connection.db.listCollections().toArray();
+    
+    const stats = {};
+    for (const coll of collections) {
+      const count = await mongoose.connection.db.collection(coll.name).countDocuments();
+      stats[coll.name] = count;
+    }
+    
+    // Get users count
+    const User = require('./models/user');
+    const users = await User.find().select('username createdAt').lean().limit(10);
+    
+    // Get flashcards count by user
+    const Flashcard = require('./models/singleFlash');
+    const flashcardsByUser = await Flashcard.aggregate([
+      { $group: { _id: '$createdBy', count: { $sum: 1 } } },
+      { $sort: { count: -1 } },
+      { $limit: 10 }
+    ]);
+    
+    res.json({
+      database: dbName,
+      host: mongoose.connection.host,
+      collections: stats,
+      sampleUsers: users,
+      flashcardsByUser
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message, stack: err.stack });
+  }
+});
+
 // Health check endpoint (SEMPRE 200 per evitare timeout su Render)
 app.get('/health', async (req, res) => {
   const mongoState = mongoose.connection.readyState;
