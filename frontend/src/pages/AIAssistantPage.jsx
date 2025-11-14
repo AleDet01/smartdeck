@@ -14,7 +14,6 @@ const AIAssistantPage = () => {
 	const [attachedFiles, setAttachedFiles] = useState([]);
 	const [aiModel, setAiModel] = useState('gpt-4o'); // gpt-4o, gpt-4o-mini, o1-preview
 	const [conversationContext, setConversationContext] = useState([]);
-	const [tokenUsage, setTokenUsage] = useState({ input: 0, output: 0, total: 0 });
 	
 	const messagesEndRef = useRef(null);
 	const textareaRef = useRef(null);
@@ -182,15 +181,8 @@ const AIAssistantPage = () => {
 					: msg
 			));
 
-			// Aggiorna context e token usage
+			// Aggiorna context
 			setConversationContext(prev => [...prev, { role: 'assistant', content: streamedContent }]);
-			if (tokenStats) {
-				setTokenUsage(prev => ({
-					input: prev.input + (tokenStats.input || 0),
-					output: prev.output + (tokenStats.output || 0),
-					total: prev.total + (tokenStats.total || 0)
-				}));
-			}
 
 		} catch (err) {
 			console.error('❌ Errore AI:', err);
@@ -245,7 +237,6 @@ const AIAssistantPage = () => {
 		if (window.confirm('Vuoi cancellare tutta la cronologia della chat?')) {
 			setMessages([]);
 			setConversationContext([]);
-			setTokenUsage({ input: 0, output: 0, total: 0 });
 			setShowQuickActions(true);
 		}
 	};
@@ -267,17 +258,7 @@ const AIAssistantPage = () => {
 		handleSendMessage(userMsg.content);
 	};
 
-	const formatCost = (tokens) => {
-		// Prezzi OpenAI per 1M tokens
-		const pricing = {
-			'gpt-4o': { input: 2.50, output: 10.00 },
-			'gpt-4o-mini': { input: 0.15, output: 0.60 },
-			'o1-preview': { input: 15.00, output: 60.00 }
-		};
-		const model = pricing[aiModel] || pricing['gpt-4o'];
-		const cost = (tokens.input / 1000000 * model.input) + (tokens.output / 1000000 * model.output);
-		return cost.toFixed(4);
-	};
+
 
 	const exportChat = () => {
 		const chatText = messages.map(msg => 
@@ -359,12 +340,6 @@ const AIAssistantPage = () => {
 										<span className="message-time">
 											{msg.timestamp.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })}
 										</span>
-										
-										{msg.tokens && (
-											<span className="token-count" title={`Input: ${msg.tokens.input} | Output: ${msg.tokens.output} | Cost: $${formatCost(msg.tokens)}`}>
-												{msg.tokens.total} tokens
-											</span>
-										)}
 										
 										{msg.role === 'assistant' && !msg.isStreaming && (
 											<div className="message-actions">
@@ -454,27 +429,6 @@ const AIAssistantPage = () => {
 					)}
 
 					<div className="input-area-wrapper">
-						{/* Stats Bar */}
-						<div className="stats-bar">
-							<div className="model-selector">
-								<select 
-									value={aiModel} 
-									onChange={(e) => setAiModel(e.target.value)}
-									disabled={isLoading}
-									className="model-select"
-								>
-									<option value="gpt-4o">GPT-4o (Più veloce)</option>
-									<option value="gpt-4o-mini">GPT-4o Mini (Economico)</option>
-									<option value="o1-preview">O1 Preview (Ragionamento)</option>
-								</select>
-							</div>
-							<div className="token-stats">
-								<span className="stat-label">Token usati:</span>
-								<span className="stat-value">{tokenUsage.total.toLocaleString()}</span>
-								<span className="stat-cost">~${formatCost(tokenUsage)}</span>
-							</div>
-						</div>
-
 						<div className="input-area">
 							<input
 								type="file"
@@ -485,13 +439,26 @@ const AIAssistantPage = () => {
 								style={{ display: 'none' }}
 							/>
 							
+							<div className="model-selector-inline">
+								<select 
+									value={aiModel} 
+									onChange={(e) => setAiModel(e.target.value)}
+									disabled={isLoading}
+									className="model-select-modern"
+								>
+									<option value="gpt-4o">⚡ GPT-4o</option>
+									<option value="gpt-4o-mini">💎 GPT-4o Mini</option>
+									<option value="o1-preview">🧠 O1 Preview</option>
+								</select>
+							</div>
+
 							<button 
 								className="attach-btn"
 								onClick={() => fileInputRef.current?.click()}
 								disabled={isLoading}
-								title="Allega file (PDF, TXT, Immagini)"
+								title="Allega file"
 							>
-								<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+								<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
 									<path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"/>
 								</svg>
 							</button>
@@ -499,7 +466,7 @@ const AIAssistantPage = () => {
 							<textarea
 								ref={textareaRef}
 								className="message-input"
-								placeholder="Chiedi qualsiasi cosa... L'AI può generare test, rispondere a domande, analizzare contenuti... 🚀"
+								placeholder="Chiedi qualsiasi cosa all'AI..."
 								value={inputMessage}
 								onChange={(e) => setInputMessage(e.target.value)}
 								onKeyPress={handleKeyPress}
@@ -516,22 +483,12 @@ const AIAssistantPage = () => {
 								{isLoading ? (
 									<div className="loading-spinner"></div>
 								) : (
-									<svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+									<svg width="18" height="18" viewBox="0 0 24 24" fill="none">
 										<path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
 									</svg>
 								)}
 							</button>
 						</div>
-					</div>
-
-					<div className="openai-disclaimer">
-						🚀 <strong>Powered by OpenAI</strong> - GPT-4o, GPT-4o-mini, O1-preview | 
-						<span style={{ marginLeft: '8px', color: 'var(--color-green-500)', fontWeight: 600 }}>
-							$10 Credit Caricato
-						</span> | 
-						<a href="https://openai.com/pricing" target="_blank" rel="noopener noreferrer" style={{ marginLeft: '8px', color: 'inherit', textDecoration: 'underline' }}>
-							Pricing Info
-						</a>
 					</div>
 				</div>
 			</div>
