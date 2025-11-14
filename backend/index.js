@@ -6,9 +6,18 @@ const compression = require('compression');
 const hpp = require('hpp');
 const morgan = require('morgan');
 const connectDB = require('./db');
-const helmetConfig = require('./middleware/security');
+const { 
+  helmetConfig, 
+  mongoSanitizeConfig, 
+  hppConfig, 
+  accountLockout, 
+  suspiciousActivityDetection, 
+  forceHTTPS, 
+  secureCookies 
+} = require('./middleware/security');
 const { apiLimiter } = require('./middleware/rateLimiter');
 const { initSentry, sentryErrorHandler } = require('./middleware/sentry');
+const { initCache } = require('./middleware/cache');
 const logger = require('./utils/logger');
 
 const app = express();
@@ -16,6 +25,9 @@ const PORT = process.env.PORT || 3000;
 
 // Initialize Sentry (deve essere PRIMA di tutto)
 initSentry(app);
+
+// Initialize Cache (Redis o Memory)
+initCache();
 
 // Trust proxy for rate limiting behind reverse proxy (Render)
 app.set('trust proxy', 1);
@@ -80,8 +92,11 @@ app.use(cors({
   optionsSuccessStatus: 204
 }));
 
-// Security middleware (AFTER CORS to avoid conflicts)
-app.use(helmetConfig);
+// Security middleware (DOPO CORS per evitare conflitti)
+app.use(forceHTTPS); // Forza HTTPS in produzione
+app.use(helmetConfig); // Security headers
+app.use(secureCookies); // Cookies sicuri con httpOnly e secure
+app.use(suspiciousActivityDetection); // Rileva pattern di attacco
 
 // Compression middleware per gzip
 app.use(compression({
@@ -107,43 +122,14 @@ app.use(express.json({
 }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// Sanitize data contro NoSQL injection (custom implementation for Express 5)
-app.use((req, res, next) => {
-  // Sanitize body
-  if (req.body && typeof req.body === 'object') {
-    req.body = sanitizeObject(req.body);
-  }
-  // Sanitize params
-  if (req.params && typeof req.params === 'object') {
-    req.params = sanitizeObject(req.params);
-  }
-  next();
-});
+// MongoDB NoSQL Injection Protection
+app.use(mongoSanitizeConfig);
 
-// Helper function to sanitize objects
-function sanitizeObject(obj) {
-  if (obj === null || typeof obj !== 'object') {
-    return obj;
-  }
-  
-  if (Array.isArray(obj)) {
-    return obj.map(item => sanitizeObject(item));
-  }
-  
-  const sanitized = {};
-  for (const key in obj) {
-    // Remove keys starting with $ or containing .
-    if (key.startsWith('$') || key.includes('.')) {
-      console.warn(`⚠️ Sanitized dangerous key: ${key}`);
-      continue;
-    }
-    sanitized[key] = sanitizeObject(obj[key]);
-  }
-  return sanitized;
-}
+// HTTP Parameter Pollution Protection
+app.use(hppConfig);
 
-// Protect against HTTP Parameter Pollution
-app.use(hpp());
+// Account Lockout Middleware (prima delle routes)
+app.use(accountLockout);
 
 // Root endpoint
 app.get('/', (req, res) => {

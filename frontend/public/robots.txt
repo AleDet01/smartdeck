@@ -13,8 +13,8 @@ Disallow: /test/
 Allow: /privacy
 Allow: /terms
 
-# Sitemap (update URL quando disponibile)
-# Sitemap: https://smartdeck.app/sitemap.xml
+# Sitemap
+Sitemap: https://smartdeck-frontend.onrender.com/sitemap.xml
 
 # Crawl-delay for polite bots
 Crawl-delay: 1

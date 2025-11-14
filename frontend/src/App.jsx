@@ -1,10 +1,14 @@
 import React, { useEffect, useState, lazy, Suspense } from 'react';
 import { HashRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { HelmetProvider } from 'react-helmet-async';
+import { Toaster } from 'react-hot-toast';
 import { ThemeProvider } from './utils/themeContext';
+import ErrorBoundary from './components/ErrorBoundary';
 import LandingPage from './pages/LandingPage';
 import LogoutButton from './components/LogoutButton';
 import CookieBanner from './components/CookieBanner';
 import SessionWarning from './components/SessionWarning';
+import LoadingFallback from './components/LoadingFallback';
 import API_HOST from './utils/apiHost';
 import { useSessionTimeout } from './utils/sessionManager';
 
@@ -72,10 +76,36 @@ function SessionManager() {
 
 export default function App() {
   return (
-    <ThemeProvider>
-      <HashRouter>
-        <SessionManager />
-        <Suspense fallback={<div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', fontSize: '1.2rem' }}>Caricamento...</div>}>
+    <ErrorBoundary>
+      <HelmetProvider>
+        <ThemeProvider>
+          <HashRouter>
+            <Toaster 
+              position="top-right"
+              toastOptions={{
+                duration: 4000,
+                style: {
+                  background: '#363636',
+                  color: '#fff',
+                  borderRadius: '10px',
+                  padding: '16px',
+                },
+                success: {
+                  iconTheme: {
+                    primary: '#4ade80',
+                    secondary: '#fff',
+                  },
+                },
+                error: {
+                  iconTheme: {
+                    primary: '#ef4444',
+                    secondary: '#fff',
+                  },
+                },
+              }}
+            />
+            <SessionManager />
+            <Suspense fallback={<LoadingFallback />}>
           <Routes>
             <Route path="/" element={<LandingPage />} />
             <Route path="/login" element={<Navigate to="/" />} />
@@ -93,5 +123,7 @@ export default function App() {
         <CookieBanner />
       </HashRouter>
     </ThemeProvider>
+    </HelmetProvider>
+    </ErrorBoundary>
   );
 }

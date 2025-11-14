@@ -1,6 +1,8 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
+const { incrementFailedAttempts, resetFailedAttempts } = require('../middleware/security');
+const logger = require('../utils/logger');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'supersecretkey';
 const TOKEN_EXPIRY = '2h';
@@ -89,8 +91,19 @@ const login = async (req, res) => {
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
       console.warn(`⚠️ Failed login for user: ${username} from IP: ${req.ip}`);
+      
+      // Incrementa failed attempts e blocca account se necessario
+      await incrementFailedAttempts(username);
+      
+      logger.logAuth('login_failed', username, req.ip, {
+        reason: 'invalid_password'
+      });
+      
       return res.status(401).json({ error: 'Credenziali non valide' });
     }
+    
+    // Password corretta - resetta failed attempts
+    await resetFailedAttempts(username);
     
     // Generate JWT token
     const token = jwt.sign(
@@ -102,6 +115,10 @@ const login = async (req, res) => {
     setAuthCookie(res, token);
     
     console.log(`✓ User logged in: ${username} from IP: ${req.ip}`);
+    
+    logger.logAuth('login_success', username, req.ip, {
+      userId: user._id
+    });
     
     res.json({ token });
   } catch (err) {

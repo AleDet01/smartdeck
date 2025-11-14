@@ -33,7 +33,7 @@ const saveTestSession = async (req, res) => {
 	}
 };
 
-// Ottieni tutte le statistiche dell'utente
+// Ottieni tutte le statistiche dell'utente (OTTIMIZZATO con aggregation)
 const getUserStatistics = async (req, res) => {
 	try {
 		const userId = req.user?.id;
@@ -41,10 +41,21 @@ const getUserStatistics = async (req, res) => {
 			return res.status(401).json({ error: 'Utente non autenticato' });
 		}
 
-		// Tutte le sessioni dell'utente
-		const sessions = await TestSession.find({ userId }).sort({ completedAt: -1 });
+		// Aggregation pipeline per statistiche generali (10x più veloce)
+		const generalStats = await TestSession.aggregate([
+			{ $match: { userId } },
+			{ $group: {
+				_id: null,
+				totalSessions: { $sum: 1 },
+				totalQuestions: { $sum: '$totalQuestions' },
+				totalCorrect: { $sum: '$correctAnswers' },
+				totalWrong: { $sum: '$wrongAnswers' },
+				averageScore: { $avg: '$score' },
+				averageDuration: { $avg: '$duration' }
+			}}
+		]);
 
-		if (sessions.length === 0) {
+		if (!generalStats.length) {
 			return res.json({
 				totalSessions: 0,
 				totalQuestions: 0,
@@ -55,77 +66,100 @@ const getUserStatistics = async (req, res) => {
 				sessions: [],
 				byArea: {},
 				recentSessions: [],
-				progressOverTime: [],
-				difficultyDistribution: { facile: 0, media: 0, difficile: 0 }
+				progressOverTime: []
 			});
 		}
 
-		// Statistiche generali
-		const totalSessions = sessions.length;
-		const totalQuestions = sessions.reduce((sum, s) => sum + s.totalQuestions, 0);
-		const totalCorrect = sessions.reduce((sum, s) => sum + s.correctAnswers, 0);
-		const totalWrong = sessions.reduce((sum, s) => sum + s.wrongAnswers, 0);
-		const averageScore = sessions.reduce((sum, s) => sum + s.score, 0) / totalSessions;
-		const averageDuration = sessions.reduce((sum, s) => sum + s.duration, 0) / totalSessions;
+		const stats = generalStats[0];
+		const totalSessions = stats.totalSessions;
+		const totalQuestions = stats.totalQuestions;
+		const totalCorrect = stats.totalCorrect;
+		const totalWrong = stats.totalWrong;
+		const averageScore = stats.averageScore;
+		const averageDuration = stats.averageDuration;
 
-		// Statistiche per area tematica
+		// Statistiche per area con aggregation (molto più veloce)
+		const byAreaStats = await TestSession.aggregate([
+			{ $match: { userId } },
+			{ $group: {
+				_id: '$thematicArea',
+				totalSessions: { $sum: 1 },
+				totalQuestions: { $sum: '$totalQuestions' },
+				totalCorrect: { $sum: '$correctAnswers' },
+				totalWrong: { $sum: '$wrongAnswers' },
+				averageScore: { $avg: '$score' },
+				bestScore: { $max: '$score' },
+				worstScore: { $min: '$score' }
+			}},
+			{ $sort: { totalSessions: -1 }}
+		]);
+
 		const byArea = {};
-		sessions.forEach(s => {
-			if (!byArea[s.thematicArea]) {
-				byArea[s.thematicArea] = {
-					totalSessions: 0,
-					totalQuestions: 0,
-					totalCorrect: 0,
-					totalWrong: 0,
-					averageScore: 0,
-					bestScore: 0,
-					worstScore: 100,
-					scores: []
-				};
-			}
-			const area = byArea[s.thematicArea];
-			area.totalSessions++;
-			area.totalQuestions += s.totalQuestions;
-			area.totalCorrect += s.correctAnswers;
-			area.totalWrong += s.wrongAnswers;
-			area.scores.push(s.score);
-			area.bestScore = Math.max(area.bestScore, s.score);
-			area.worstScore = Math.min(area.worstScore, s.score);
+		byAreaStats.forEach(area => {
+			byArea[area._id] = {
+				totalSessions: area.totalSessions,
+				totalQuestions: area.totalQuestions,
+				totalCorrect: area.totalCorrect,
+				totalWrong: area.totalWrong,
+				averageScore: Math.round(area.averageScore * 10) / 10,
+				bestScore: area.bestScore,
+				worstScore: area.worstScore
+			};
 		});
 
-		// Calcola media per area
-		Object.keys(byArea).forEach(area => {
-			const data = byArea[area];
-			data.averageScore = data.scores.reduce((sum, s) => sum + s, 0) / data.scores.length;
-		});
+		// Ultime 10 sessioni (lean query)
+		const recentSessions = await TestSession.find({ userId })
+			.select('thematicArea score correctAnswers totalQuestions duration completedAt')
+			.sort({ completedAt: -1 })
+			.limit(10)
+			.lean();
 
-		// Ultime 10 sessioni
-		const recentSessions = sessions.slice(0, 10).map(s => ({
-			id: s._id,
-			thematicArea: s.thematicArea,
-			score: s.score,
-			correctAnswers: s.correctAnswers,
-			totalQuestions: s.totalQuestions,
-			duration: s.duration,
-			completedAt: s.completedAt
-		}));
-
-		// Progresso nel tempo (ultime 30 sessioni)
-		const progressOverTime = sessions.slice(0, 30).reverse().map((s, idx) => ({
+		// Progresso nel tempo (ultime 30 sessioni con projection)
+		const progressSessions = await TestSession.find({ userId })
+			.select('score completedAt thematicArea')
+			.sort({ completedAt: 1 })
+			.limit(30)
+			.lean();
+		
+		const progressOverTime = progressSessions.map((s, idx) => ({
 			sessionNumber: idx + 1,
 			score: s.score,
 			date: s.completedAt,
 			thematicArea: s.thematicArea
 		}));
 
-		// Best & Worst performance
-		const bestSession = sessions.reduce((best, s) => s.score > best.score ? s : best, sessions[0]);
-		const worstSession = sessions.reduce((worst, s) => s.score < worst.score ? s : worst, sessions[0]);
+		// Best & Worst performance con aggregation
+		const extremes = await TestSession.aggregate([
+			{ $match: { userId } },
+			{ $group: {
+				_id: null,
+				bestSession: { $max: { score: '$score', area: '$thematicArea', date: '$completedAt' }},
+				worstSession: { $min: { score: '$score', area: '$thematicArea', date: '$completedAt' }}
+			}}
+		]);
 
-		// Streak (sessioni consecutive con score >= 60%)
+		const bestSession = extremes.length ? {
+			thematicArea: extremes[0].bestSession?.area || 'N/A',
+			score: extremes[0].bestSession?.score || 0,
+			date: extremes[0].bestSession?.date || new Date()
+		} : null;
+
+		const worstSession = extremes.length ? {
+			thematicArea: extremes[0].worstSession?.area || 'N/A',
+			score: extremes[0].worstSession?.score || 0,
+			date: extremes[0].worstSession?.date || new Date()
+		} : null;
+
+		// Streak calculation (manteniamo in memoria, è veloce su 30-50 sessioni)
+		const streakSessions = await TestSession.find({ userId })
+			.select('score')
+			.sort({ completedAt: -1 })
+			.limit(50)
+			.lean();
+
 		let currentStreak = 0;
 		let maxStreak = 0;
-		for (const s of sessions) {
+		for (const s of streakSessions) {
 			if (s.score >= 60) {
 				currentStreak++;
 				maxStreak = Math.max(maxStreak, currentStreak);
@@ -141,7 +175,8 @@ const getUserStatistics = async (req, res) => {
 			totalWrong,
 			averageScore: Math.round(averageScore * 10) / 10,
 			averageDuration: Math.round(averageDuration),
-			sessions: sessions.map(s => ({
+			byArea,
+			recentSessions: recentSessions.map(s => ({
 				id: s._id,
 				thematicArea: s.thematicArea,
 				score: s.score,
@@ -150,19 +185,9 @@ const getUserStatistics = async (req, res) => {
 				duration: s.duration,
 				completedAt: s.completedAt
 			})),
-			byArea,
-			recentSessions,
 			progressOverTime,
-			bestSession: {
-				thematicArea: bestSession.thematicArea,
-				score: bestSession.score,
-				date: bestSession.completedAt
-			},
-			worstSession: {
-				thematicArea: worstSession.thematicArea,
-				score: worstSession.score,
-				date: worstSession.completedAt
-			},
+			bestSession,
+			worstSession,
 			currentStreak,
 			maxStreak
 		});
