@@ -110,16 +110,31 @@ app.use(compression({
 }));
 
 // Body parser con limite dimensione
+app.use((req, res, next) => {
+  console.log(`🔍 [REQUEST] ${req.method} ${req.path} from ${req.ip}`);
+  console.log(`🔍 [REQUEST] Content-Type: ${req.headers['content-type']}`);
+  console.log(`🔍 [REQUEST] Origin: ${req.headers.origin}`);
+  next();
+});
+
 app.use(express.json({ 
   limit: '10mb',
   verify: (req, res, buf) => {
     try {
       JSON.parse(buf);
     } catch (e) {
+      console.error(`❌ [BODY_PARSER] Invalid JSON from ${req.ip}: ${e.message}`);
       throw new Error('Invalid JSON');
     }
   }
 }));
+
+app.use((req, res, next) => {
+  console.log(`✓ [BODY_PARSER] JSON parsed successfully`);
+  console.log(`🔍 [BODY_PARSER] Body:`, JSON.stringify(req.body));
+  next();
+});
+
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // MongoDB NoSQL Injection Protection
@@ -193,11 +208,19 @@ app.get('/health', async (req, res) => {
 // Apply general API rate limiting
 app.use('/api', apiLimiter);
 
-// Routes
-app.use('/auth', accountLockout, require('./routes/auth'));
+// Routes with logging
+console.log('✓ Mounting routes...');
+
+app.use('/auth', (req, res, next) => {
+  console.log(`🔍 [ROUTE] Entering /auth route: ${req.method} ${req.path}`);
+  next();
+}, accountLockout, require('./routes/auth'));
+
 app.use('/flash', require('./routes/flash'));
 app.use('/statistics', require('./routes/statistics'));
 app.use('/ai-assistant', require('./routes/aiAssistant'));
+
+console.log('✓ Routes mounted successfully');
 
 // Sentry error handler (PRIMA del nostro error handler)
 app.use(sentryErrorHandler());
@@ -218,8 +241,23 @@ app.use((req, res) => {
 
 // Global error handler
 app.use((err, req, res, next) => {
+  console.error('❌❌❌ [GLOBAL_ERROR_HANDLER] ❌❌❌');
+  console.error('Error:', err);
+  console.error('Error stack:', err.stack);
+  console.error('Error name:', err.name);
+  console.error('Error message:', err.message);
+  console.error('Error code:', err.code);
+  console.error('Request:', req.method, req.path);
+  console.error('Request body:', JSON.stringify(req.body));
+  console.error('Request IP:', req.ip);
+  console.error('❌❌❌ [END GLOBAL_ERROR_HANDLER] ❌❌❌');
+  
   // Log error con Winston
-  logger.logError(err, req);
+  try {
+    logger.logError(err, req);
+  } catch (logErr) {
+    console.error('Failed to log error:', logErr.message);
+  }
   
   // Mongoose validation error
   if (err.name === 'ValidationError') {
