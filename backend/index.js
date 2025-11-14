@@ -166,13 +166,15 @@ app.use(mongoSanitizeConfig);
 // HTTP Parameter Pollution Protection
 app.use(hppConfig);
 
-// Handle OPTIONS requests explicitly (CORS preflight)
-app.options('*', (req, res) => {
-  console.log(`🔍 [OPTIONS] Preflight request for ${req.path}`);
-  console.log(`   Origin: ${req.headers.origin}`);
-  console.log(`   Access-Control-Request-Method: ${req.headers['access-control-request-method']}`);
-  console.log(`   Access-Control-Request-Headers: ${req.headers['access-control-request-headers']}`);
-  res.status(204).end();
+// Log OPTIONS requests (handled automatically by CORS middleware)
+app.use((req, res, next) => {
+  if (req.method === 'OPTIONS') {
+    console.log(`🔍 [OPTIONS] Preflight request for ${req.path}`);
+    console.log(`   Origin: ${req.headers.origin}`);
+    console.log(`   Access-Control-Request-Method: ${req.headers['access-control-request-method']}`);
+    console.log(`   Access-Control-Request-Headers: ${req.headers['access-control-request-headers']}`);
+  }
+  next();
 });
 
 // Root endpoint
