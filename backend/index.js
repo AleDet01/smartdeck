@@ -8,7 +8,6 @@ const morgan = require('morgan');
 const connectDB = require('./db');
 const { 
   helmetConfig, 
-  mongoSanitizeConfig, 
   hppConfig, 
   accountLockout, 
   suspiciousActivityDetection, 
@@ -160,11 +159,38 @@ app.use((req, res, next) => {
 
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// MongoDB NoSQL Injection Protection
-app.use(mongoSanitizeConfig);
+// MongoDB NoSQL Injection Protection - MANUAL (express-mongo-sanitize not compatible with Express 5)
+app.use((req, res, next) => {
+  // Sanitize req.body
+  if (req.body) {
+    req.body = sanitizeObject(req.body);
+  }
+  // Note: req.query and req.params are read-only in Express 5, sanitized by express-validator
+  next();
+});
 
 // HTTP Parameter Pollution Protection
 app.use(hppConfig);
+
+// Helper function for MongoDB sanitization
+function sanitizeObject(obj) {
+  if (typeof obj !== 'object' || obj === null) return obj;
+  
+  if (Array.isArray(obj)) {
+    return obj.map(item => sanitizeObject(item));
+  }
+  
+  const sanitized = {};
+  for (const [key, value] of Object.entries(obj)) {
+    // Remove keys starting with $ or containing .
+    if (key.startsWith('$') || key.includes('.')) {
+      console.warn(`⚠️ [SANITIZE] Blocked MongoDB injection attempt: ${key}`);
+      continue;
+    }
+    sanitized[key] = sanitizeObject(value);
+  }
+  return sanitized;
+}
 
 // Log OPTIONS requests (handled automatically by CORS middleware)
 app.use((req, res, next) => {
