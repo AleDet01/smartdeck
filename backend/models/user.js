@@ -44,8 +44,7 @@ const userSchema = new mongoose.Schema({
 });
 
 // Indexes ottimizzati per produzione
-userSchema.index({ username: 1 }, { unique: true }); // Login rapidi
-userSchema.index({ email: 1 }, { sparse: true }); // Password recovery
+// username e email già hanno unique: true nel schema, non servono indici duplicati
 userSchema.index({ createdAt: -1 }); // Ordinamento cronologico
 userSchema.index({ lastLogin: -1 }); // Analytics utenti attivi
 userSchema.index({ isVerified: 1, createdAt: -1 }); // Utenti da verificare
