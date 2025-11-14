@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import Topbar from '../components/Topbar';
 import PageBackground from '../components/PageBackground';
 import '../css/PreTestPage.css';
@@ -9,6 +10,7 @@ import { useFetch } from '../utils/hooks';
 const PreTestPage = () => {
   const { area } = useParams();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [numQuestions, setNumQuestions] = useState(10);
   
   const { data } = useFetch(`${API_HOST}/flash/thematic/${area}`);
@@ -30,8 +32,8 @@ const PreTestPage = () => {
       <PageBackground />
       <Topbar />
       <div className="pretest-card">
-        <h2>Configura il test: <span className="accent">{area}</span></h2>
-        <div className="quick-picks" aria-label="Selezione rapida numero domande">
+        <h2>{t('pretest.title')} <span className="accent">{area}</span></h2>
+        <div className="quick-picks" aria-label={t('pretest.quickSelect')}>
           {quickPicks.map(n => (
             <button
               key={n}
@@ -44,7 +46,7 @@ const PreTestPage = () => {
           ))}
         </div>
         <label>
-          Numero domande (max {maxQuestions}):
+          {t('pretest.numQuestions')} (max {maxQuestions}):
           <input
             type="number"
             min={1}
@@ -60,7 +62,7 @@ const PreTestPage = () => {
           disabled={!maxQuestions || numQuestions < 1}
           type="button"
         >
-          Inizia il test
+          {t('pretest.startTest')}
         </button>
       </div>
     </div>

@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import Topbar from '../components/Topbar';
 import '../css/TestPage.css';
 import API_HOST from '../utils/apiHost';
 
 export default function TestPage() {
   const { area, num } = useParams();
+  const { t } = useTranslation();
   const [questions, setQuestions] = useState([]);
   const [current, setCurrent] = useState(0);
   const [allAnswers, setAllAnswers] = useState([]);
@@ -120,7 +122,7 @@ export default function TestPage() {
         <img className="page-bg" src={process.env.PUBLIC_URL + '/sfondo_pages.jpg'} alt="" loading="lazy" />
       </div>
       <Topbar />
-      <div style={{ padding: 24 }}>Caricamento domande...</div>
+      <div style={{ padding: 24 }}>{t('test.loading')}</div>
     </div>
   );
 
@@ -141,21 +143,21 @@ export default function TestPage() {
         <Topbar />
         <div style={{ paddingTop: 88 }}>
           <div className="header">
-            <h2>Risultato Test: <span className="header-accent">{area}</span></h2>
+            <h2>{t('test.result')} <span className="header-accent">{area}</span></h2>
             <div className="go-tests">
               <button className="modern-btn" onClick={() => navigate('/dashboard')}>
-                Torna alla dashboard
+                {t('test.backToDashboard')}
               </button>
             </div>
           </div>
         </div>
         <div className="test-stats-box">
-          <div><b>Domande totali:</b> {questions.length}</div>
-          <div><b>Corrette:</b> {correctCount}</div>
-          <div><b>Percentuale superamento:</b> {percent}%</div>
+          <div><b>{t('test.totalQuestions')}</b> {questions.length}</div>
+          <div><b>{t('test.correct')}</b> {correctCount}</div>
+          <div><b>{t('test.percentage')}</b> {percent}%</div>
         </div>
         <div className="results-grid">
-          <b>Domande sbagliate:</b>
+          <b>{t('test.wrongQuestions')}</b>
           <div className="container">
             <div className="question-item">
               {questions.map((qq, idx) => {
@@ -169,13 +171,13 @@ export default function TestPage() {
                 return (
                   <div key={idx} className="question-box">
                     <div className="q-title">{idx + 1}. {qq.question}</div>
-                    <div className="answer-given">Risposta data: <span className="wrong">{selected?.text || 'Nessuna'}</span></div>
-                    <div className="answer-correct">Risposta corretta: <span className="correct">{correct?.text}</span></div>
+                    <div className="answer-given">{t('test.yourAnswer')} <span className="wrong">{selected?.text || t('test.none')}</span></div>
+                    <div className="answer-correct">{t('test.correctAnswer')} <span className="correct">{correct?.text}</span></div>
                   </div>
                 );
               })}
               {correctCount === questions.length && (
-                <div className="all-correct">Tutte corrette!</div>
+                <div className="all-correct">{t('test.allCorrect')}</div>
               )}
             </div>
           </div>
@@ -191,7 +193,7 @@ export default function TestPage() {
       </div>
       <Topbar />
       <div className="test-content">
-        <h2 className="question-count">Domanda {current + 1} / {questions.length}</h2>
+        <h2 className="question-count">{t('test.question')} {current + 1} / {questions.length}</h2>
         <div className="flashcard">
           <div className="question">{q.question}</div>
           <div className="answers">
@@ -208,7 +210,7 @@ export default function TestPage() {
           </div>
         </div>
         <div className="test-nav">
-          <button className="modern-btn" onClick={() => setCurrent(c => Math.max(0, c - 1))} disabled={current === 0}>Indietro</button>
+          <button className="modern-btn" onClick={() => setCurrent(c => Math.max(0, c - 1))} disabled={current === 0}>{t('test.back')}</button>
         </div>
       </div>
     </div>

@@ -281,33 +281,14 @@ const AIAssistantPage = () => {
 			<Topbar />
 			<div className="ai-container">
 				<div className="ai-header">
-					<div className="ai-title">
-						<span className="ai-title-icon">🤖</span>
-						<div className="ai-title-text">
-							<h1>AI Assistant</h1>
-							<p>Genera flashcard intelligenti con l'AI</p>
-						</div>
-					</div>
-					<div className="ai-utilities">
+					<h1>AI Assistant</h1>
+					<div className="ai-actions">
 						<button 
-							className="utility-btn"
-							onClick={exportChat}
-							disabled={messages.length === 0}
-							title="Esporta chat"
-						>
-							<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-								<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-								<polyline points="7 10 12 15 17 10"/>
-								<line x1="12" y1="15" x2="12" y2="3"/>
-							</svg>
-						</button>
-						<button 
-							className="utility-btn"
+							className="icon-btn"
 							onClick={clearChat}
 							disabled={messages.length === 0}
-							title="Cancella cronologia"
 						>
-							<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+							<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
 								<polyline points="3 6 5 6 21 6"/>
 								<path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
 							</svg>
@@ -318,55 +299,36 @@ const AIAssistantPage = () => {
 				<div className="chat-container">
 					<div className="messages-area">
 						{messages.map((msg, idx) => (
-							<div key={idx} className={`message ${msg.role} ${msg.isError ? 'error' : ''} ${msg.isStreaming ? 'streaming' : ''}`}>
-								<div className="message-avatar">
-									{msg.role === 'assistant' ? '🤖' : '👤'}
-								</div>
+							<div key={idx} className={`message ${msg.role} ${msg.isError ? 'error' : ''}`}>
 								<div className="message-content">
 									<div className="message-text">
 										{msg.content}
-										{msg.isStreaming && <span className="cursor-blink">▋</span>}
+										{msg.isStreaming && <span className="cursor">|</span>}
 									</div>
 									
-									{msg.files && msg.files.length > 0 && (
-										<div className="message-files">
-											{msg.files.map((file, i) => (
-												<span key={i} className="file-badge">📎 {file}</span>
-											))}
+									{msg.role === 'assistant' && !msg.isStreaming && (
+										<div className="message-actions">
+											<button 
+												className="action-btn"
+												onClick={() => copyMessage(msg.content)}
+											>
+												Copy
+											</button>
+											<button 
+												className="action-btn"
+												onClick={() => regenerateResponse(idx)}
+											>
+												Regenerate
+											</button>
 										</div>
 									)}
 
-									<div className="message-footer">
-										<span className="message-time">
-											{msg.timestamp.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })}
-										</span>
-										
-										{msg.role === 'assistant' && !msg.isStreaming && (
-											<div className="message-actions">
-												<button 
-													className="msg-action-btn"
-													onClick={() => copyMessage(msg.content)}
-													title="Copia"
-												>
-													📋
-												</button>
-												<button 
-													className="msg-action-btn"
-													onClick={() => regenerateResponse(idx)}
-													title="Rigenera"
-												>
-													🔄
-												</button>
-											</div>
-										)}
-									</div>
-
 									{msg.testGenerated && (
 										<button 
-											className="test-action-btn"
+											className="test-btn"
 											onClick={() => navigate('/dashboard')}
 										>
-											✨ Vai al Test Generato
+											Go to Test →
 										</button>
 									)}
 								</div>
@@ -374,9 +336,8 @@ const AIAssistantPage = () => {
 						))}
 						{isLoading && (
 							<div className="message assistant">
-								<div className="message-avatar">🤖</div>
 								<div className="message-content">
-									<div className="typing-indicator">
+									<div className="typing">
 										<span></span>
 										<span></span>
 										<span></span>
@@ -388,85 +349,56 @@ const AIAssistantPage = () => {
 					</div>
 
 					{showQuickActions && messages.length === 0 && (
-						<div className="quick-actions">
-							<div className="quick-title">💡 Esempi rapidi</div>
-							<div className="quick-buttons">
-								{quickPrompts.map((prompt, idx) => (
-									<button 
-										key={idx}
-										className="quick-btn"
-										onClick={() => handleQuickPrompt(prompt)}
-									>
-										{prompt}
-									</button>
-								))}
-							</div>
+						<div className="suggestions">
+							{quickPrompts.slice(0, 4).map((prompt, idx) => (
+								<button 
+									key={idx}
+									className="suggestion"
+									onClick={() => handleQuickPrompt(prompt)}
+								>
+									{prompt}
+								</button>
+							))}
 						</div>
 					)}
 
-					{/* File Attachments Preview */}
 					{attachedFiles.length > 0 && (
-						<div className="attached-files-preview">
+						<div className="files">
 							{attachedFiles.map((file, idx) => (
-								<div key={idx} className="attached-file">
-									<div className="file-info">
-										<span className="file-icon">📄</span>
-										<div className="file-details">
-											<span className="file-name">{file.name}</span>
-											<span className="file-size">{formatFileSize(file.size)}</span>
-										</div>
-									</div>
-									<button 
-										className="remove-file-btn"
-										onClick={() => removeFile(idx)}
-										title="Rimuovi file"
-									>
-										✕
-									</button>
+								<div key={idx} className="file">
+									<span>{file.name}</span>
+									<button onClick={() => removeFile(idx)}>×</button>
 								</div>
 							))}
 						</div>
 					)}
 
-					<div className="input-area-wrapper">
-						<div className="input-area">
-							<input
-								type="file"
-								ref={fileInputRef}
-								onChange={handleFileSelect}
-								multiple
-								accept=".txt,.pdf,.png,.jpg,.jpeg"
-								style={{ display: 'none' }}
-							/>
-							
-							<div className="model-selector-inline">
-								<select 
-									value={aiModel} 
-									onChange={(e) => setAiModel(e.target.value)}
-									disabled={isLoading}
-									className="model-select-modern"
-								>
-									<option value="gpt-4o">⚡ GPT-4o</option>
-									<option value="gpt-4o-mini">💎 GPT-4o Mini</option>
-									<option value="o1-preview">🧠 O1 Preview</option>
-								</select>
-							</div>
-
-							<button 
-								className="attach-btn"
-								onClick={() => fileInputRef.current?.click()}
+					<div className="input-container">
+						<input
+							type="file"
+							ref={fileInputRef}
+							onChange={handleFileSelect}
+							multiple
+							accept=".txt,.pdf,.png,.jpg,.jpeg"
+							style={{ display: 'none' }}
+						/>
+						
+						<div className="input-wrapper">
+							<select 
+								value={aiModel} 
+								onChange={(e) => setAiModel(e.target.value)}
 								disabled={isLoading}
-								title="Allega file"
+								className="model-select"
 							>
-								<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-									<path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"/>
-								</svg>
-							</button>
+								<option value="gpt-4o">GPT-4o</option>
+								<option value="gpt-4o-mini">GPT-4o Mini</option>
+								<option value="o1-preview">O1 Preview</option>
+							</select>
 
 							<textarea
 								ref={textareaRef}
-								className="message-input"
-								placeholder="Chiedi qualsiasi cosa all'AI..."
+								className="input"
+								placeholder="Message AI..."
 								value={inputMessage}
 								onChange={(e) => setInputMessage(e.target.value)}
 								onKeyPress={handleKeyPress}
@@ -475,18 +407,11 @@ const AIAssistantPage = () => {
 							/>
 
 							<button 
-								className="send-btn"
+								className="send"
 								onClick={() => handleSendMessage()}
-								disabled={isLoading || (!inputMessage.trim() && attachedFiles.length === 0)}
-								title={isLoading ? 'Generazione in corso...' : 'Invia'}
+								disabled={isLoading || !inputMessage.trim()}
 							>
-								{isLoading ? (
-									<div className="loading-spinner"></div>
-								) : (
-									<svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-										<path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-									</svg>
-								)}
+								{isLoading ? '...' : '→'}
 							</button>
 						</div>
 					</div>

@@ -38,25 +38,26 @@
     "start": "Iniciar {{area}}"
   },
   "pretest": {
-    "title": "Pre-Prueba",
-    "selectNumber": "Selecciona el número de tarjetas",
+    "title": "Configurar prueba:",
+    "quickSelect": "Selección rápida número de preguntas",
+    "numQuestions": "Número de preguntas",
     "startTest": "Iniciar Prueba",
-    "cancel": "Cancelar",
-    "questionCount": "{{count}} preguntas"
+    "cancel": "Cancelar"
   },
   "test": {
-    "title": "Prueba",
-    "question": "Pregunta {{current}} de {{total}}",
-    "yourAnswer": "Tu respuesta",
-    "submit": "Enviar",
-    "next": "Siguiente",
-    "finish": "Terminar",
-    "correct": "¡Correcto!",
-    "wrong": "Incorrecto",
-    "correctAnswer": "Respuesta correcta: {{answer}}",
-    "score": "Puntuación: {{score}}/{{total}}",
-    "timeElapsed": "Tiempo transcurrido: {{time}}",
-    "backToDashboard": "Volver al Panel"
+    "loading": "Cargando preguntas...",
+    "result": "Resultado de la Prueba:",
+    "backToDashboard": "Volver al panel",
+    "totalQuestions": "Preguntas totales:",
+    "correct": "Correctas:",
+    "percentage": "Porcentaje de aprobación:",
+    "wrongQuestions": "Preguntas incorrectas:",
+    "yourAnswer": "Tu respuesta:",
+    "correctAnswer": "Respuesta correcta:",
+    "none": "Ninguna",
+    "allCorrect": "¡Todas correctas!",
+    "question": "Pregunta",
+    "back": "Atrás"
   },
   "statistics": {
     "title": "Estadísticas",
@@ -85,14 +86,16 @@
     "tokens": "Tokens utilizados: {{count}}"
   },
   "createTest": {
-    "title": "Crear Tarjeta",
-    "area": "Área Temática",
-    "question": "Pregunta",
-    "answer": "Respuesta",
-    "create": "Crear Tarjeta",
-    "cancel": "Cancelar",
-    "success": "¡Tarjeta creada con éxito!",
-    "error": "Error al crear la tarjeta"
+    "title": "Crear una nueva prueba",
+    "subtitle": "Establece el nombre, elige cuántas preguntas e indica la respuesta correcta para cada una.",
+    "testNamePlaceholder": "Nombre de la prueba (ej. Álgebra 1)",
+    "numQuestionsPlaceholder": "Número de preguntas",
+    "chooseImage": "Elegir imagen (opcional)",
+    "noFile": "Sin archivo",
+    "questionPlaceholder": "Pregunta {{number}}",
+    "answerPlaceholder": "Respuesta {{number}}",
+    "correct": "Correcta",
+    "confirm": "Confirmar"
   },
   "topbar": {
     "home": "Inicio",

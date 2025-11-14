@@ -38,25 +38,26 @@
     "start": "Start {{area}}"
   },
   "pretest": {
-    "title": "Pre-Test",
-    "selectNumber": "Selecteer het aantal flashcards",
+    "title": "Configureer test:",
+    "quickSelect": "Snelle selectie aantal vragen",
+    "numQuestions": "Aantal vragen",
     "startTest": "Start Test",
-    "cancel": "Annuleren",
-    "questionCount": "{{count}} vragen"
+    "cancel": "Annuleren"
   },
   "test": {
-    "title": "Test",
-    "question": "Vraag {{current}} van {{total}}",
-    "yourAnswer": "Jouw antwoord",
-    "submit": "Indienen",
-    "next": "Volgende",
-    "finish": "Voltooien",
-    "correct": "Correct!",
-    "wrong": "Fout",
-    "correctAnswer": "Correct antwoord: {{answer}}",
-    "score": "Score: {{score}}/{{total}}",
-    "timeElapsed": "Verstreken tijd: {{time}}",
-    "backToDashboard": "Terug naar Dashboard"
+    "loading": "Vragen laden...",
+    "result": "Testresultaat:",
+    "backToDashboard": "Terug naar dashboard",
+    "totalQuestions": "Totaal vragen:",
+    "correct": "Correct:",
+    "percentage": "Slagingspercentage:",
+    "wrongQuestions": "Foute vragen:",
+    "yourAnswer": "Jouw antwoord:",
+    "correctAnswer": "Correct antwoord:",
+    "none": "Geen",
+    "allCorrect": "Alles correct!",
+    "question": "Vraag",
+    "back": "Terug"
   },
   "statistics": {
     "title": "Statistieken",
@@ -85,14 +86,16 @@
     "tokens": "Gebruikte tokens: {{count}}"
   },
   "createTest": {
-    "title": "Flashcard Maken",
-    "area": "Thematisch Gebied",
-    "question": "Vraag",
-    "answer": "Antwoord",
-    "create": "Flashcard Maken",
-    "cancel": "Annuleren",
-    "success": "Flashcard succesvol gemaakt!",
-    "error": "Fout bij maken van flashcard"
+    "title": "Een nieuwe test maken",
+    "subtitle": "Stel de naam in, kies hoeveel vragen en geef het juiste antwoord voor elk.",
+    "testNamePlaceholder": "Testnaam (bijv. Algebra 1)",
+    "numQuestionsPlaceholder": "Aantal vragen",
+    "chooseImage": "Kies afbeelding (optioneel)",
+    "noFile": "Geen bestand",
+    "questionPlaceholder": "Vraag {{number}}",
+    "answerPlaceholder": "Antwoord {{number}}",
+    "correct": "Correct",
+    "confirm": "Bevestigen"
   },
   "topbar": {
     "home": "Home",

@@ -38,25 +38,26 @@
     "start": "Start {{area}}"
   },
   "pretest": {
-    "title": "Pre-Test",
-    "selectNumber": "Select the number of flashcards",
+    "title": "Configure test:",
+    "quickSelect": "Quick select number of questions",
+    "numQuestions": "Number of questions",
     "startTest": "Start Test",
-    "cancel": "Cancel",
-    "questionCount": "{{count}} questions"
+    "cancel": "Cancel"
   },
   "test": {
-    "title": "Test",
-    "question": "Question {{current}} of {{total}}",
-    "yourAnswer": "Your answer",
-    "submit": "Submit",
-    "next": "Next",
-    "finish": "Finish",
-    "correct": "Correct!",
-    "wrong": "Wrong",
-    "correctAnswer": "Correct answer: {{answer}}",
-    "score": "Score: {{score}}/{{total}}",
-    "timeElapsed": "Time elapsed: {{time}}",
-    "backToDashboard": "Back to Dashboard"
+    "loading": "Loading questions...",
+    "result": "Test Result:",
+    "backToDashboard": "Back to dashboard",
+    "totalQuestions": "Total questions:",
+    "correct": "Correct:",
+    "percentage": "Pass percentage:",
+    "wrongQuestions": "Wrong questions:",
+    "yourAnswer": "Your answer:",
+    "correctAnswer": "Correct answer:",
+    "none": "None",
+    "allCorrect": "All correct!",
+    "question": "Question",
+    "back": "Back"
   },
   "statistics": {
     "title": "Statistics",
@@ -85,14 +86,16 @@
     "tokens": "Tokens used: {{count}}"
   },
   "createTest": {
-    "title": "Create Flashcard",
-    "area": "Thematic Area",
-    "question": "Question",
-    "answer": "Answer",
-    "create": "Create Flashcard",
-    "cancel": "Cancel",
-    "success": "Flashcard created successfully!",
-    "error": "Error creating flashcard"
+    "title": "Create a new test",
+    "subtitle": "Set the name, choose how many questions and indicate the correct answer for each.",
+    "testNamePlaceholder": "Test name (e.g. Algebra 1)",
+    "numQuestionsPlaceholder": "Number of questions",
+    "chooseImage": "Choose image (optional)",
+    "noFile": "No file",
+    "questionPlaceholder": "Question {{number}}",
+    "answerPlaceholder": "Answer {{number}}",
+    "correct": "Correct",
+    "confirm": "Confirm"
   },
   "topbar": {
     "home": "Home",

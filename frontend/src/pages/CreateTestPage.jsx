@@ -1,10 +1,12 @@
 import { useState, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import Topbar from '../components/Topbar';
 import PageBackground from '../components/PageBackground';
 // Styles removed: CreateTestPage deprecated.
 import API_HOST from '../utils/apiHost';
 
 const CreateTestPage = () => {
+  const { t } = useTranslation();
   const [testName, setTestName] = useState('');
   const [numQuestions, setNumQuestions] = useState(1);
   const [questions, setQuestions] = useState([{ question: '', answers: ['', '', ''] }]);
@@ -81,13 +83,13 @@ const CreateTestPage = () => {
       <div className="create-test-page">
         <div className="ct-card">
           <div className="ct-header">
-            <h2>Crea un nuovo test</h2>
-            <p className="ct-sub">Imposta il nome, scegli quante domande e indica la risposta corretta per ciascuna.</p>
+            <h2>{t('createTest.title')}</h2>
+            <p className="ct-sub">{t('createTest.subtitle')}</p>
           </div>
           <form onSubmit={handleSubmit}>
             <input 
               type="text" 
-              placeholder="Nome del test (es. Algebra 1)" 
+              placeholder={t('createTest.testNamePlaceholder')} 
               value={testName} 
               onChange={e => setTestName(e.target.value)} 
               className="modern-input" 
@@ -101,7 +103,7 @@ const CreateTestPage = () => {
                 value={numQuestions} 
                 onChange={e => handleNumQuestions(Number(e.target.value))} 
                 className="modern-input" 
-                placeholder="Numero domande" 
+                placeholder={t('createTest.numQuestionsPlaceholder')} 
               />
               <div className="ct-quick">
                 {[5, 10, 15].map(n => (
@@ -114,8 +116,8 @@ const CreateTestPage = () => {
 
             <div className="ct-file">
               <input id="cover-image" type="file" accept="image/*" onChange={handleImage} />
-              <label htmlFor="cover-image" className="file-btn">Scegli immagine (opzionale)</label>
-              <span className="file-name">{fileName || 'Nessun file'}</span>
+              <label htmlFor="cover-image" className="file-btn">{t('createTest.chooseImage')}</label>
+              <span className="file-name">{fileName || t('createTest.noFile')}</span>
             </div>
 
             <div className="question-list">
@@ -123,7 +125,7 @@ const CreateTestPage = () => {
                 <div key={i} className="question-item">
                   <input 
                     type="text" 
-                    placeholder={`Domanda ${i+1}`} 
+                    placeholder={t('createTest.questionPlaceholder', { number: i + 1 })} 
                     value={q.question} 
                     onChange={e => handleQuestionChange(i, e.target.value)} 
                     className="modern-input" 
@@ -132,7 +134,7 @@ const CreateTestPage = () => {
                     <div key={j} className="answer-row">
                       <input 
                         type="text" 
-                        placeholder={`Risposta ${j+1}`} 
+                        placeholder={t('createTest.answerPlaceholder', { number: j + 1 })} 
                         value={a} 
                         onChange={e => handleAnswerChange(i, j, e.target.value)} 
                         className="modern-input" 
@@ -144,7 +146,7 @@ const CreateTestPage = () => {
                           checked={correctIndexes[i] === j} 
                           onChange={() => handleMarkCorrect(i, j)} 
                         />
-                        <span>Corretta</span>
+                        <span>{t('createTest.correct')}</span>
                       </label>
                     </div>
                   ))}
@@ -153,7 +155,7 @@ const CreateTestPage = () => {
             </div>
             {submitError && <div className="error" role="alert" style={{ marginTop: 8 }}>{submitError}</div>}
             <button className="modern-btn" type="submit" disabled={!allFilled}>
-              Conferma
+              {t('createTest.confirm')}
             </button>
           </form>
         </div>

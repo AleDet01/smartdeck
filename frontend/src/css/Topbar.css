@@ -53,12 +53,18 @@
 .dashboard-topbar .language-toggle {
   padding: 8px 12px;
   min-width: auto;
-  height: auto;
+  height: 32px;
   font-size: 0.85rem;
   border-radius: var(--radius-full);
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 6px;
+}
+
+.dashboard-topbar .language-toggle .language-flag {
+  font-size: 1.05rem;
+  line-height: 1;
 }
 
 .theme-toggle-btn {

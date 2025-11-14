@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import Topbar from '../components/Topbar';
 import PageBackground from '../components/PageBackground';
 import LEDEffect from '../components/LEDEffect';

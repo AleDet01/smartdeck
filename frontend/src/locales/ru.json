@@ -38,25 +38,26 @@
     "start": "Начать {{area}}"
   },
   "pretest": {
-    "title": "Пре-тест",
-    "selectNumber": "Выберите количество карточек",
+    "title": "Настроить тест:",
+    "quickSelect": "Быстрый выбор количества вопросов",
+    "numQuestions": "Количество вопросов",
     "startTest": "Начать Тест",
-    "cancel": "Отмена",
-    "questionCount": "{{count}} вопросов"
+    "cancel": "Отмена"
   },
   "test": {
-    "title": "Тест",
-    "question": "Вопрос {{current}} из {{total}}",
-    "yourAnswer": "Ваш ответ",
-    "submit": "Отправить",
-    "next": "Далее",
-    "finish": "Завершить",
-    "correct": "Правильно!",
-    "wrong": "Неправильно",
-    "correctAnswer": "Правильный ответ: {{answer}}",
-    "score": "Счет: {{score}}/{{total}}",
-    "timeElapsed": "Затраченное время: {{time}}",
-    "backToDashboard": "Вернуться на Панель"
+    "loading": "Загрузка вопросов...",
+    "result": "Результат теста:",
+    "backToDashboard": "Вернуться на панель",
+    "totalQuestions": "Всего вопросов:",
+    "correct": "Правильно:",
+    "percentage": "Процент прохождения:",
+    "wrongQuestions": "Неправильные вопросы:",
+    "yourAnswer": "Ваш ответ:",
+    "correctAnswer": "Правильный ответ:",
+    "none": "Нет",
+    "allCorrect": "Все правильно!",
+    "question": "Вопрос",
+    "back": "Назад"
   },
   "statistics": {
     "title": "Статистика",
@@ -85,14 +86,16 @@
     "tokens": "Использовано токенов: {{count}}"
   },
   "createTest": {
-    "title": "Создать Карточку",
-    "area": "Тематическая Область",
-    "question": "Вопрос",
-    "answer": "Ответ",
-    "create": "Создать Карточку",
-    "cancel": "Отмена",
-    "success": "Карточка успешно создана!",
-    "error": "Ошибка создания карточки"
+    "title": "Создать новый тест",
+    "subtitle": "Установите название, выберите количество вопросов и укажите правильный ответ для каждого.",
+    "testNamePlaceholder": "Название теста (напр. Алгебра 1)",
+    "numQuestionsPlaceholder": "Количество вопросов",
+    "chooseImage": "Выбрать изображение (необязательно)",
+    "noFile": "Файл не выбран",
+    "questionPlaceholder": "Вопрос {{number}}",
+    "answerPlaceholder": "Ответ {{number}}",
+    "correct": "Правильный",
+    "confirm": "Подтвердить"
   },
   "topbar": {
     "home": "Главная",

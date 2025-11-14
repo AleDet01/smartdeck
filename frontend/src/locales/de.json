@@ -38,25 +38,26 @@
     "start": "{{area}} starten"
   },
   "pretest": {
-    "title": "Vor-Test",
-    "selectNumber": "Wählen Sie die Anzahl der Karten",
+    "title": "Test konfigurieren:",
+    "quickSelect": "Schnellauswahl Anzahl Fragen",
+    "numQuestions": "Anzahl der Fragen",
     "startTest": "Test Starten",
-    "cancel": "Abbrechen",
-    "questionCount": "{{count}} Fragen"
+    "cancel": "Abbrechen"
   },
   "test": {
-    "title": "Test",
-    "question": "Frage {{current}} von {{total}}",
-    "yourAnswer": "Ihre Antwort",
-    "submit": "Absenden",
-    "next": "Weiter",
-    "finish": "Beenden",
-    "correct": "Richtig!",
-    "wrong": "Falsch",
-    "correctAnswer": "Richtige Antwort: {{answer}}",
-    "score": "Punktzahl: {{score}}/{{total}}",
-    "timeElapsed": "Verstrichene Zeit: {{time}}",
-    "backToDashboard": "Zurück zum Dashboard"
+    "loading": "Fragen werden geladen...",
+    "result": "Testergebnis:",
+    "backToDashboard": "Zurück zum Dashboard",
+    "totalQuestions": "Gesamte Fragen:",
+    "correct": "Richtig:",
+    "percentage": "Erfolgsquote:",
+    "wrongQuestions": "Falsche Fragen:",
+    "yourAnswer": "Ihre Antwort:",
+    "correctAnswer": "Richtige Antwort:",
+    "none": "Keine",
+    "allCorrect": "Alle richtig!",
+    "question": "Frage",
+    "back": "Zurück"
   },
   "statistics": {
     "title": "Statistiken",
@@ -85,14 +86,16 @@
     "tokens": "Verwendete Tokens: {{count}}"
   },
   "createTest": {
-    "title": "Karte Erstellen",
-    "area": "Thematischer Bereich",
-    "question": "Frage",
-    "answer": "Antwort",
-    "create": "Karte Erstellen",
-    "cancel": "Abbrechen",
-    "success": "Karte erfolgreich erstellt!",
-    "error": "Fehler beim Erstellen der Karte"
+    "title": "Einen neuen Test erstellen",
+    "subtitle": "Legen Sie den Namen fest, wählen Sie wie viele Fragen und geben Sie die richtige Antwort für jede an.",
+    "testNamePlaceholder": "Testname (z.B. Algebra 1)",
+    "numQuestionsPlaceholder": "Anzahl der Fragen",
+    "chooseImage": "Bild auswählen (optional)",
+    "noFile": "Keine Datei",
+    "questionPlaceholder": "Frage {{number}}",
+    "answerPlaceholder": "Antwort {{number}}",
+    "correct": "Richtig",
+    "confirm": "Bestätigen"
   },
   "topbar": {
     "home": "Startseite",
