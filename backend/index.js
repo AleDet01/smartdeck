@@ -58,19 +58,21 @@ if (process.env.NODE_ENV !== 'production') {
   }));
 }
 
-// Configure allowed origins with production defaults
+// Configure allowed origins with custom domain support
 const allowedOrigins = process.env.ALLOW_ORIGINS 
   ? process.env.ALLOW_ORIGINS.split(',').map(s => s.trim())
   : [
+      // Development
       'http://localhost:3001', 
       'http://localhost:3000',
-      'https://smartdeck-frontend.onrender.com' // Always allow production frontend
+      // Production (Render default)
+      'https://smartdeck-frontend.onrender.com',
+      // Custom domain (configure in Render environment variables)
+      ...(process.env.CUSTOM_DOMAIN ? [
+        `https://${process.env.CUSTOM_DOMAIN}`,
+        `https://www.${process.env.CUSTOM_DOMAIN}`
+      ] : [])
     ];
-
-// Ensure production frontend is always in the list
-if (process.env.NODE_ENV === 'production' && !allowedOrigins.includes('https://smartdeck-frontend.onrender.com')) {
-  allowedOrigins.push('https://smartdeck-frontend.onrender.com');
-}
 
 console.log('✓ CORS allowedOrigins:', allowedOrigins);
 
