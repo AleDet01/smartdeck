@@ -128,9 +128,6 @@ app.use(mongoSanitizeConfig);
 // HTTP Parameter Pollution Protection
 app.use(hppConfig);
 
-// Account Lockout Middleware (prima delle routes)
-app.use(accountLockout);
-
 // Root endpoint
 app.get('/', (req, res) => {
   res.json({ 
@@ -197,7 +194,7 @@ app.get('/health', async (req, res) => {
 app.use('/api', apiLimiter);
 
 // Routes
-app.use('/auth', require('./routes/auth'));
+app.use('/auth', accountLockout, require('./routes/auth'));
 app.use('/flash', require('./routes/flash'));
 app.use('/statistics', require('./routes/statistics'));
 app.use('/ai-assistant', require('./routes/aiAssistant'));
