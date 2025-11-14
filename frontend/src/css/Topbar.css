@@ -46,14 +46,19 @@
 /* Language selector in topbar */
 .dashboard-topbar .language-selector {
   position: relative;
-  margin-left: 4px;
+  display: flex;
+  align-items: center;
 }
 
 .dashboard-topbar .language-toggle {
-  padding: 6px 10px;
-  min-width: 70px;
+  padding: 8px 12px;
+  min-width: auto;
+  height: auto;
   font-size: 0.85rem;
   border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .theme-toggle-btn {

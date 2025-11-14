@@ -54,7 +54,6 @@ export default function LanguageSelector() {
         aria-haspopup="true"
       >
         <span className="language-flag">{currentLanguage.flag}</span>
-        <span className="language-code">{currentLanguage.code.toUpperCase()}</span>
         <svg 
           className={`dropdown-arrow ${isOpen ? 'open' : ''}`} 
           width="12" 
