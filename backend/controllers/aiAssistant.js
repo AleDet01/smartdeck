@@ -231,7 +231,7 @@ const streamChatWithAI = async (req, res) => {
 			return res.status(401).json({ error: 'Utente non autenticato' });
 		}
 
-		const { prompt, model = 'gpt-4o', conversationHistory = [], files = null } = req.body;
+		const { prompt, model = 'gpt-4o', conversationHistory = [], files = null, mode = 'auto' } = req.body;
 
 		if (!prompt || prompt.trim().length === 0) {
 			return res.status(400).json({ error: 'Prompt richiesto' });
@@ -290,7 +290,8 @@ Se l'utente chiede di generare un test, crea un JSON strutturato con domande e r
 		console.log(`🤖 Streaming ${model}: "${prompt.substring(0, 100)}..."`);
 
 		// Verifica se è una richiesta di generazione test
-		const isTestGeneration = /genera|crea|test|quiz|flashcard|domande|esercizi/i.test(prompt);
+		const forceTestGeneration = typeof mode === 'string' && ['test', 'flashcards', 'quiz'].includes(mode.toLowerCase());
+		const isTestGeneration = forceTestGeneration || /genera|crea|test|quiz|flashcard|domande|esercizi/i.test(prompt);
 
 		if (isTestGeneration) {
 			// Usa response_format JSON per test generation
@@ -306,42 +307,74 @@ Se l'utente chiede di generare un test, crea un JSON strutturato con domande e r
 				const content = completion.choices?.[0]?.message?.content || '';
 				const testData = JSON.parse(content);
 
-				// Valida e salva
-				if (testData.thematicArea && Array.isArray(testData.questions)) {
-					const docs = testData.questions.map(q => ({
-						question: q.question,
-						answers: q.answers,
-						thematicArea: testData.thematicArea,
-						difficulty: q.difficulty || 'media',
-						createdBy: userId
-					}));
-
-					const created = await Flashcard.insertMany(docs);
-
-					// CORRETTO: Invia il contenuto completo come streaming
-					const responseMessage = `Test Generato: ${testData.thematicArea}\n\n${created.length} domande create con successo!\n\nIl test è disponibile nella Dashboard.`;
-
-					// Invia contenuto
-					res.write(`data: ${JSON.stringify({ content: responseMessage })}\n\n`);
-					
-					// Poi invia metadata test
-					res.write(`data: ${JSON.stringify({ 
-						testGenerated: true,
-						testData: { thematicArea: testData.thematicArea, questionCount: created.length },
-						tokens: { 
-							input: completion.usage?.prompt_tokens || 0,
-							output: completion.usage?.completion_tokens || 0,
-							total: completion.usage?.total_tokens || 0
-						}
-					})}\n\n`);
+				if (!testData.thematicArea || !Array.isArray(testData.questions) || testData.questions.length === 0) {
+					throw new Error('Formato test non valido generato dall\'AI');
 				}
+
+				const normalizeAnswers = (answers = []) => {
+					const raw = Array.isArray(answers) ? answers.slice(0, 3) : [];
+					const mapped = raw.map((ans, idx) => {
+						if (typeof ans === 'string') {
+							return { text: ans, isCorrect: idx === 0 };
+						}
+						if (ans && typeof ans.text === 'string') {
+							return { text: ans.text, isCorrect: !!ans.isCorrect };
+						}
+						return null;
+					}).filter(Boolean);
+
+					// Garantisce sempre 3 risposte duplicando l'ultima valida
+					while (mapped.length < 3 && mapped.length > 0) {
+						mapped.push({ ...mapped[mapped.length - 1], isCorrect: false });
+					}
+
+					if (mapped.length > 0 && !mapped.some(ans => ans.isCorrect)) {
+						mapped[0].isCorrect = true;
+					}
+					return mapped;
+				};
+
+				const docs = testData.questions
+					.map(q => {
+						const normalizedDifficulty = (q?.difficulty || '').toLowerCase();
+						return {
+							question: q?.question,
+							answers: normalizeAnswers(q?.answers),
+							thematicArea: testData.thematicArea,
+							difficulty: ['facile', 'media', 'difficile'].includes(normalizedDifficulty)
+								? normalizedDifficulty
+								: 'media',
+							createdBy: userId
+						};
+					})
+					.filter(doc => doc.question && doc.answers.length === 3);
+
+				if (docs.length === 0) {
+					throw new Error('Nessuna domanda valida generata dall\'AI');
+				}
+
+				const created = await Flashcard.insertMany(docs);
+
+				const responseMessage = `Test Generato: ${testData.thematicArea}\n\n${created.length} domande create con successo!\n\nIl test è disponibile nella Dashboard.`;
+
+				res.write(`data: ${JSON.stringify({ content: responseMessage })}\n\n`);
+				
+				res.write(`data: ${JSON.stringify({ 
+					testGenerated: true,
+					testData: { thematicArea: testData.thematicArea, questionCount: created.length },
+					tokens: { 
+						input: completion.usage?.prompt_tokens || 0,
+						output: completion.usage?.completion_tokens || 0,
+						total: completion.usage?.total_tokens || 0
+					}
+				})}\n\n`);
 
 				res.write('data: [DONE]\n\n');
 				res.end();
 
 			} catch (error) {
 				console.error('❌ Errore generazione test:', error);
-				res.write(`data: ${JSON.stringify({ error: 'Errore nella generazione del test. Prova a riformulare la richiesta.' })}\n\n`);
+				res.write(`data: ${JSON.stringify({ error: error.message || 'Errore nella generazione del test. Prova a riformulare la richiesta.' })}\n\n`);
 				res.write('data: [DONE]\n\n');
 				res.end();
 			}

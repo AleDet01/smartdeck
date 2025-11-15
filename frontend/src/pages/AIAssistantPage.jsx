@@ -6,61 +6,117 @@ import LEDEffect from '../components/LEDEffect';
 import '../css/AIAssistantPage.css';
 import API_HOST from '../utils/apiHost';
 
+const MODES = {
+	CHAT: 'chat',
+	TEST: 'test'
+};
+
+const quickPrompts = {
+	[MODES.CHAT]: [
+		'Spiega il DNA in modo semplice',
+		'Riassumi il Romanticismo italiano',
+		'Come funziona l\'energia solare?',
+		'Dammi un esempio pratico di derivate'
+	],
+	[MODES.TEST]: [
+		'Genera 8 domande miste sulla Rivoluzione francese',
+		'Quiz di matematica: equazioni di secondo grado (10 domande)',
+		'Creo un test facile di biologia sul sistema nervoso',
+		'Flashcard su informatica: sicurezza delle reti'
+	]
+};
+
+const modeMeta = {
+	[MODES.CHAT]: {
+		label: 'Chat',
+		description: 'Fai domande rapide, ottieni spiegazioni e suggerimenti istantanei.'
+	},
+	[MODES.TEST]: {
+		label: 'Genera Test',
+		description: 'Descrivi un argomento: creo automaticamente flashcard salvate nella Dashboard.'
+	}
+};
+
+const placeholderByMode = {
+	[MODES.CHAT]: 'Scrivi un messaggio o una domanda... (Invio per inviare)',
+	[MODES.TEST]: 'Descrivi l\'argomento del test, livello e numero di domande...'
+};
+
+const createMessageId = () => `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+
 const AIAssistantPage = () => {
-	const [messages, setMessages] = useState([]);
-	const [inputMessage, setInputMessage] = useState('');
+	const [mode, setMode] = useState(MODES.CHAT);
+	const [messagesByMode, setMessagesByMode] = useState({
+		[MODES.CHAT]: [],
+		[MODES.TEST]: []
+	});
+	const [drafts, setDrafts] = useState({
+		[MODES.CHAT]: '',
+		[MODES.TEST]: ''
+	});
 	const [isLoading, setIsLoading] = useState(false);
-	const [showQuickActions, setShowQuickActions] = useState(true);
 	const [aiModel, setAiModel] = useState('gpt-4o');
-	const [conversationContext, setConversationContext] = useState([]);
-	
+
 	const messagesEndRef = useRef(null);
 	const textareaRef = useRef(null);
 	const navigate = useNavigate();
+
+	const inputMessage = drafts[mode];
+	const currentMessages = messagesByMode[mode];
+	const isTestMode = mode === MODES.TEST;
 
 	const scrollToBottom = () => {
 		messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
 	};
 
 	useEffect(() => {
-		if (messages.length > 0) {
+		if (currentMessages.length > 0) {
 			scrollToBottom();
 		}
-	}, [messages]);
+	}, [currentMessages, mode]);
 
-	// Auto-resize textarea
 	useEffect(() => {
 		if (textareaRef.current) {
 			textareaRef.current.style.height = 'auto';
 			textareaRef.current.style.height = Math.min(textareaRef.current.scrollHeight, 200) + 'px';
 		}
-	}, [inputMessage]);
+	}, [inputMessage, mode]);
 
-	const quickPrompts = [
-		'Storia: Seconda Guerra Mondiale',
-		'Matematica: Equazioni di secondo grado',
-		'Geografia: Capitali europee',
-		'Biologia: Corpo umano'
-	];
+	const updateMessagesForMode = (targetMode, updater) => {
+		setMessagesByMode(prev => ({
+			...prev,
+			[targetMode]: updater(prev[targetMode] || [])
+		}));
+	};
 
-	const handleSendMessage = async (text = inputMessage) => {
-		if (!text || text.trim().length === 0 || isLoading) return;
+	const buildConversationHistory = (targetMode, extraEntries = []) => {
+		const base = messagesByMode[targetMode] || [];
+		const compact = base
+			.filter(msg => msg.role === 'user' || msg.role === 'assistant')
+			.map(msg => ({ role: msg.role, content: msg.content }));
+		return [...compact, ...extraEntries].slice(-10);
+	};
+
+	const handleSendMessage = async (text = inputMessage, targetMode = mode) => {
+		const trimmed = (text || '').trim();
+		if (!trimmed || isLoading) return;
 
 		const userMessage = {
+			id: createMessageId(),
 			role: 'user',
-			content: text.trim(),
+			content: trimmed,
 			timestamp: new Date()
 		};
 
-		setMessages(prev => [...prev, userMessage]);
-		const newContext = [...conversationContext, { role: 'user', content: text.trim() }];
-		setConversationContext(newContext);
-		setInputMessage('');
-		setIsLoading(true);
-		setShowQuickActions(false);
+		updateMessagesForMode(targetMode, prev => [...prev, userMessage]);
+		const newHistory = targetMode === MODES.CHAT
+			? buildConversationHistory(targetMode, [{ role: 'user', content: trimmed }])
+			: [{ role: 'user', content: trimmed }];
 
-		// Crea messaggio assistant vuoto per streaming
-		const assistantMessageId = Date.now();
+		setDrafts(prev => ({ ...prev, [targetMode]: '' }));
+		setIsLoading(true);
+
+		const assistantMessageId = createMessageId();
 		const initialAssistantMessage = {
 			id: assistantMessageId,
 			role: 'assistant',
@@ -68,17 +124,18 @@ const AIAssistantPage = () => {
 			timestamp: new Date(),
 			isStreaming: true
 		};
-		setMessages(prev => [...prev, initialAssistantMessage]);
+		updateMessagesForMode(targetMode, prev => [...prev, initialAssistantMessage]);
 
 		try {
 			const res = await fetch(`${API_HOST}/ai-assistant/stream`, {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				credentials: 'include',
-				body: JSON.stringify({ 
-					prompt: text.trim(),
+				body: JSON.stringify({
+					prompt: trimmed,
 					model: aiModel,
-					conversationHistory: newContext.slice(-10)
+					conversationHistory: targetMode === MODES.CHAT ? newHistory : [],
+					mode: targetMode
 				})
 			});
 
@@ -91,7 +148,6 @@ const AIAssistantPage = () => {
 				throw new Error(`HTTP error! status: ${res.status}`);
 			}
 
-			// Leggi stream
 			const reader = res.body.getReader();
 			const decoder = new TextDecoder();
 			let streamedContent = '';
@@ -105,55 +161,51 @@ const AIAssistantPage = () => {
 				const lines = chunk.split('\n');
 
 				for (const line of lines) {
-					if (line.startsWith('data: ')) {
-						const data = line.slice(6);
-						if (data === '[DONE]') continue;
+					if (!line.startsWith('data: ')) continue;
+					const data = line.slice(6);
+					if (data === '[DONE]') continue;
 
-						try {
-							const parsed = JSON.parse(data);
-							
-							if (parsed.content) {
-								streamedContent += parsed.content;
-								setMessages(prev => prev.map(msg => 
-									msg.id === assistantMessageId 
-										? { ...msg, content: streamedContent }
-										: msg
-								));
-							}
+					try {
+						const parsed = JSON.parse(data);
 
-							if (parsed.testGenerated) {
-								testData = parsed.testData;
-							}
-
-							if (parsed.error) {
-								throw new Error(parsed.error);
-							}
-						} catch (e) {
-							console.warn('Parse error:', e);
+						if (parsed.content) {
+							streamedContent += parsed.content;
+							updateMessagesForMode(targetMode, prev => prev.map(msg => 
+								msg.id === assistantMessageId
+									? { ...msg, content: streamedContent }
+									: msg
+							));
 						}
+
+						if (parsed.testGenerated) {
+							testData = parsed.testData;
+						}
+
+						if (parsed.error) {
+							throw new Error(parsed.error);
+						}
+					} catch (streamError) {
+						console.warn('Parse error:', streamError);
 					}
 				}
 			}
 
-			// Finalizza messaggio
-			setMessages(prev => prev.map(msg => 
-				msg.id === assistantMessageId 
-					? { 
-						...msg, 
+			updateMessagesForMode(targetMode, prev => prev.map(msg => 
+				msg.id === assistantMessageId
+					? {
+						...msg,
 						isStreaming: false,
 						testGenerated: !!testData,
-						testArea: testData?.thematicArea
+						testArea: testData?.thematicArea,
+						testCount: testData?.questionCount
 					}
 					: msg
 			));
 
-			// Aggiorna context
-			setConversationContext(prev => [...prev, { role: 'assistant', content: streamedContent }]);
-
 		} catch (err) {
 			console.error('❌ Errore AI:', err);
-			setMessages(prev => prev.map(msg => 
-				msg.id === assistantMessageId 
+			updateMessagesForMode(targetMode, prev => prev.map(msg => 
+				msg.id === assistantMessageId
 					? {
 						...msg,
 						content: `❌ Errore: ${err.message || 'Connessione fallita'}\n\nProva a:\n• Verificare la connessione\n• Riformulare la richiesta\n• Ridurre la lunghezza del messaggio`,
@@ -175,15 +227,14 @@ const AIAssistantPage = () => {
 	};
 
 	const handleQuickPrompt = (prompt) => {
-		setInputMessage(prompt);
+		setDrafts(prev => ({ ...prev, [mode]: prompt }));
 		handleSendMessage(prompt);
 	};
 
 	const clearChat = () => {
-		if (window.confirm('Vuoi cancellare tutta la cronologia della chat?')) {
-			setMessages([]);
-			setConversationContext([]);
-			setShowQuickActions(true);
+		if (window.confirm('Vuoi cancellare la cronologia di questa modalità?')) {
+			updateMessagesForMode(mode, () => []);
+			setDrafts(prev => ({ ...prev, [mode]: '' }));
 		}
 	};
 
@@ -191,17 +242,14 @@ const AIAssistantPage = () => {
 		navigator.clipboard.writeText(content);
 	};
 
-	const regenerateResponse = async (messageIndex) => {
-		if (messageIndex < 1) return;
-		const userMsg = messages[messageIndex - 1];
-		if (userMsg.role !== 'user') return;
+	const regenerateResponse = (messageIndex) => {
+		const modeMessages = messagesByMode[mode];
+		if (!modeMessages || messageIndex < 1) return;
+		const userMsg = modeMessages[messageIndex - 1];
+		if (!userMsg || userMsg.role !== 'user') return;
 
-		// Rimuovi messaggi dopo quello da rigenerare
-		setMessages(prev => prev.slice(0, messageIndex));
-		setConversationContext(prev => prev.slice(0, messageIndex));
-		
-		// Rigenera
-		handleSendMessage(userMsg.content);
+		updateMessagesForMode(mode, prev => prev.slice(0, messageIndex));
+		handleSendMessage(userMsg.content, mode);
 	};
 
 	return (
@@ -212,43 +260,57 @@ const AIAssistantPage = () => {
 			<div className="ai-container">
 				<div className="ai-header">
 					<h1>AI Assistant</h1>
-					<button 
-						className="clear-btn"
-						onClick={clearChat}
-						disabled={messages.length === 0}
-					>
-						Clear
-					</button>
+					<div className="ai-actions">
+						<button 
+							className="clear-btn"
+							onClick={clearChat}
+							disabled={currentMessages.length === 0 || isLoading}
+						>
+							Pulisci chat
+						</button>
+					</div>
 				</div>
-				
+
+				<div className="mode-switch">
+					{Object.values(MODES).map(key => (
+						<button
+							key={key}
+							className={`mode-btn ${mode === key ? 'active' : ''}`}
+							onClick={() => setMode(key)}
+							disabled={isLoading && mode !== key}
+						>
+							{modeMeta[key].label}
+						</button>
+					))}
+				</div>
+				<p className="mode-description">{modeMeta[mode].description}</p>
+
 				<div className="chat-container">
 					<div className="messages-area">
-						{messages.map((msg, idx) => (
-							<div key={idx} className={`message ${msg.role} ${msg.isError ? 'error' : ''}`}>
+						{currentMessages.map((msg, idx) => (
+							<div key={msg.id || idx} className={`message ${msg.role} ${msg.isError ? 'error' : ''}`}>
 								<div className="message-content">
-									{msg.content}
-									{msg.isStreaming && <span className="cursor">|</span>}
-								</div>
-								
-								{msg.role === 'assistant' && !msg.isStreaming && (
-									<div className="message-actions">
-										<button onClick={() => copyMessage(msg.content)}>
-											Copy
-										</button>
-										<button onClick={() => regenerateResponse(idx)}>
-											Regenerate
-										</button>
+									<div className="message-text">
+										{msg.content}
+										{msg.isStreaming && <span className="cursor">|</span>}
 									</div>
-								)}
 
-								{msg.testGenerated && (
-									<button 
-										className="test-btn"
-										onClick={() => navigate('/dashboard')}
-									>
-										View Test
-									</button>
-								)}
+									{msg.role === 'assistant' && !msg.isStreaming && (
+										<div className="message-actions">
+											<button className="action-btn" onClick={() => copyMessage(msg.content)}>Copia</button>
+											<button className="action-btn" onClick={() => regenerateResponse(idx)}>Rigenera</button>
+										</div>
+									)}
+
+									{msg.testGenerated && (
+										<button 
+											className="test-btn"
+											onClick={() => navigate('/dashboard')}
+										>
+											Vai al test ({msg.testArea || 'Dashboard'})
+										</button>
+									)}
+								</div>
 							</div>
 						))}
 						{isLoading && (
@@ -265,9 +327,9 @@ const AIAssistantPage = () => {
 						<div ref={messagesEndRef} />
 					</div>
 
-					{showQuickActions && messages.length === 0 && (
+					{currentMessages.length === 0 && (
 						<div className="suggestions">
-							{quickPrompts.slice(0, 4).map((prompt, idx) => (
+							{quickPrompts[mode].map((prompt, idx) => (
 								<button 
 									key={idx}
 									className="suggestion"
@@ -292,20 +354,20 @@ const AIAssistantPage = () => {
 
 						<textarea
 							ref={textareaRef}
-							placeholder="Message AI..."
+							placeholder={placeholderByMode[mode]}
 							value={inputMessage}
-							onChange={(e) => setInputMessage(e.target.value)}
+							onChange={(e) => setDrafts(prev => ({ ...prev, [mode]: e.target.value }))}
 							onKeyPress={handleKeyPress}
 							rows={1}
 							disabled={isLoading}
 						/>
 
 						<button 
-							className="send-btn"
+							className="send"
 							onClick={() => handleSendMessage()}
 							disabled={isLoading || !inputMessage.trim()}
 						>
-							{isLoading ? '...' : '→'}
+							{isLoading ? '...' : isTestMode ? 'Genera' : '→'}
 						</button>
 					</div>
 				</div>
