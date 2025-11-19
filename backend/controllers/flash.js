@@ -53,7 +53,7 @@ const getFlashByThematicArea = async (req, res) => {
 		// Costruisci query
 		const query = buildUserQuery(userId, { 
 			thematicArea: decodedArea,
-			isActive: { $ne: false } 
+			isActive: true 
 		});
 		
 		console.log(`🔍 [getFlashByThematicArea] Query:`, JSON.stringify(query));
@@ -113,7 +113,7 @@ const listThematicAreas = async (req, res) => {
 		
 		// Aggregation pipeline per contare flashcard per area (più veloce di distinct + count separati)
 		// NOTA: buildAggregationMatch ritorna ObjectId per createdBy, fondamentale per $match in aggregation
-		const matchQuery = buildAggregationMatch(userId, { isActive: { $ne: false } });
+		const matchQuery = buildAggregationMatch(userId, { isActive: true });
 		console.log(`🔍 [listThematicAreas] Match Query:`, JSON.stringify(matchQuery));
 
 		const areasWithCount = await Flashcard.aggregate([
