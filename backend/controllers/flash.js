@@ -6,9 +6,14 @@ const getUserId = (req) => req.user?.id || null;
 const buildUserQuery = (userId, additionalFields = {}) => {
 	const query = { ...additionalFields };
 	if (userId) {
-		// Se stiamo usando aggregation, dobbiamo assicurarci che userId sia ObjectId
-		// Ma per find() va bene anche stringa.
-		// Per sicurezza, se è una stringa valida ObjectId, la convertiamo
+		query.createdBy = userId;
+	}
+	return query;
+};
+
+const buildAggregationMatch = (userId, additionalFields = {}) => {
+	const query = { ...additionalFields };
+	if (userId) {
 		if (mongoose.Types.ObjectId.isValid(userId)) {
 			query.createdBy = new mongoose.Types.ObjectId(userId);
 		} else {
@@ -96,8 +101,8 @@ const listThematicAreas = async (req, res) => {
 		console.log(`🔍 [listThematicAreas] Query for userId: ${userId}`);
 		
 		// Aggregation pipeline per contare flashcard per area (più veloce di distinct + count separati)
-		// NOTA: buildUserQuery ora ritorna ObjectId per createdBy, fondamentale per $match in aggregation
-		const matchQuery = buildUserQuery(userId, { isActive: { $ne: false } });
+		// NOTA: buildAggregationMatch ritorna ObjectId per createdBy, fondamentale per $match in aggregation
+		const matchQuery = buildAggregationMatch(userId, { isActive: { $ne: false } });
 		console.log(`🔍 [listThematicAreas] Match Query:`, JSON.stringify(matchQuery));
 
 		const areasWithCount = await Flashcard.aggregate([
