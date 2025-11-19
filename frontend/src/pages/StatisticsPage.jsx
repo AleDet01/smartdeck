@@ -1,6 +1,26 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import {
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  Radar,
+  RadarChart,
+  PolarGrid,
+  PolarAngleAxis,
+  PolarRadiusAxis,
+  PieChart,
+  Pie,
+  Cell,
+  BarChart,
+  Bar,
+  Legend
+} from 'recharts';
 import Topbar from '../components/Topbar';
 import PageBackground from '../components/PageBackground';
 import LEDEffect from '../components/LEDEffect';
@@ -67,60 +87,21 @@ const getScoreClass = (score) => {
 	return 'poor';
 };
 
-// Componente semplice per grafico lineare
-const SimpleLineChart = ({ data }) => {
-	const { t } = useTranslation();
-	if (!data || data.length === 0) return null;
-
-	const maxScore = 100;
-	const minScore = 0;
-	const height = 200;
-
-	const points = data.map((item, idx) => {
-		const x = (idx / (data.length - 1)) * 100;
-		const y = height - ((item.score - minScore) / (maxScore - minScore)) * height;
-		return `${x},${y}`;
-	}).join(' ');
-
-	return (
-		<div className="simple-chart">
-			<svg viewBox={`0 0 100 ${height}`} preserveAspectRatio="none" className="chart-svg">
-				<line x1="0" y1={height * 0.25} x2="100" y2={height * 0.25} stroke="rgba(255,255,255,0.1)" strokeWidth="0.5" />
-				<line x1="0" y1={height * 0.5} x2="100" y2={height * 0.5} stroke="rgba(255,255,255,0.2)" strokeWidth="0.5" />
-				<line x1="0" y1={height * 0.75} x2="100" y2={height * 0.75} stroke="rgba(255,255,255,0.1)" strokeWidth="0.5" />
-				
-				<polyline
-					points={points}
-					fill="none"
-					stroke="url(#lineGradient)"
-					strokeWidth="2"
-					strokeLinecap="round"
-					strokeLinejoin="round"
-				/>
-				
-				<polygon
-					points={`0,${height} ${points} 100,${height}`}
-					fill="url(#areaGradient)"
-					opacity="0.3"
-				/>
-
-				<defs>
-					<linearGradient id="lineGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-						<stop offset="0%" stopColor="#ffd60a" />
-						<stop offset="100%" stopColor="#3b82f6" />
-					</linearGradient>
-					<linearGradient id="areaGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-						<stop offset="0%" stopColor="#3b82f6" />
-						<stop offset="100%" stopColor="transparent" />
-					</linearGradient>
-				</defs>
-			</svg>
-			<div className="chart-labels">
-				<span>{t('statistics.session1')}</span>
-				<span>{t('statistics.sessionN', { n: data.length })}</span>
+const CustomTooltip = ({ active, payload, label }) => {
+	if (active && payload && payload.length) {
+		return (
+			<div className="custom-tooltip">
+				<p className="tooltip-label">{`Test ${label}`}</p>
+				<p className="tooltip-score" style={{ color: payload[0].stroke }}>
+					{`Score: ${payload[0].value}%`}
+				</p>
+				{payload[0].payload.thematicArea && (
+					<p className="tooltip-area">{payload[0].payload.thematicArea}</p>
+				)}
 			</div>
-		</div>
-	);
+		);
+	}
+	return null;
 };
 
 const StatisticsPage = () => {
@@ -149,9 +130,9 @@ const StatisticsPage = () => {
 		};
 	}, [stats]);
 
-	// Distribuzione score
-	const scoreDistribution = useMemo(() => {
-		if (!stats || !stats.sessions) return { excellent: 0, good: 0, fair: 0, poor: 0 };
+	// Distribuzione score per PieChart
+	const scoreDistributionData = useMemo(() => {
+		if (!stats || !stats.sessions) return [];
 		
 		const dist = { excellent: 0, good: 0, fair: 0, poor: 0 };
 		stats.sessions.forEach(s => {
@@ -160,7 +141,23 @@ const StatisticsPage = () => {
 			else if (s.score >= 50) dist.fair++;
 			else dist.poor++;
 		});
-		return dist;
+
+		return [
+			{ name: t('statistics.excellent'), value: dist.excellent, color: '#10b981' },
+			{ name: t('statistics.good'), value: dist.good, color: '#3b82f6' },
+			{ name: t('statistics.fair'), value: dist.fair, color: '#f59e0b' },
+			{ name: t('statistics.poor'), value: dist.poor, color: '#ef4444' }
+		].filter(item => item.value > 0);
+	}, [stats, t]);
+
+	// Dati per Radar Chart (Performance per Area)
+	const radarData = useMemo(() => {
+		if (!stats || !stats.byArea) return [];
+		return Object.entries(stats.byArea).map(([area, data]) => ({
+			subject: area,
+			A: data.averageScore,
+			fullMark: 100
+		})).slice(0, 6); // Limit to top 6 areas to avoid clutter
 	}, [stats]);
 
 	// Aree da migliorare
@@ -244,396 +241,203 @@ const StatisticsPage = () => {
 						<h1>{t('statistics.pageTitle')}</h1>
 						<p className="stats-subtitle">{t('statistics.pageSubtitle')}</p>
 					</div>
-					<div className="header-summary">
-						<div className="summary-item">
-							<span className="summary-label">{t('statistics.completedSessions')}</span>
-							<span className="summary-value">{stats.totalSessions}</span>
-							<span className="summary-unit">{t('statistics.tests')}</span>
-						</div>
-						<div className="summary-divider"></div>
-						<div className="summary-item">
-							<span className="summary-label">{t('statistics.totalStudyTime')}</span>
-							<span className="summary-value">{advancedMetrics?.totalStudyTime}</span>
-							<span className="summary-unit">{t('statistics.hours')}:{t('statistics.minutes')}</span>
-						</div>
-						<div className="summary-divider"></div>
-						<div className="summary-item">
-							<span className="summary-label">{t('statistics.averagePerformance')}</span>
-							<span className="summary-value">{stats.averageScore.toFixed(1)}%</span>
-							<span className="summary-unit">{t('statistics.accuracy')}</span>
-						</div>
-						<div className="summary-divider"></div>
-						<div className="summary-item">
-							<span className="summary-label">{t('statistics.standardDeviation')}</span>
-							<span className="summary-value">{(100 - advancedMetrics?.consistency).toFixed(1)}%</span>
-							<span className="summary-unit">{t('statistics.variability')}</span>
-						</div>
-					</div>
-				</div>
-
-				{/* Filtro per area */}
-				{areas.length > 0 && (
-					<div className="area-filter">
-						<button 
-							className={selectedArea === 'all' ? 'filter-btn active' : 'filter-btn'}
-							onClick={() => setSelectedArea('all')}
-						>
-							{t('statistics.overallAnalysis')}
-						</button>
-						{areas.map(area => (
+					
+					{/* Filtro per area */}
+					{areas.length > 0 && (
+						<div className="area-filter">
 							<button 
-								key={area}
-								className={selectedArea === area ? 'filter-btn active' : 'filter-btn'}
-								onClick={() => setSelectedArea(area)}
+								className={selectedArea === 'all' ? 'filter-btn active' : 'filter-btn'}
+								onClick={() => setSelectedArea('all')}
 							>
-								{area}
+								{t('statistics.overallAnalysis')}
 							</button>
-						))}
-					</div>
-				)}
-
-				{/* Metriche Avanzate */}
-				{selectedArea === 'all' && advancedMetrics && (
-					<div className="advanced-metrics-section">
-						<h2 className="section-title">{t('statistics.kpiTitle')}</h2>
-						<div className="metrics-grid">
-							<div className="metric-card accuracy">
-								<div className="metric-header">
-									<div className="metric-label">{t('statistics.accuracyRate')}</div>
-									<div className="metric-value">{advancedMetrics.accuracyRate.toFixed(2)}%</div>
-								</div>
-								<div className="metric-description">{t('statistics.accuracyDesc')}</div>
-								<div className="metric-bar">
-									<div className="metric-bar-fill" style={{width: `${advancedMetrics.accuracyRate}%`, background: '#10b981'}}></div>
-								</div>
-								<div className="metric-stats">
-									<span className="stat-item">n = {stats.totalQuestions}</span>
-									<span className="stat-item">σ = {(100 - advancedMetrics.consistency).toFixed(2)}%</span>
-								</div>
-							</div>
-
-							<div className="metric-card consistency">
-								<div className="metric-header">
-									<div className="metric-label">{t('statistics.consistencyIndex')}</div>
-									<div className="metric-value">{advancedMetrics.consistency.toFixed(2)}%</div>
-								</div>
-								<div className="metric-description">{t('statistics.consistencyDesc')}</div>
-								<div className="metric-bar">
-									<div className="metric-bar-fill" style={{width: `${advancedMetrics.consistency}%`, background: '#3b82f6'}}></div>
-								</div>
-								<div className="metric-stats">
-									<span className="stat-item">CV = {(100 - advancedMetrics.consistency).toFixed(2)}%</span>
-								</div>
-							</div>
-
-							<div className="metric-card improvement">
-								<div className="metric-header">
-									<div className="metric-label">{t('statistics.improvementCoef')}</div>
-									<div className="metric-value" style={{color: advancedMetrics.improvementTrend > 0 ? '#10b981' : advancedMetrics.improvementTrend < 0 ? '#ef4444' : '#6b7280'}}>
-										{advancedMetrics.improvementTrend > 0 ? '+' : ''}{advancedMetrics.improvementTrend.toFixed(2)}%
-									</div>
-								</div>
-								<div className="metric-description">{t('statistics.improvementDesc')}</div>
-								<div className="metric-trend">
-									<span className={`trend-indicator ${advancedMetrics.improvementTrend > 0 ? 'positive' : advancedMetrics.improvementTrend < 0 ? 'negative' : 'neutral'}`}>
-										{advancedMetrics.improvementTrend > 0 ? `▲ ${t('statistics.positiveTrend')}` : advancedMetrics.improvementTrend < 0 ? `▼ ${t('statistics.negativeTrend')}` : `━ ${t('statistics.stableTrend')}`}
-									</span>
-								</div>
-								<div className="metric-stats">
-									<span className="stat-item">{t('statistics.last10tests')}</span>
-								</div>
-							</div>
-
-							<div className="metric-card speed">
-								<div className="metric-header">
-									<div className="metric-label">{t('statistics.avgResponseTime')}</div>
-									<div className="metric-value">{advancedMetrics.timePerQuestion.toFixed(2)}s</div>
-								</div>
-								<div className="metric-description">{t('statistics.avgResponseTimeDesc')}</div>
-								<div className="metric-stats">
-									<span className="stat-item">{t('statistics.totalTime', { time: advancedMetrics.totalStudyTime })}</span>
-								</div>
-							</div>
-
-							<div className="metric-card streak">
-								<div className="metric-header">
-									<div className="metric-label">{t('statistics.currentStreak')}</div>
-									<div className="metric-value">{stats.currentStreak}</div>
-								</div>
-								<div className="metric-description">{t('statistics.currentStreakDesc')}</div>
-								<div className="metric-stats">
-									<span className="stat-item">{t('statistics.recordTests', { count: stats.maxStreak })}</span>
-								</div>
-							</div>
-
-							<div className="metric-card questions">
-								<div className="metric-header">
-									<div className="metric-label">{t('statistics.questionsPerSession')}</div>
-									<div className="metric-value">{advancedMetrics.questionsPerSession}</div>
-								</div>
-								<div className="metric-description">{t('statistics.questionsPerSessionDesc')}</div>
-								<div className="metric-stats">
-									<span className="stat-item">{t('statistics.totalQuestionsCount', { count: stats.totalQuestions })}</span>
-								</div>
-							</div>
+							{areas.map(area => (
+								<button 
+									key={area}
+									className={selectedArea === area ? 'filter-btn active' : 'filter-btn'}
+									onClick={() => setSelectedArea(area)}
+								>
+									{area}
+								</button>
+							))}
 						</div>
-					</div>
-				)}
-
-				{/* Distribuzione Score */}
-				{selectedArea === 'all' && (
-					<div className="distribution-section">
-						<h2 className="section-title">{t('statistics.distributionTitle')}</h2>
-						<div className="distribution-grid">
-							<div className="dist-card excellent">
-								<div className="dist-label">{t('statistics.excellent')}</div>
-								<div className="dist-value">{scoreDistribution.excellent}</div>
-								<div className="dist-range">90% ≤ x ≤ 100%</div>
-								<div className="dist-percentage">{t('statistics.ofTests', { percent: ((scoreDistribution.excellent / stats.totalSessions) * 100).toFixed(1) })}</div>
-							</div>
-							<div className="dist-card good">
-								<div className="dist-label">{t('statistics.good')}</div>
-								<div className="dist-value">{scoreDistribution.good}</div>
-								<div className="dist-range">70% ≤ x &lt; 90%</div>
-								<div className="dist-percentage">{t('statistics.ofTests', { percent: ((scoreDistribution.good / stats.totalSessions) * 100).toFixed(1) })}</div>
-							</div>
-							<div className="dist-card fair">
-								<div className="dist-label">{t('statistics.fair')}</div>
-								<div className="dist-value">{scoreDistribution.fair}</div>
-								<div className="dist-range">50% ≤ x &lt; 70%</div>
-								<div className="dist-percentage">{t('statistics.ofTests', { percent: ((scoreDistribution.fair / stats.totalSessions) * 100).toFixed(1) })}</div>
-							</div>
-							<div className="dist-card poor">
-								<div className="dist-label">{t('statistics.poor')}</div>
-								<div className="dist-value">{scoreDistribution.poor}</div>
-								<div className="dist-range">x &lt; 50%</div>
-								<div className="dist-percentage">{t('statistics.ofTests', { percent: ((scoreDistribution.poor / stats.totalSessions) * 100).toFixed(1) })}</div>
-							</div>
-						</div>
-					</div>
-				)}
-
-				{/* Aree Top & Bottom */}
-				{selectedArea === 'all' && topPerformingAreas.length > 0 && (
-					<div className="areas-comparison-section">
-						<div className="areas-column top-areas">
-							<h2 className="section-title">{t('statistics.topAreasTitle')}</h2>
-							<p className="column-subtitle">{t('statistics.topAreasDesc')}</p>
-							<div className="areas-list">
-								{topPerformingAreas.map((area, idx) => (
-									<div key={area.name} className="area-item top">
-										<div className="area-rank">
-											<span className="rank-number">{idx + 1}</span>
-											<span className="rank-label">{t('statistics.rank')}</span>
-										</div>
-										<div className="area-info">
-											<div className="area-name">{area.name}</div>
-											<div className="area-stats">
-												<span>n = {area.sessions} {t('statistics.tests')}</span>
-												<span>μ = {area.avgScore.toFixed(2)}%</span>
-											</div>
-										</div>
-										<div className="area-score excellent">
-											<span className="score-value">{area.avgScore.toFixed(2)}%</span>
-											<span className="score-label">{t('statistics.performance')}</span>
-										</div>
-									</div>
-								))}
-							</div>
-						</div>
-
-						<div className="areas-column bottom-areas">
-							<h2 className="section-title">{t('statistics.bottomAreasTitle')}</h2>
-							<p className="column-subtitle">{t('statistics.bottomAreasDesc')}</p>
-							<div className="areas-list">
-								{areasToImprove.map((area, idx) => (
-									<div key={area.name} className="area-item bottom">
-										<div className="area-rank">
-											<span className="rank-number">{idx + 1}</span>
-											<span className="rank-label">{t('statistics.rank')}</span>
-										</div>
-										<div className="area-info">
-											<div className="area-name">{area.name}</div>
-											<div className="area-stats">
-												<span>n = {area.sessions} {t('statistics.tests')}</span>
-												<span>μ = {area.avgScore.toFixed(2)}%</span>
-											</div>
-										</div>
-										<div className="area-score needs-work">
-											<span className="score-value">{area.avgScore.toFixed(2)}%</span>
-											<span className="score-label">{t('statistics.performance')}</span>
-										</div>
-									</div>
-								))}
-							</div>
-						</div>
-					</div>
-				)}
-
-				{/* KPI Cards principali */}
-				<div className="kpi-section">
-					<h2 className="section-title">{t('statistics.baseMetricsTitle')}</h2>
-					<div className="kpi-grid">
-						<div className="kpi-card">
-						<div className="kpi-icon"></div>
-						<div className="kpi-value">{selectedArea === 'all' ? stats.totalSessions : displayStats.totalSessions}</div>
-						<div className="kpi-label">{t('statistics.totalTests')}</div>
-					</div>
-					<div className="kpi-card">
-						<div className="kpi-icon"></div>
-						<div className="kpi-value">{selectedArea === 'all' ? stats.totalQuestions : displayStats.totalQuestions}</div>
-						<div className="kpi-label">{t('statistics.totalQuestions')}</div>
-					</div>
-					<div className="kpi-card success">
-						<div className="kpi-icon"></div>
-						<div className="kpi-value">{selectedArea === 'all' ? stats.totalCorrect : displayStats.totalCorrect}</div>
-						<div className="kpi-label">{t('statistics.correctAnswers')}</div>
-					</div>
-					<div className="kpi-card danger">
-						<div className="kpi-icon"></div>
-						<div className="kpi-value">{selectedArea === 'all' ? stats.totalWrong : displayStats.totalWrong}</div>
-						<div className="kpi-label">{t('statistics.wrongAnswers')}</div>
-					</div>
-				</div>
-
-				{/* Score medio e tempo medio */}
-				<div className="secondary-stats">
-					<div className="stat-box">
-						<div className="stat-label">{t('statistics.normalizedPerformance')}</div>
-						<div className="stat-value">{selectedArea === 'all' ? stats.averageScore.toFixed(2) : displayStats.averageScore.toFixed(2)}%</div>
-						<div className="stat-unit">{t('statistics.arithmeticMean')}</div>
-					</div>
-					{selectedArea === 'all' && (
-						<>
-							<div className="stat-box">
-								<div className="stat-label">{t('statistics.avgTestLatency')}</div>
-								<div className="stat-value">{formatDuration(stats.averageDuration)}</div>
-								<div className="stat-unit">{t('statistics.avgTime')}</div>
-							</div>
-							<div className="stat-box">
-								<div className="stat-label">{t('statistics.currentStreakLabel')}</div>
-								<div className="stat-value">{stats.currentStreak}</div>
-								<div className="stat-unit">{t('statistics.consecutiveTests')}</div>
-							</div>
-							<div className="stat-box">
-								<div className="stat-label">{t('statistics.maxStreakLabel')}</div>
-								<div className="stat-value">{stats.maxStreak}</div>
-								<div className="stat-unit">{t('statistics.historicalMaxUnit')}</div>
-							</div>
-						</>
 					)}
 				</div>
-			</div>
 
-				{/* Best & Worst Performance (solo per "all") */}
-				{selectedArea === 'all' && stats.bestSession && (
-					<div className="performance-section">
-						<h2 className="section-title">{t('statistics.extremesTitle')}</h2>
-						<div className="performance-grid">
-							<div className="performance-card best">
-								<div className="perf-header">
-									<span className="perf-label">{t('statistics.historicalMax')}</span>
-									<span className="perf-badge positive">{t('statistics.topPerformanceBadge')}</span>
-								</div>
-								<div className="perf-score">{stats.bestSession.score.toFixed(2)}%</div>
-								<div className="perf-detail">
-									<span className="perf-field">{t('statistics.thematicAreaField')}</span>
-									<span className="perf-value">{stats.bestSession.thematicArea}</span>
-								</div>
-								<div className="perf-detail">
-									<span className="perf-field">{t('statistics.dateField')}</span>
-									<span className="perf-value">{new Date(stats.bestSession.date).toLocaleDateString('it-IT', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
-								</div>
+				{/* Main Dashboard Grid */}
+				<div className="dashboard-grid">
+					
+					{/* 1. Summary Cards Row */}
+					<div className="summary-cards-row">
+						<div className="summary-card">
+							<div className="summary-icon">📊</div>
+							<div className="summary-info">
+								<span className="summary-value">{stats.totalSessions}</span>
+								<span className="summary-label">{t('statistics.completedSessions')}</span>
 							</div>
-							<div className="performance-card worst">
-								<div className="perf-header">
-									<span className="perf-label">{t('statistics.historicalMin')}</span>
-									<span className="perf-badge negative">{t('statistics.needsAttentionBadge')}</span>
-								</div>
-								<div className="perf-score">{stats.worstSession.score.toFixed(2)}%</div>
-								<div className="perf-detail">
-									<span className="perf-field">{t('statistics.thematicAreaField')}</span>
-									<span className="perf-value">{stats.worstSession.thematicArea}</span>
-								</div>
-								<div className="perf-detail">
-									<span className="perf-field">{t('statistics.dateField')}</span>
-									<span className="perf-value">{new Date(stats.worstSession.date).toLocaleDateString('it-IT', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
-								</div>
+						</div>
+						<div className="summary-card">
+							<div className="summary-icon">⏱️</div>
+							<div className="summary-info">
+								<span className="summary-value">{advancedMetrics?.totalStudyTime}</span>
+								<span className="summary-label">{t('statistics.totalStudyTime')}</span>
+							</div>
+						</div>
+						<div className="summary-card">
+							<div className="summary-icon">🎯</div>
+							<div className="summary-info">
+								<span className="summary-value">{stats.averageScore.toFixed(1)}%</span>
+								<span className="summary-label">{t('statistics.averagePerformance')}</span>
+							</div>
+						</div>
+						<div className="summary-card">
+							<div className="summary-icon">📈</div>
+							<div className="summary-info">
+								<span className="summary-value">{(100 - advancedMetrics?.consistency).toFixed(1)}%</span>
+								<span className="summary-label">{t('statistics.standardDeviation')}</span>
 							</div>
 						</div>
 					</div>
-				)}
 
-				{/* Grafico Progresso nel Tempo */}
-				{selectedArea === 'all' && stats.progressOverTime && stats.progressOverTime.length > 0 && (
-					<div className="chart-section">
-						<h2 className="section-title">{t('statistics.timeAnalysisTitle')}</h2>
-						<p className="chart-subtitle">{t('statistics.timeAnalysisDesc')}</p>
-						<div className="chart-container">
-							<SimpleLineChart data={stats.progressOverTime} />
+					{/* 2. Charts Row (Progress & Radar) */}
+					{selectedArea === 'all' && (
+						<div className="charts-row">
+							<div className="chart-card large">
+								<h3 className="chart-title">{t('statistics.timeAnalysisTitle')}</h3>
+								<div className="chart-wrapper">
+									<ResponsiveContainer width="100%" height="100%">
+										<AreaChart data={stats.progressOverTime}>
+											<defs>
+												<linearGradient id="colorScore" x1="0" y1="0" x2="0" y2="1">
+													<stop offset="5%" stopColor="#3b82f6" stopOpacity={0.8}/>
+													<stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
+												</linearGradient>
+											</defs>
+											<CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
+											<XAxis dataKey="sessionNumber" stroke="#9ca3af" />
+											<YAxis stroke="#9ca3af" domain={[0, 100]} />
+											<Tooltip content={<CustomTooltip />} />
+											<Area 
+												type="monotone" 
+												dataKey="score" 
+												stroke="#3b82f6" 
+												fillOpacity={1} 
+												fill="url(#colorScore)" 
+											/>
+										</AreaChart>
+									</ResponsiveContainer>
+								</div>
+							</div>
+							
+							<div className="chart-card medium">
+								<h3 className="chart-title">{t('statistics.areaPerformanceTitle')}</h3>
+								<div className="chart-wrapper">
+									<ResponsiveContainer width="100%" height="100%">
+										<RadarChart cx="50%" cy="50%" outerRadius="80%" data={radarData}>
+											<PolarGrid stroke="rgba(255,255,255,0.2)" />
+											<PolarAngleAxis dataKey="subject" tick={{ fill: '#9ca3af', fontSize: 12 }} />
+											<PolarRadiusAxis angle={30} domain={[0, 100]} tick={false} axisLine={false} />
+											<Radar
+												name="Performance"
+												dataKey="A"
+												stroke="#10b981"
+												fill="#10b981"
+												fillOpacity={0.6}
+											/>
+											<Tooltip />
+										</RadarChart>
+									</ResponsiveContainer>
+								</div>
+							</div>
 						</div>
-					</div>
-				)}
+					)}
 
-				{/* Performance per Area Tematica */}
-				{selectedArea === 'all' && Object.keys(stats.byArea).length > 0 && (
-					<div className="area-performance-section">
-						<h2 className="section-title">{t('statistics.areaPerformanceTitle')}</h2>
-						<p className="section-subtitle">{t('statistics.areaPerformanceDesc')}</p>
-						<div className="area-bars">
-							{Object.entries(stats.byArea).map(([areaName, areaData]) => (
-								<div key={areaName} className="area-bar-item">
-									<div className="area-bar-label">
-										<span className="area-name">{areaName}</span>
-										<span className="area-score">{areaData.averageScore.toFixed(1)}%</span>
-									</div>
-									<div className="area-bar-container">
-										<div 
-											className="area-bar-fill" 
-											style={{ 
-												width: `${areaData.averageScore}%`,
-												backgroundColor: getScoreColor(areaData.averageScore)
-											}}
-										></div>
-									</div>
-									<div className="area-bar-stats">
-										<span>{areaData.totalSessions} {t('statistics.tests')}</span>
-										<span>Best: {areaData.bestScore}%</span>
+					{/* 3. Distribution & KPI Row */}
+					{selectedArea === 'all' && (
+						<div className="mixed-row">
+							<div className="chart-card medium">
+								<h3 className="chart-title">{t('statistics.distributionTitle')}</h3>
+								<div className="chart-wrapper">
+									<ResponsiveContainer width="100%" height="100%">
+										<PieChart>
+											<Pie
+												data={scoreDistributionData}
+												cx="50%"
+												cy="50%"
+												innerRadius={60}
+												outerRadius={80}
+												paddingAngle={5}
+												dataKey="value"
+											>
+												{scoreDistributionData.map((entry, index) => (
+													<Cell key={`cell-${index}`} fill={entry.color} />
+												))}
+											</Pie>
+											<Tooltip />
+											<Legend />
+										</PieChart>
+									</ResponsiveContainer>
+								</div>
+							</div>
+
+							<div className="kpi-grid-compact">
+								<div className="kpi-box">
+									<span className="kpi-box-label">{t('statistics.accuracyRate')}</span>
+									<span className="kpi-box-value">{advancedMetrics?.accuracyRate.toFixed(1)}%</span>
+									<div className="kpi-progress">
+										<div className="kpi-progress-bar" style={{width: `${advancedMetrics?.accuracyRate}%`, background: '#10b981'}}></div>
 									</div>
 								</div>
-							))}
-						</div>
-					</div>
-				)}
-
-				{/* Tabella Sessioni Recenti */}
-				<div className="recent-sessions-section">
-					<h2 className="section-title">{t('statistics.recentLogTitle')}</h2>
-					<p className="section-subtitle">{t('statistics.recentLogDesc')}</p>
-					<div className="sessions-table">
-						<div className="table-header">
-							<div className="th">{t('statistics.tableDate')}</div>
-							<div className="th">{t('statistics.tableArea')}</div>
-							<div className="th">{t('statistics.tableScore')}</div>
-							<div className="th">{t('statistics.tableQuestions')}</div>
-							<div className="th">{t('statistics.tableTime')}</div>
-						</div>
-						<div className="table-body">
-							{(selectedArea === 'all' ? stats.recentSessions : displayStats.sessions?.slice(0, 10) || []).map((session, idx) => (
-								<div key={session.id || idx} className="table-row">
-									<div className="td">{new Date(session.completedAt).toLocaleDateString('it-IT')}</div>
-									<div className="td">{session.thematicArea}</div>
-									<div className="td">
-										<span className={`score-badge ${getScoreClass(session.score)}`}>
-											{session.score}%
-										</span>
+								<div className="kpi-box">
+									<span className="kpi-box-label">{t('statistics.consistencyIndex')}</span>
+									<span className="kpi-box-value">{advancedMetrics?.consistency.toFixed(1)}%</span>
+									<div className="kpi-progress">
+										<div className="kpi-progress-bar" style={{width: `${advancedMetrics?.consistency}%`, background: '#3b82f6'}}></div>
 									</div>
-									<div className="td">{session.correctAnswers}/{session.totalQuestions}</div>
-									<div className="td">{formatDuration(session.duration)}</div>
 								</div>
-							))}
+								<div className="kpi-box">
+									<span className="kpi-box-label">{t('statistics.improvementCoef')}</span>
+									<span className="kpi-box-value" style={{color: advancedMetrics?.improvementTrend > 0 ? '#10b981' : '#ef4444'}}>
+										{advancedMetrics?.improvementTrend > 0 ? '+' : ''}{advancedMetrics?.improvementTrend.toFixed(1)}%
+									</span>
+								</div>
+								<div className="kpi-box">
+									<span className="kpi-box-label">{t('statistics.currentStreak')}</span>
+									<span className="kpi-box-value">{stats.currentStreak} 🔥</span>
+								</div>
+							</div>
+						</div>
+					)}
+
+					{/* 4. Recent Sessions Table */}
+					<div className="recent-sessions-section">
+						<h2 className="section-title">{t('statistics.recentLogTitle')}</h2>
+						<div className="sessions-table">
+							<div className="table-header">
+								<div className="th">{t('statistics.tableDate')}</div>
+								<div className="th">{t('statistics.tableArea')}</div>
+								<div className="th">{t('statistics.tableScore')}</div>
+								<div className="th">{t('statistics.tableQuestions')}</div>
+								<div className="th">{t('statistics.tableTime')}</div>
+							</div>
+							<div className="table-body">
+								{(selectedArea === 'all' ? stats.recentSessions : displayStats.sessions?.slice(0, 10) || []).map((session, idx) => (
+									<div key={session.id || idx} className="table-row">
+										<div className="td">{new Date(session.completedAt).toLocaleDateString('it-IT')}</div>
+										<div className="td">{session.thematicArea}</div>
+										<div className="td">
+											<span className={`score-badge ${getScoreClass(session.score)}`}>
+												{session.score}%
+											</span>
+										</div>
+										<div className="td">{session.correctAnswers}/{session.totalQuestions}</div>
+										<div className="td">{formatDuration(session.duration)}</div>
+									</div>
+								))}
+							</div>
 						</div>
 					</div>
+
 				</div>
 			</div>
 		</div>
