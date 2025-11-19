@@ -45,20 +45,31 @@ const getFlashByThematicArea = async (req, res) => {
 	const { thematicArea } = req.params;
 	try {
 		const userId = getUserId(req);
-		// Lean query con projection + index hint per performance
-		const flashcards = await Flashcard.find(buildUserQuery(userId, { 
-			thematicArea,
-			isActive: { $ne: false } // Escludi soft-deleted
-		}))
+		console.log(`🔍 [getFlashByThematicArea] Request for area: "${thematicArea}" by user: ${userId}`);
+
+		// Decodifica esplicita per sicurezza (anche se Express lo fa già)
+		const decodedArea = decodeURIComponent(thematicArea);
+		
+		// Costruisci query
+		const query = buildUserQuery(userId, { 
+			thematicArea: decodedArea,
+			isActive: { $ne: false } 
+		});
+		
+		console.log(`🔍 [getFlashByThematicArea] Query:`, JSON.stringify(query));
+
+		const flashcards = await Flashcard.find(query)
 			.select('question answers difficulty createdAt usageCount')
 			.lean()
-			.sort({ usageCount: -1, createdAt: -1 }) // Popolari prima
+			.sort({ usageCount: -1, createdAt: -1 })
 			.limit(500);
 		
+		console.log(`✓ [getFlashByThematicArea] Found ${flashcards.length} cards`);
 		res.json(flashcards);
 	} catch (err) {
-		console.error('Errore getFlashByThematicArea:', err);
-		res.status(500).json({ error: 'Errore nel recupero delle flashcard per area tematica', details: err.message });
+		console.error('❌ Errore getFlashByThematicArea:', err);
+		console.error('Stack:', err.stack);
+		res.status(500).json({ error: 'Errore nel recupero delle flashcard', details: err.message });
 	}
 };
 

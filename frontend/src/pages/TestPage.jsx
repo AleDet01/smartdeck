@@ -32,12 +32,20 @@ export default function TestPage() {
         const res = await fetch(`${API_HOST}/flash/thematic/${area}`, { signal: controller.signal, credentials: 'include' });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
+        
+        if (!Array.isArray(data)) {
+          console.error('Invalid data format received:', data);
+          throw new Error('Formato dati non valido dal server');
+        }
+
         const shuffled = data.sort(() => 0.5 - Math.random());
         const selected = shuffled.slice(0, parseInt(num));
         resetStateForTest(selected);
       } catch (err) {
         if (err.name === 'AbortError') return;
         console.error('Failed to load flashcards for test:', err.message);
+        // Mostra un messaggio di errore all'utente invece di crashare
+        alert(`Errore caricamento test: ${err.message}`);
         setQuestions([]);
       }
     })();
