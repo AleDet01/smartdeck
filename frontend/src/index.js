@@ -17,7 +17,7 @@ root.render(
 reportWebVitals();
 
 // Register service worker per cache offline
-serviceWorkerRegistration.register();
+serviceWorkerRegistration.unregister();
 
 
                                                                                                                               
