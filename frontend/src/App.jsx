@@ -6,6 +6,7 @@ import { ThemeProvider } from './utils/themeContext';
 import ErrorBoundary from './components/ErrorBoundary';
 import LandingPage from './pages/LandingPage';
 import LogoutButton from './components/LogoutButton';
+import BottomControls from './components/BottomControls';
 import CookieBanner from './components/CookieBanner';
 import SessionWarning from './components/SessionWarning';
 import LoadingFallback from './components/LoadingFallback';
@@ -120,6 +121,7 @@ export default function App() {
           </Routes>
         </Suspense>
         <LogoutButton />
+        <BottomControls />
         <CookieBanner />
       </HashRouter>
     </ThemeProvider>

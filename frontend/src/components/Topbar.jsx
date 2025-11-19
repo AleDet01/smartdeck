@@ -33,17 +33,6 @@ const Topbar = memo(() => {
       >
         {t('topbar.statistics')}
       </button>
-      
-      <LanguageSelector />
-      
-      <button 
-        className="theme-toggle-btn"
-        onClick={toggleTheme}
-        aria-label={t('landing.changeTheme')}
-        title={theme === 'light' ? t('landing.darkTheme') : t('landing.lightTheme')}
-      >
-        {theme === 'light' ? '🌙' : '☀️'}
-      </button>
     </div>
   );
 });

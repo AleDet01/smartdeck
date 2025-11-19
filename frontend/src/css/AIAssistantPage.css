@@ -1,4 +1,4 @@
-/* AI Assistant - Ultra Minimal Professional v0.1.2 - BUILD 2025-11-19 */
+/* AI Assistant - Refined UI */
 
 .ai-assistant-page {
 	min-height: 100vh;
@@ -6,6 +6,7 @@
 	padding-top: 80px;
 	display: flex;
 	flex-direction: column;
+	color: var(--text-primary);
 }
 
 .ai-container {
@@ -75,8 +76,8 @@
 }
 
 .mode-btn.active {
-	background: #007AFF;
-	border-color: #007AFF;
+	background: var(--color-blue);
+	border-color: var(--color-blue);
 	color: white;
 	box-shadow: 0 4px 16px rgba(0, 122, 255, 0.25);
 }
@@ -117,12 +118,12 @@
 }
 
 .messages-area::-webkit-scrollbar {
-	width: 4px;
+	width: 6px;
 }
 
 .messages-area::-webkit-scrollbar-thumb {
 	background: var(--border-color);
-	border-radius: 2px;
+	border-radius: 3px;
 }
 
 /* Messages */
@@ -147,7 +148,7 @@
 }
 
 .message.user .message-content {
-	background: #007AFF;
+	background: var(--color-blue);
 	color: white;
 	padding: 12px 16px;
 	border-radius: 18px 18px 4px 18px;
@@ -161,6 +162,7 @@
 	line-height: 1.6;
 	white-space: pre-wrap;
 	word-wrap: break-word;
+	overflow-wrap: break-word;
 }
 
 .message.user .message-text {
@@ -205,7 +207,7 @@
 
 .test-btn {
 	margin-top: 12px;
-	background: #007AFF;
+	background: var(--color-blue);
 	color: white;
 	border: none;
 	padding: 10px 16px;
@@ -278,14 +280,14 @@
 	align-items: flex-end;
 	background: var(--bg-secondary);
 	border: 2px solid var(--border-color);
-	border-radius: 16px;
+	border-radius: 24px;
 	padding: 8px 12px;
 	transition: border-color 0.2s;
 	margin-top: auto;
 }
 
 .input-area:focus-within {
-	border-color: #007AFF;
+	border-color: var(--color-blue);
 }
 
 .input-area select {
@@ -398,12 +400,12 @@
 }
 
 .send {
-	background: #007AFF;
+	background: var(--color-blue);
 	color: white;
 	border: none;
-	width: 32px;
-	height: 32px;
-	border-radius: 8px;
+	width: 36px;
+	height: 36px;
+	border-radius: 50%;
 	display: flex;
 	align-items: center;
 	justify-content: center;
@@ -416,6 +418,7 @@
 
 .send:hover:not(:disabled) {
 	opacity: 0.9;
+	transform: scale(1.05);
 }
 
 .send:disabled {
