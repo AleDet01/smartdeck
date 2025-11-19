@@ -26,7 +26,7 @@ staticSites:
   - name: smartdeck-frontend
     branch: main
     plan: free
-    buildCommand: "echo 'No build needed - using pre-built files'"
+    buildCommand: "cd frontend && npm install && npm run build"
     publishPath: "frontend/build"
     autoDeploy: true
     rewrites:
