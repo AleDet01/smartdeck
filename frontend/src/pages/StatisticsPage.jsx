@@ -69,6 +69,7 @@ const getScoreClass = (score) => {
 
 // Componente semplice per grafico lineare
 const SimpleLineChart = ({ data }) => {
+	const { t } = useTranslation();
 	if (!data || data.length === 0) return null;
 
 	const maxScore = 100;
@@ -115,8 +116,8 @@ const SimpleLineChart = ({ data }) => {
 				</defs>
 			</svg>
 			<div className="chart-labels">
-				<span>Sessione 1</span>
-				<span>Sessione {data.length}</span>
+				<span>{t('statistics.session1')}</span>
+				<span>{t('statistics.sessionN', { n: data.length })}</span>
 			</div>
 		</div>
 	);
@@ -127,6 +128,7 @@ const StatisticsPage = () => {
 	const [loading, setLoading] = useState(true);
 	const [selectedArea, setSelectedArea] = useState('all');
 	const navigate = useNavigate();
+	const { t } = useTranslation();
 
 	// Calcola metriche avanzate
 	const advancedMetrics = useMemo(() => {
@@ -201,7 +203,7 @@ const StatisticsPage = () => {
 				<PageBackground />
 				<Topbar />
 				<div className="stats-container">
-					<div className="loading-text">Caricamento statistiche...</div>
+					<div className="loading-text">{t('statistics.loading')}</div>
 				</div>
 			</div>
 		);
@@ -214,13 +216,13 @@ const StatisticsPage = () => {
 				<Topbar />
 				<div className="stats-container">
 					<div className="stats-header">
-						<h1>Statistiche</h1>
-						<p className="stats-subtitle">Le tue performance nei test</p>
+						<h1>{t('statistics.title')}</h1>
+						<p className="stats-subtitle">{t('statistics.subtitle')}</p>
 					</div>
 					<div className="no-data">
-						<p>Nessun test completato ancora. Inizia a fare test per vedere le tue statistiche!</p>
+						<p>{t('statistics.noDataMessage')}</p>
 						<button className="modern-btn" onClick={() => navigate('/dashboard')}>
-							Vai alla Dashboard
+							{t('statistics.goToDashboard')}
 						</button>
 					</div>
 				</div>
@@ -239,32 +241,32 @@ const StatisticsPage = () => {
 			<div className="stats-container">
 				<div className="stats-header">
 					<div className="header-content">
-						<h1>Analisi Statistica delle Performance</h1>
-						<p className="stats-subtitle">Report Dettagliato delle Metriche di Apprendimento</p>
+						<h1>{t('statistics.pageTitle')}</h1>
+						<p className="stats-subtitle">{t('statistics.pageSubtitle')}</p>
 					</div>
 					<div className="header-summary">
 						<div className="summary-item">
-							<span className="summary-label">Sessioni Completate</span>
+							<span className="summary-label">{t('statistics.completedSessions')}</span>
 							<span className="summary-value">{stats.totalSessions}</span>
-							<span className="summary-unit">test</span>
+							<span className="summary-unit">{t('statistics.tests')}</span>
 						</div>
 						<div className="summary-divider"></div>
 						<div className="summary-item">
-							<span className="summary-label">Tempo Totale di Studio</span>
+							<span className="summary-label">{t('statistics.totalStudyTime')}</span>
 							<span className="summary-value">{advancedMetrics?.totalStudyTime}</span>
-							<span className="summary-unit">ore:minuti</span>
+							<span className="summary-unit">{t('statistics.hours')}:{t('statistics.minutes')}</span>
 						</div>
 						<div className="summary-divider"></div>
 						<div className="summary-item">
-							<span className="summary-label">Performance Media</span>
+							<span className="summary-label">{t('statistics.averagePerformance')}</span>
 							<span className="summary-value">{stats.averageScore.toFixed(1)}%</span>
-							<span className="summary-unit">accuratezza</span>
+							<span className="summary-unit">{t('statistics.accuracy')}</span>
 						</div>
 						<div className="summary-divider"></div>
 						<div className="summary-item">
-							<span className="summary-label">Deviazione Standard</span>
+							<span className="summary-label">{t('statistics.standardDeviation')}</span>
 							<span className="summary-value">{(100 - advancedMetrics?.consistency).toFixed(1)}%</span>
-							<span className="summary-unit">variabilità</span>
+							<span className="summary-unit">{t('statistics.variability')}</span>
 						</div>
 					</div>
 				</div>
@@ -276,7 +278,7 @@ const StatisticsPage = () => {
 							className={selectedArea === 'all' ? 'filter-btn active' : 'filter-btn'}
 							onClick={() => setSelectedArea('all')}
 						>
-							Analisi Complessiva
+							{t('statistics.overallAnalysis')}
 						</button>
 						{areas.map(area => (
 							<button 
@@ -293,14 +295,14 @@ const StatisticsPage = () => {
 				{/* Metriche Avanzate */}
 				{selectedArea === 'all' && advancedMetrics && (
 					<div className="advanced-metrics-section">
-						<h2 className="section-title">Indicatori Chiave di Performance (KPI)</h2>
+						<h2 className="section-title">{t('statistics.kpiTitle')}</h2>
 						<div className="metrics-grid">
 							<div className="metric-card accuracy">
 								<div className="metric-header">
-									<div className="metric-label">Tasso di Accuratezza</div>
+									<div className="metric-label">{t('statistics.accuracyRate')}</div>
 									<div className="metric-value">{advancedMetrics.accuracyRate.toFixed(2)}%</div>
 								</div>
-								<div className="metric-description">Rapporto risposte corrette / totale domande</div>
+								<div className="metric-description">{t('statistics.accuracyDesc')}</div>
 								<div className="metric-bar">
 									<div className="metric-bar-fill" style={{width: `${advancedMetrics.accuracyRate}%`, background: '#10b981'}}></div>
 								</div>
@@ -312,10 +314,10 @@ const StatisticsPage = () => {
 
 							<div className="metric-card consistency">
 								<div className="metric-header">
-									<div className="metric-label">Indice di Consistenza</div>
+									<div className="metric-label">{t('statistics.consistencyIndex')}</div>
 									<div className="metric-value">{advancedMetrics.consistency.toFixed(2)}%</div>
 								</div>
-								<div className="metric-description">Stabilità della performance nel tempo</div>
+								<div className="metric-description">{t('statistics.consistencyDesc')}</div>
 								<div className="metric-bar">
 									<div className="metric-bar-fill" style={{width: `${advancedMetrics.consistency}%`, background: '#3b82f6'}}></div>
 								</div>
@@ -326,52 +328,52 @@ const StatisticsPage = () => {
 
 							<div className="metric-card improvement">
 								<div className="metric-header">
-									<div className="metric-label">Coefficiente di Miglioramento</div>
+									<div className="metric-label">{t('statistics.improvementCoef')}</div>
 									<div className="metric-value" style={{color: advancedMetrics.improvementTrend > 0 ? '#10b981' : advancedMetrics.improvementTrend < 0 ? '#ef4444' : '#6b7280'}}>
 										{advancedMetrics.improvementTrend > 0 ? '+' : ''}{advancedMetrics.improvementTrend.toFixed(2)}%
 									</div>
 								</div>
-								<div className="metric-description">Variazione media tra prima e seconda metà dataset</div>
+								<div className="metric-description">{t('statistics.improvementDesc')}</div>
 								<div className="metric-trend">
 									<span className={`trend-indicator ${advancedMetrics.improvementTrend > 0 ? 'positive' : advancedMetrics.improvementTrend < 0 ? 'negative' : 'neutral'}`}>
-										{advancedMetrics.improvementTrend > 0 ? '▲ Trend Positivo' : advancedMetrics.improvementTrend < 0 ? '▼ Trend Negativo' : '━ Stabile'}
+										{advancedMetrics.improvementTrend > 0 ? `▲ ${t('statistics.positiveTrend')}` : advancedMetrics.improvementTrend < 0 ? `▼ ${t('statistics.negativeTrend')}` : `━ ${t('statistics.stableTrend')}`}
 									</span>
 								</div>
 								<div className="metric-stats">
-									<span className="stat-item">Ultimi 10 test</span>
+									<span className="stat-item">{t('statistics.last10tests')}</span>
 								</div>
 							</div>
 
 							<div className="metric-card speed">
 								<div className="metric-header">
-									<div className="metric-label">Tempo Medio di Risposta</div>
+									<div className="metric-label">{t('statistics.avgResponseTime')}</div>
 									<div className="metric-value">{advancedMetrics.timePerQuestion.toFixed(2)}s</div>
 								</div>
-								<div className="metric-description">Latenza media per domanda</div>
+								<div className="metric-description">{t('statistics.avgResponseTimeDesc')}</div>
 								<div className="metric-stats">
-									<span className="stat-item">Totale: {advancedMetrics.totalStudyTime}</span>
+									<span className="stat-item">{t('statistics.totalTime', { time: advancedMetrics.totalStudyTime })}</span>
 								</div>
 							</div>
 
 							<div className="metric-card streak">
 								<div className="metric-header">
-									<div className="metric-label">Serie Positiva Attuale</div>
+									<div className="metric-label">{t('statistics.currentStreak')}</div>
 									<div className="metric-value">{stats.currentStreak}</div>
 								</div>
-								<div className="metric-description">Test consecutivi con performance ≥60%</div>
+								<div className="metric-description">{t('statistics.currentStreakDesc')}</div>
 								<div className="metric-stats">
-									<span className="stat-item">Record: {stats.maxStreak} test</span>
+									<span className="stat-item">{t('statistics.recordTests', { count: stats.maxStreak })}</span>
 								</div>
 							</div>
 
 							<div className="metric-card questions">
 								<div className="metric-header">
-									<div className="metric-label">Domande per Sessione</div>
+									<div className="metric-label">{t('statistics.questionsPerSession')}</div>
 									<div className="metric-value">{advancedMetrics.questionsPerSession}</div>
 								</div>
-								<div className="metric-description">Media aritmetica domande/test</div>
+								<div className="metric-description">{t('statistics.questionsPerSessionDesc')}</div>
 								<div className="metric-stats">
-									<span className="stat-item">Tot. domande: {stats.totalQuestions}</span>
+									<span className="stat-item">{t('statistics.totalQuestionsCount', { count: stats.totalQuestions })}</span>
 								</div>
 							</div>
 						</div>
@@ -381,31 +383,31 @@ const StatisticsPage = () => {
 				{/* Distribuzione Score */}
 				{selectedArea === 'all' && (
 					<div className="distribution-section">
-						<h2 className="section-title">Distribuzione Statistica dei Risultati</h2>
+						<h2 className="section-title">{t('statistics.distributionTitle')}</h2>
 						<div className="distribution-grid">
 							<div className="dist-card excellent">
-								<div className="dist-label">Eccellenza</div>
+								<div className="dist-label">{t('statistics.excellent')}</div>
 								<div className="dist-value">{scoreDistribution.excellent}</div>
 								<div className="dist-range">90% ≤ x ≤ 100%</div>
-								<div className="dist-percentage">{((scoreDistribution.excellent / stats.totalSessions) * 100).toFixed(1)}% dei test</div>
+								<div className="dist-percentage">{t('statistics.ofTests', { percent: ((scoreDistribution.excellent / stats.totalSessions) * 100).toFixed(1) })}</div>
 							</div>
 							<div className="dist-card good">
-								<div className="dist-label">Competenza</div>
+								<div className="dist-label">{t('statistics.good')}</div>
 								<div className="dist-value">{scoreDistribution.good}</div>
 								<div className="dist-range">70% ≤ x &lt; 90%</div>
-								<div className="dist-percentage">{((scoreDistribution.good / stats.totalSessions) * 100).toFixed(1)}% dei test</div>
+								<div className="dist-percentage">{t('statistics.ofTests', { percent: ((scoreDistribution.good / stats.totalSessions) * 100).toFixed(1) })}</div>
 							</div>
 							<div className="dist-card fair">
-								<div className="dist-label">Sufficienza</div>
+								<div className="dist-label">{t('statistics.fair')}</div>
 								<div className="dist-value">{scoreDistribution.fair}</div>
 								<div className="dist-range">50% ≤ x &lt; 70%</div>
-								<div className="dist-percentage">{((scoreDistribution.fair / stats.totalSessions) * 100).toFixed(1)}% dei test</div>
+								<div className="dist-percentage">{t('statistics.ofTests', { percent: ((scoreDistribution.fair / stats.totalSessions) * 100).toFixed(1) })}</div>
 							</div>
 							<div className="dist-card poor">
-								<div className="dist-label">Critico</div>
+								<div className="dist-label">{t('statistics.poor')}</div>
 								<div className="dist-value">{scoreDistribution.poor}</div>
 								<div className="dist-range">x &lt; 50%</div>
-								<div className="dist-percentage">{((scoreDistribution.poor / stats.totalSessions) * 100).toFixed(1)}% dei test</div>
+								<div className="dist-percentage">{t('statistics.ofTests', { percent: ((scoreDistribution.poor / stats.totalSessions) * 100).toFixed(1) })}</div>
 							</div>
 						</div>
 					</div>
@@ -415,25 +417,25 @@ const StatisticsPage = () => {
 				{selectedArea === 'all' && topPerformingAreas.length > 0 && (
 					<div className="areas-comparison-section">
 						<div className="areas-column top-areas">
-							<h2 className="section-title">Aree Tematiche ad Alta Performance</h2>
-							<p className="column-subtitle">Top 3 aree ordinate per performance media</p>
+							<h2 className="section-title">{t('statistics.topAreasTitle')}</h2>
+							<p className="column-subtitle">{t('statistics.topAreasDesc')}</p>
 							<div className="areas-list">
 								{topPerformingAreas.map((area, idx) => (
 									<div key={area.name} className="area-item top">
 										<div className="area-rank">
 											<span className="rank-number">{idx + 1}</span>
-											<span className="rank-label">Rank</span>
+											<span className="rank-label">{t('statistics.rank')}</span>
 										</div>
 										<div className="area-info">
 											<div className="area-name">{area.name}</div>
 											<div className="area-stats">
-												<span>n = {area.sessions} test</span>
+												<span>n = {area.sessions} {t('statistics.tests')}</span>
 												<span>μ = {area.avgScore.toFixed(2)}%</span>
 											</div>
 										</div>
 										<div className="area-score excellent">
 											<span className="score-value">{area.avgScore.toFixed(2)}%</span>
-											<span className="score-label">Performance</span>
+											<span className="score-label">{t('statistics.performance')}</span>
 										</div>
 									</div>
 								))}
@@ -441,25 +443,25 @@ const StatisticsPage = () => {
 						</div>
 
 						<div className="areas-column bottom-areas">
-							<h2 className="section-title">Aree Tematiche a Bassa Performance</h2>
-							<p className="column-subtitle">Bottom 3 aree che richiedono attenzione</p>
+							<h2 className="section-title">{t('statistics.bottomAreasTitle')}</h2>
+							<p className="column-subtitle">{t('statistics.bottomAreasDesc')}</p>
 							<div className="areas-list">
 								{areasToImprove.map((area, idx) => (
 									<div key={area.name} className="area-item bottom">
 										<div className="area-rank">
 											<span className="rank-number">{idx + 1}</span>
-											<span className="rank-label">Rank</span>
+											<span className="rank-label">{t('statistics.rank')}</span>
 										</div>
 										<div className="area-info">
 											<div className="area-name">{area.name}</div>
 											<div className="area-stats">
-												<span>n = {area.sessions} test</span>
+												<span>n = {area.sessions} {t('statistics.tests')}</span>
 												<span>μ = {area.avgScore.toFixed(2)}%</span>
 											</div>
 										</div>
 										<div className="area-score needs-work">
 											<span className="score-value">{area.avgScore.toFixed(2)}%</span>
-											<span className="score-label">Performance</span>
+											<span className="score-label">{t('statistics.performance')}</span>
 										</div>
 									</div>
 								))}
@@ -470,53 +472,53 @@ const StatisticsPage = () => {
 
 				{/* KPI Cards principali */}
 				<div className="kpi-section">
-					<h2 className="section-title">Metriche Aggregate di Base</h2>
+					<h2 className="section-title">{t('statistics.baseMetricsTitle')}</h2>
 					<div className="kpi-grid">
 						<div className="kpi-card">
 						<div className="kpi-icon"></div>
 						<div className="kpi-value">{selectedArea === 'all' ? stats.totalSessions : displayStats.totalSessions}</div>
-						<div className="kpi-label">Test Completati</div>
+						<div className="kpi-label">{t('statistics.totalTests')}</div>
 					</div>
 					<div className="kpi-card">
 						<div className="kpi-icon"></div>
 						<div className="kpi-value">{selectedArea === 'all' ? stats.totalQuestions : displayStats.totalQuestions}</div>
-						<div className="kpi-label">Domande Totali</div>
+						<div className="kpi-label">{t('statistics.totalQuestions')}</div>
 					</div>
 					<div className="kpi-card success">
 						<div className="kpi-icon"></div>
 						<div className="kpi-value">{selectedArea === 'all' ? stats.totalCorrect : displayStats.totalCorrect}</div>
-						<div className="kpi-label">Risposte Corrette</div>
+						<div className="kpi-label">{t('statistics.correctAnswers')}</div>
 					</div>
 					<div className="kpi-card danger">
 						<div className="kpi-icon"></div>
 						<div className="kpi-value">{selectedArea === 'all' ? stats.totalWrong : displayStats.totalWrong}</div>
-						<div className="kpi-label">Risposte Sbagliate</div>
+						<div className="kpi-label">{t('statistics.wrongAnswers')}</div>
 					</div>
 				</div>
 
 				{/* Score medio e tempo medio */}
 				<div className="secondary-stats">
 					<div className="stat-box">
-						<div className="stat-label">Performance Media Normalizzata</div>
+						<div className="stat-label">{t('statistics.normalizedPerformance')}</div>
 						<div className="stat-value">{selectedArea === 'all' ? stats.averageScore.toFixed(2) : displayStats.averageScore.toFixed(2)}%</div>
-						<div className="stat-unit">μ (media aritmetica)</div>
+						<div className="stat-unit">{t('statistics.arithmeticMean')}</div>
 					</div>
 					{selectedArea === 'all' && (
 						<>
 							<div className="stat-box">
-								<div className="stat-label">Latenza Media per Test</div>
+								<div className="stat-label">{t('statistics.avgTestLatency')}</div>
 								<div className="stat-value">{formatDuration(stats.averageDuration)}</div>
-								<div className="stat-unit">tempo medio</div>
+								<div className="stat-unit">{t('statistics.avgTime')}</div>
 							</div>
 							<div className="stat-box">
-								<div className="stat-label">Serie Positiva Corrente</div>
+								<div className="stat-label">{t('statistics.currentStreakLabel')}</div>
 								<div className="stat-value">{stats.currentStreak}</div>
-								<div className="stat-unit">test consecutivi</div>
+								<div className="stat-unit">{t('statistics.consecutiveTests')}</div>
 							</div>
 							<div className="stat-box">
-								<div className="stat-label">Record Serie Positiva</div>
+								<div className="stat-label">{t('statistics.maxStreakLabel')}</div>
 								<div className="stat-value">{stats.maxStreak}</div>
-								<div className="stat-unit">massimo storico</div>
+								<div className="stat-unit">{t('statistics.historicalMaxUnit')}</div>
 							</div>
 						</>
 					)}
@@ -526,35 +528,35 @@ const StatisticsPage = () => {
 				{/* Best & Worst Performance (solo per "all") */}
 				{selectedArea === 'all' && stats.bestSession && (
 					<div className="performance-section">
-						<h2 className="section-title">Analisi Estremi di Performance</h2>
+						<h2 className="section-title">{t('statistics.extremesTitle')}</h2>
 						<div className="performance-grid">
 							<div className="performance-card best">
 								<div className="perf-header">
-									<span className="perf-label">MASSIMO STORICO</span>
-									<span className="perf-badge positive">Top Performance</span>
+									<span className="perf-label">{t('statistics.historicalMax')}</span>
+									<span className="perf-badge positive">{t('statistics.topPerformanceBadge')}</span>
 								</div>
 								<div className="perf-score">{stats.bestSession.score.toFixed(2)}%</div>
 								<div className="perf-detail">
-									<span className="perf-field">Area Tematica:</span>
+									<span className="perf-field">{t('statistics.thematicAreaField')}</span>
 									<span className="perf-value">{stats.bestSession.thematicArea}</span>
 								</div>
 								<div className="perf-detail">
-									<span className="perf-field">Data Rilevazione:</span>
+									<span className="perf-field">{t('statistics.dateField')}</span>
 									<span className="perf-value">{new Date(stats.bestSession.date).toLocaleDateString('it-IT', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
 								</div>
 							</div>
 							<div className="performance-card worst">
 								<div className="perf-header">
-									<span className="perf-label">MINIMO STORICO</span>
-									<span className="perf-badge negative">Richiede Attenzione</span>
+									<span className="perf-label">{t('statistics.historicalMin')}</span>
+									<span className="perf-badge negative">{t('statistics.needsAttentionBadge')}</span>
 								</div>
 								<div className="perf-score">{stats.worstSession.score.toFixed(2)}%</div>
 								<div className="perf-detail">
-									<span className="perf-field">Area Tematica:</span>
+									<span className="perf-field">{t('statistics.thematicAreaField')}</span>
 									<span className="perf-value">{stats.worstSession.thematicArea}</span>
 								</div>
 								<div className="perf-detail">
-									<span className="perf-field">Data Rilevazione:</span>
+									<span className="perf-field">{t('statistics.dateField')}</span>
 									<span className="perf-value">{new Date(stats.worstSession.date).toLocaleDateString('it-IT', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
 								</div>
 							</div>
@@ -565,8 +567,8 @@ const StatisticsPage = () => {
 				{/* Grafico Progresso nel Tempo */}
 				{selectedArea === 'all' && stats.progressOverTime && stats.progressOverTime.length > 0 && (
 					<div className="chart-section">
-						<h2 className="section-title">Analisi Temporale della Performance</h2>
-						<p className="chart-subtitle">Andamento cronologico dei punteggi con visualizzazione trend lineare</p>
+						<h2 className="section-title">{t('statistics.timeAnalysisTitle')}</h2>
+						<p className="chart-subtitle">{t('statistics.timeAnalysisDesc')}</p>
 						<div className="chart-container">
 							<SimpleLineChart data={stats.progressOverTime} />
 						</div>
@@ -576,8 +578,8 @@ const StatisticsPage = () => {
 				{/* Performance per Area Tematica */}
 				{selectedArea === 'all' && Object.keys(stats.byArea).length > 0 && (
 					<div className="area-performance-section">
-						<h2 className="section-title">Distribuzione Performance per Area Tematica</h2>
-						<p className="section-subtitle">Confronto normalizzato delle metriche aggregate per ciascuna area</p>
+						<h2 className="section-title">{t('statistics.areaPerformanceTitle')}</h2>
+						<p className="section-subtitle">{t('statistics.areaPerformanceDesc')}</p>
 						<div className="area-bars">
 							{Object.entries(stats.byArea).map(([areaName, areaData]) => (
 								<div key={areaName} className="area-bar-item">
@@ -595,7 +597,7 @@ const StatisticsPage = () => {
 										></div>
 									</div>
 									<div className="area-bar-stats">
-										<span>{areaData.totalSessions} test</span>
+										<span>{areaData.totalSessions} {t('statistics.tests')}</span>
 										<span>Best: {areaData.bestScore}%</span>
 									</div>
 								</div>
@@ -606,15 +608,15 @@ const StatisticsPage = () => {
 
 				{/* Tabella Sessioni Recenti */}
 				<div className="recent-sessions-section">
-					<h2 className="section-title">Log Sessioni Recenti</h2>
-					<p className="section-subtitle">Storico cronologico delle ultime sessioni di test completate</p>
+					<h2 className="section-title">{t('statistics.recentLogTitle')}</h2>
+					<p className="section-subtitle">{t('statistics.recentLogDesc')}</p>
 					<div className="sessions-table">
 						<div className="table-header">
-							<div className="th">Data</div>
-							<div className="th">Area</div>
-							<div className="th">Score</div>
-							<div className="th">Domande</div>
-							<div className="th">Tempo</div>
+							<div className="th">{t('statistics.tableDate')}</div>
+							<div className="th">{t('statistics.tableArea')}</div>
+							<div className="th">{t('statistics.tableScore')}</div>
+							<div className="th">{t('statistics.tableQuestions')}</div>
+							<div className="th">{t('statistics.tableTime')}</div>
 						</div>
 						<div className="table-body">
 							{(selectedArea === 'all' ? stats.recentSessions : displayStats.sessions?.slice(0, 10) || []).map((session, idx) => (

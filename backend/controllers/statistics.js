@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const TestSession = require('../models/testSession');
 
 // Salva una nuova sessione di test
@@ -41,9 +42,11 @@ const getUserStatistics = async (req, res) => {
 			return res.status(401).json({ error: 'Utente non autenticato' });
 		}
 
+		const userObjectId = new mongoose.Types.ObjectId(userId);
+
 		// Aggregation pipeline per statistiche generali (10x più veloce)
 		const generalStats = await TestSession.aggregate([
-			{ $match: { userId } },
+			{ $match: { userId: userObjectId } },
 			{ $group: {
 				_id: null,
 				totalSessions: { $sum: 1 },
@@ -80,7 +83,7 @@ const getUserStatistics = async (req, res) => {
 
 		// Statistiche per area con aggregation (molto più veloce)
 		const byAreaStats = await TestSession.aggregate([
-			{ $match: { userId } },
+			{ $match: { userId: userObjectId } },
 			{ $group: {
 				_id: '$thematicArea',
 				totalSessions: { $sum: 1 },
@@ -130,7 +133,7 @@ const getUserStatistics = async (req, res) => {
 
 		// Best & Worst performance con aggregation
 		const extremes = await TestSession.aggregate([
-			{ $match: { userId } },
+			{ $match: { userId: userObjectId } },
 			{ $group: {
 				_id: null,
 				bestSession: { $max: { score: '$score', area: '$thematicArea', date: '$completedAt' }},
