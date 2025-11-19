@@ -32,14 +32,48 @@
 
 /* Adjust LanguageSelector to match */
 .bottom-controls .language-selector {
+  /* Remove container styling to avoid double borders */
+  background: transparent;
+  border: none;
+  padding: 0;
+  height: auto;
+  box-shadow: none;
+}
+
+.bottom-controls .language-selector .language-toggle {
+  height: 40px;
+  border-radius: 10px;
   background: var(--bg-secondary);
   border: 1px solid var(--border-color);
-  border-radius: 10px;
-  padding: 0 8px;
-  height: 40px;
-  display: flex;
-  align-items: center;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+  padding: 0 12px;
+}
+
+.bottom-controls .language-selector .language-toggle:hover {
+  background: var(--bg-tertiary);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+/* Fix dropdown position to open upwards */
+.bottom-controls .language-dropdown {
+  top: auto;
+  bottom: calc(100% + 8px);
+  left: 0;
+  right: auto;
+  transform-origin: bottom left;
+  animation: dropdownFadeInUp 0.2s ease;
+}
+
+@keyframes dropdownFadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .bottom-controls .language-selector select {
