@@ -1,9 +1,22 @@
 const Flashcard = require('../models/singleFlash');
+const mongoose = require('mongoose');
 
 const getUserId = (req) => req.user?.id || null;
 
-const buildUserQuery = (userId, additionalFields = {}) => 
-	userId ? { ...additionalFields, createdBy: userId } : additionalFields;
+const buildUserQuery = (userId, additionalFields = {}) => {
+	const query = { ...additionalFields };
+	if (userId) {
+		// Se stiamo usando aggregation, dobbiamo assicurarci che userId sia ObjectId
+		// Ma per find() va bene anche stringa.
+		// Per sicurezza, se è una stringa valida ObjectId, la convertiamo
+		if (mongoose.Types.ObjectId.isValid(userId)) {
+			query.createdBy = new mongoose.Types.ObjectId(userId);
+		} else {
+			query.createdBy = userId;
+		}
+	}
+	return query;
+};
 
 const getFlash = async (req, res) => {
 	try {
@@ -83,8 +96,12 @@ const listThematicAreas = async (req, res) => {
 		console.log(`🔍 [listThematicAreas] Query for userId: ${userId}`);
 		
 		// Aggregation pipeline per contare flashcard per area (più veloce di distinct + count separati)
+		// NOTA: buildUserQuery ora ritorna ObjectId per createdBy, fondamentale per $match in aggregation
+		const matchQuery = buildUserQuery(userId, { isActive: { $ne: false } });
+		console.log(`🔍 [listThematicAreas] Match Query:`, JSON.stringify(matchQuery));
+
 		const areasWithCount = await Flashcard.aggregate([
-			{ $match: buildUserQuery(userId, { isActive: { $ne: false } }) },
+			{ $match: matchQuery },
 			{ $group: { 
 				_id: '$thematicArea', 
 				count: { $sum: 1 },
