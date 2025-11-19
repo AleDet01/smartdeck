@@ -74,6 +74,11 @@ const createFlashcards = async (req, res) => {
 
 const listThematicAreas = async (req, res) => {
 	try {
+		// Previene caching del browser per questa richiesta critica
+		res.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+		res.set('Pragma', 'no-cache');
+		res.set('Expires', '0');
+
 		const userId = getUserId(req);
 		console.log(`🔍 [listThematicAreas] Query for userId: ${userId}`);
 		
@@ -85,12 +90,14 @@ const listThematicAreas = async (req, res) => {
 				count: { $sum: 1 },
 				lastCreated: { $max: '$createdAt' }
 			}},
-			{ $sort: { count: -1 } }, // Aree con più flashcard prima
+			{ $sort: { lastCreated: -1 } }, // Ordina per data di creazione (più recenti prima)
 			{ $project: { area: '$_id', count: 1, lastCreated: 1, _id: 0 }}
 		]);
 		
 		console.log(`✓ [listThematicAreas] Found ${areasWithCount.length} areas for userId: ${userId}`);
-		console.log(`   Areas:`, areasWithCount.map(a => `${a.area} (${a.count})`).join(', '));
+		if (areasWithCount.length > 0) {
+			console.log(`   Most recent area: ${areasWithCount[0].area} (${areasWithCount[0].lastCreated})`);
+		}
 		
 		res.json({ 
 			areas: areasWithCount.map(a => a.area), // Retrocompatibilità

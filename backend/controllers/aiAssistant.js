@@ -371,6 +371,9 @@ REGOLE RIGIDE:
 				}
 
 				const created = await Flashcard.insertMany(docs);
+				console.log(`✓ [AI] Inserted ${created.length} flashcards for user ${userId}`);
+				console.log(`   Collection: ${Flashcard.collection.name}`);
+				console.log(`   DB Name: ${Flashcard.db.name}`);
 
 				// Invalida la cache dell'utente per forzare il refresh della dashboard
 				if (userId) {
