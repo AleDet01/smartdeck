@@ -253,7 +253,7 @@ const streamChatWithAI = async (req, res) => {
 
 		// Verifica se è una richiesta di generazione test
 		const forceTestGeneration = typeof mode === 'string' && ['test', 'flashcards', 'quiz'].includes(mode.toLowerCase());
-		const isTestGeneration = forceTestGeneration || (mode === 'auto' && /genera|crea|test|quiz|flashcard|domande|esercizi/i.test(prompt));
+		const isTestGeneration = forceTestGeneration || /genera|crea|test|quiz|flashcard|domande|esercizi/i.test(prompt);
 
 		// Sistema prompt avanzato dinamico
 		let systemPrompt = `Sei un assistente AI educativo avanzato integrato in SmartDeck.

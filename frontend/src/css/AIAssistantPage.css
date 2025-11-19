@@ -1,4 +1,4 @@
-/* AI Assistant - Ultra Minimal Professional v0.1.1 - BUILD 2025-11-14 */
+/* AI Assistant - Ultra Minimal Professional v0.1.2 - BUILD 2025-11-19 */
 
 .ai-assistant-page {
 	min-height: 100vh;
@@ -9,7 +9,7 @@
 }
 
 .ai-container {
-	max-width: 800px;
+	max-width: 900px;
 	width: 100%;
 	margin: 0 auto;
 	padding: 24px;
@@ -96,30 +96,6 @@
 .ai-actions {
 	display: flex;
 	gap: 8px;
-}
-
-.icon-btn {
-	background: transparent;
-	border: 1px solid var(--border-color);
-	width: 36px;
-	height: 36px;
-	border-radius: 8px;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	cursor: pointer;
-	color: var(--text-secondary);
-	transition: all 0.2s;
-}
-
-.icon-btn:hover:not(:disabled) {
-	background: var(--bg-secondary);
-	border-color: var(--text-secondary);
-}
-
-.icon-btn:disabled {
-	opacity: 0.3;
-	cursor: not-allowed;
 }
 
 /* Chat */
@@ -293,35 +269,6 @@
 .suggestion:hover {
 	background: var(--bg-tertiary);
 	border-color: var(--text-secondary);
-}
-
-/* Files */
-.files {
-	display: flex;
-	gap: 8px;
-	flex-wrap: wrap;
-	margin-bottom: 12px;
-}
-
-.file {
-	display: flex;
-	align-items: center;
-	gap: 8px;
-	background: var(--bg-secondary);
-	padding: 6px 12px;
-	border-radius: 8px;
-	border: 1px solid var(--border-color);
-	font-size: 0.8125rem;
-}
-
-.file button {
-	background: transparent;
-	border: none;
-	color: var(--text-secondary);
-	cursor: pointer;
-	padding: 0 4px;
-	font-size: 1.25rem;
-	line-height: 1;
 }
 
 /* Input */

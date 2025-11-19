@@ -317,7 +317,7 @@ const AIAssistantPage = () => {
 								</div>
 							</div>
 						))}
-						{isLoading && (
+						{isLoading && currentMessages.length > 0 && !currentMessages[currentMessages.length - 1].isStreaming && (
 							<div className="message assistant">
 								<div className="message-content">
 									<div className="typing">
