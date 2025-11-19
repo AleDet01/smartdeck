@@ -325,12 +325,7 @@
 }
 
 /* Input */
-.input-container {
-	border-top: 1px solid var(--border-color);
-	padding-top: 16px;
-}
-
-.input-wrapper {
+.input-area {
 	display: flex;
 	gap: 8px;
 	align-items: flex-end;
@@ -339,13 +334,14 @@
 	border-radius: 16px;
 	padding: 8px 12px;
 	transition: border-color 0.2s;
+	margin-top: auto;
 }
 
-.input-wrapper:focus-within {
+.input-area:focus-within {
 	border-color: #007AFF;
 }
 
-.model-select {
+.input-area select {
 	background: transparent;
 	border: none;
 	color: var(--text-primary);
@@ -358,11 +354,11 @@
 	flex-shrink: 0;
 }
 
-.model-select:hover {
+.input-area select:hover {
 	background: var(--bg-tertiary);
 }
 
-.input {
+.input-area textarea {
 	flex: 1;
 	background: transparent;
 	border: none;
@@ -376,8 +372,82 @@
 	padding: 8px 4px;
 }
 
-.input::placeholder {
+.input-area textarea::placeholder {
 	color: var(--text-tertiary);
+}
+
+/* Markdown Styles */
+.message-text p {
+	margin: 0 0 8px 0;
+}
+
+.message-text p:last-child {
+	margin-bottom: 0;
+}
+
+.message-text strong {
+	font-weight: 600;
+	color: inherit;
+}
+
+.message-text ul, .message-text ol {
+	margin: 8px 0;
+	padding-left: 24px;
+}
+
+.message-text li {
+	margin-bottom: 4px;
+}
+
+.message-text code {
+	background: rgba(0, 0, 0, 0.1);
+	padding: 2px 4px;
+	border-radius: 4px;
+	font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
+	font-size: 0.9em;
+}
+
+.message.user .message-text code {
+	background: rgba(255, 255, 255, 0.2);
+}
+
+.message-text pre {
+	background: var(--bg-secondary);
+	padding: 12px;
+	border-radius: 8px;
+	overflow-x: auto;
+	margin: 12px 0;
+	border: 1px solid var(--border-color);
+}
+
+.message-text pre code {
+	background: transparent;
+	padding: 0;
+	color: var(--text-primary);
+}
+
+.message-text blockquote {
+	border-left: 4px solid var(--border-color);
+	margin: 12px 0;
+	padding-left: 12px;
+	color: var(--text-secondary);
+}
+
+.message-text table {
+	width: 100%;
+	border-collapse: collapse;
+	margin: 12px 0;
+}
+
+.message-text th, .message-text td {
+	border: 1px solid var(--border-color);
+	padding: 8px;
+	text-align: left;
+}
+
+.message-text th {
+	background: var(--bg-secondary);
+	font-weight: 600;
 }
 
 .send {

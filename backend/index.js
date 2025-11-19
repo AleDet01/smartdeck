@@ -466,5 +466,5 @@ connectDB()
     logger.error('Errore connessione MongoDB', { error: err.message });
     console.error('❌ Errore connessione MongoDB:', err.message);
     console.error('⚠️ Server attivo ma database non disponibile');
-    process.exit(1);
+    // process.exit(1); // Temporarily disabled to allow debugging
   });

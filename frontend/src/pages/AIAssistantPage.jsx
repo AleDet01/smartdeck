@@ -1,5 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import Topbar from '../components/Topbar';
 import PageBackground from '../components/PageBackground';
 import LEDEffect from '../components/LEDEffect';
@@ -291,7 +293,9 @@ const AIAssistantPage = () => {
 							<div key={msg.id || idx} className={`message ${msg.role} ${msg.isError ? 'error' : ''}`}>
 								<div className="message-content">
 									<div className="message-text">
-										{msg.content}
+										<ReactMarkdown remarkPlugins={[remarkGfm]}>
+											{msg.content}
+										</ReactMarkdown>
 										{msg.isStreaming && <span className="cursor">|</span>}
 									</div>
 

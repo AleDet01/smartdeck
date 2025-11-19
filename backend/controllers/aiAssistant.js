@@ -230,6 +230,7 @@ const streamChatWithAI = async (req, res) => {
 		if (!userId) {
 			return res.status(401).json({ error: 'Utente non autenticato' });
 		}
+		console.log(`🔐 streamChatWithAI called by userId: ${userId}`);
 
 		const { prompt, model = 'gpt-4o', conversationHistory = [], files = null, mode = 'auto' } = req.body;
 
@@ -250,11 +251,14 @@ const streamChatWithAI = async (req, res) => {
 		res.setHeader('Cache-Control', 'no-cache');
 		res.setHeader('Connection', 'keep-alive');
 
-		// Sistema prompt avanzato
-		const systemPrompt = `Sei un assistente AI educativo avanzato integrato in SmartDeck.
+		// Verifica se è una richiesta di generazione test
+		const forceTestGeneration = typeof mode === 'string' && ['test', 'flashcards', 'quiz'].includes(mode.toLowerCase());
+		const isTestGeneration = forceTestGeneration || (mode === 'auto' && /genera|crea|test|quiz|flashcard|domande|esercizi/i.test(prompt));
+
+		// Sistema prompt avanzato dinamico
+		let systemPrompt = `Sei un assistente AI educativo avanzato integrato in SmartDeck.
 
 CAPACITÀ PRINCIPALI:
-- Generare test e quiz intelligenti su qualsiasi argomento
 - Rispondere a domande educative con spiegazioni chiare
 - Analizzare documenti e creare flashcard
 - Fornire spiegazioni dettagliate e esempi pratici
@@ -270,9 +274,33 @@ FORMATTAZIONE:
 - Usa **grassetto** per concetti importanti
 - Usa elenchi puntati per liste
 - Usa numeri per passaggi sequenziali
-- Usa \`code\` per termini tecnici
+- Usa \`code\` per termini tecnici`;
 
-Se l'utente chiede di generare un test, crea un JSON strutturato con domande e risposte.`;
+		if (isTestGeneration) {
+			systemPrompt = `Sei un generatore di test esperto per SmartDeck.
+Il tuo UNICO scopo è generare un JSON valido contenente domande e risposte basate sulla richiesta dell'utente.
+
+REGOLE RIGIDE:
+1. Output DEVE essere SOLO un oggetto JSON valido.
+2. Niente testo prima o dopo il JSON.
+3. Struttura JSON richiesta:
+{
+  "thematicArea": "Titolo conciso dell'argomento",
+  "questions": [
+    {
+      "question": "Testo della domanda",
+      "answers": [
+        {"text": "Risposta corretta", "isCorrect": true},
+        {"text": "Distrattore 1", "isCorrect": false},
+        {"text": "Distrattore 2", "isCorrect": false}
+      ],
+      "difficulty": "facile" | "media" | "difficile"
+    }
+  ]
+}
+4. Genera almeno 5 domande se non specificato diversamente.
+5. Le risposte errate devono essere plausibili.`;
+		}
 
 		// Costruisci messaggi con contesto
 		const messages = [
@@ -280,18 +308,6 @@ Se l'utente chiede di generare un test, crea un JSON strutturato con domande e r
 			...conversationHistory.slice(-10), // Ultimi 10 messaggi
 			{ role: 'user', content: prompt }
 		];
-
-		// Aggiungi file context se presenti
-		if (files && files.length > 0) {
-			const filesContext = `\n\n[File allegati: ${files.map(f => f.name).join(', ')}]\n\nAnalizza il contenuto e rispondi alla richiesta dell'utente.`;
-			messages[messages.length - 1].content += filesContext;
-		}
-
-		console.log(`🤖 Streaming ${model}: "${prompt.substring(0, 100)}..."`);
-
-		// Verifica se è una richiesta di generazione test
-		const forceTestGeneration = typeof mode === 'string' && ['test', 'flashcards', 'quiz'].includes(mode.toLowerCase());
-		const isTestGeneration = forceTestGeneration || /genera|crea|test|quiz|flashcard|domande|esercizi/i.test(prompt);
 
 		if (isTestGeneration) {
 			// Usa response_format JSON per test generation
