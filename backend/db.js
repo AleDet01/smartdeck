@@ -24,8 +24,8 @@ const connectDB = async (retries = 5) => {
     // Auto index (false in produzione per performance)
     autoIndex: process.env.NODE_ENV !== 'production',
     
-    // Buffering
-    bufferCommands: false,
+    // Buffering (true per gestire richieste durante la connessione iniziale)
+    bufferCommands: true,
     
     // Monitoring
     heartbeatFrequencyMS: 10000,

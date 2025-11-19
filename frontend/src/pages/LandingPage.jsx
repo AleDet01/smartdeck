@@ -108,7 +108,7 @@ export default function LandingPage() {
     window.authStartTime = Date.now(); // Track start time for minimum animation duration
     
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 45000); // 45s per cold start Render
+    const timeoutId = setTimeout(() => controller.abort(), 90000); // 90s per cold start Render
     
     try {
       console.log(`📡 Tentativo ${mode} su ${API_HOST}/auth/${mode}`);
@@ -156,7 +156,7 @@ export default function LandingPage() {
       console.error('❌ Errore autenticazione:', err);
       
       if (err.name === 'AbortError') {
-        setError('Timeout: il server sta avviandosi (attendi 30-60s per il primo accesso). Riprova.');
+        setError('Timeout: il server sta avviandosi (potrebbe richiedere fino a 2 minuti). Riprova.');
       } else if (err.message.includes('Failed to fetch')) {
         setError('Errore di rete. Verifica CORS e che il backend sia attivo su Render.');
       } else {
