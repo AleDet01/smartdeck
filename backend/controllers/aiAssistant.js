@@ -1,5 +1,6 @@
 const Flashcard = require('../models/singleFlash');
 const OpenAI = require('openai');
+const { invalidateUserCache } = require('../middleware/cache');
 
 // Inizializza il client OpenAI
 let openaiClient = null;
@@ -370,6 +371,12 @@ REGOLE RIGIDE:
 				}
 
 				const created = await Flashcard.insertMany(docs);
+
+				// Invalida la cache dell'utente per forzare il refresh della dashboard
+				if (userId) {
+					await invalidateUserCache(userId);
+					console.log(`✓ Cache invalidata per utente ${userId} dopo generazione test AI`);
+				}
 
 				const responseMessage = `Test Generato: ${testData.thematicArea}\n\n${created.length} domande create con successo!\n\nIl test è disponibile nella Dashboard.`;
 
